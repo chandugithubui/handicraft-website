@@ -1,70 +1,130 @@
-# Getting Started with Create React App
+🌿 Handicraft Hub – MERN E-Commerce Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack MERN application for showcasing and managing handcrafted products.
 
-## Available Scripts
+Built using:
 
-In the project directory, you can run:
+⚛ React (Frontend)
 
-### `npm start`
+🟢 Node.js + Express (Backend)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+🍃 MongoDB Atlas (Database)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+☁ Deployed on Vercel + Render
 
-### `npm test`
+🚀 Live Demo
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Frontend: (Add Vercel link after deployment)
+Backend API: (Add Render link after deployment)
 
-### `npm run build`
+📌 Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+🛍 Product Listing
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+📂 Category Management
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+🖼 Image Upload & Display
 
-### `npm run eject`
+📬 Contact Form API
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+🔍 RESTful API Integration
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+🌐 Cloud Database (MongoDB Atlas)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+📦 Full CRUD Operations
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+🏗 Tech Stack
+Frontend
 
-## Learn More
+React
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Axios
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+React Router
 
-### Code Splitting
+CSS
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Backend
 
-### Analyzing the Bundle Size
+Node.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Express.js
 
-### Making a Progressive Web App
+MongoDB (Mongoose)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+CORS
 
-### Advanced Configuration
+dotenv
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Database
 
-### Deployment
+MongoDB Atlas (Cloud)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+📁 Project Structure
+handicraft-website/
+│
+├── client/        # React frontend
+├── server/        # Express backend
+│   ├── routes/
+│   ├── models/
+│   ├── uploads/
+│   └── index.js
+│
+└── README.md
+⚙️ Installation (Local Setup)
+1️⃣ Clone the Repository
+git clone https://github.com/chandugithubui/handicraft-website.git
+cd handicraft-website
+2️⃣ Backend Setup
+cd server
+npm install
 
-### `npm run build` fails to minify
+Create .env file inside server/:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+MONGODB_URI=your_mongodb_connection_string
+PORT=5000
+
+Run backend:
+
+node index.js
+
+Server runs on:
+
+http://localhost:5000
+3️⃣ Frontend Setup
+cd client
+npm install
+npm start
+
+Frontend runs on:
+
+http://localhost:3000
+🔌 API Endpoints
+Method	Endpoint	Description
+GET	/api/products	Get all products
+POST	/api/products	Add new product
+GET	/api/categories	Get categories
+POST	/api/contacts	Submit contact form
+🌍 Deployment
+
+Frontend → Vercel
+Backend → Render
+Database → MongoDB Atlas
+
+🔐 Environment Variables
+
+Create a .env file in server folder:
+
+MONGODB_URI=your_atlas_connection_string
+PORT=5000
+
+⚠️ Never commit .env to GitHub.
+
+👨‍💻 Author
+
+Chandan Sahoo
+GitHub: https://github.com/chandugithubui
+
+📜 License
+
+This project is for learning and portfolio purposes.
