@@ -35,9 +35,19 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
    DATABASE CONNECTION
 =========================== */
 
+console.log("Mongo URI:", process.env.MONGODB_URI);
+
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected successfully');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.log('MongoDB connection error:', err);
+});
+
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB connection promise resolved'))
+  .catch((err) => console.error('MongoDB connection failed:', err));
 
 
 /* ===========================

@@ -29,7 +29,10 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/contacts', formData);
+      const response = await axios.post(
+      'https://handicraft-website.onrender.com/api/contacts',
+       formData
+      );
       setResponseMessage('Message sent successfully!');
       setFormData({ name: '', email: '', message: '' }); // Clear form after submission
     } catch (error) {
