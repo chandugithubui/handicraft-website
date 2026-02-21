@@ -1,0 +1,83 @@
+/* Contact.css */
+.contact-heading {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #4CAF50; /* Green color for title */
+    margin-bottom: 30px;
+  }
+  
+  .contact-form-card,
+  .contact-info-card {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contact-form-card .card-body,
+  .contact-info-card .card-body {
+    padding: 30px;
+  }
+  
+  .submit-btn {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+    font-size: 1rem;
+  }
+  
+  .submit-btn:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+  }
+  
+  .response-message {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+  
+  .contact-info-card h4 {
+    color: #007bff; /* Blue color for headings */
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .contact-info-card p {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .contact-info-card ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .contact-info-card ul li {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .contact-info-card ul li a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .contact-info-card ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Form Fields */
+  .form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .form-control:focus {
+    border-color: #4CAF50; /* Green focus color */
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+  }
+  
+  h2 {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+  

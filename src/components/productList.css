@@ -1,0 +1,14 @@
+.product-card {
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 576px) {
+  .card-img-top {
+    height: 180px !important;
+  }
+}
