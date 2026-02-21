@@ -29,7 +29,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(
+      await axios.post(
       'https://handicraft-website.onrender.com/api/contacts',
        formData
       );
