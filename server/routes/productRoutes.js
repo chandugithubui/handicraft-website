@@ -1,37 +1,67 @@
 const express = require('express');
 const router = express.Router();
-
-// Assuming you have a Product model
 const Product = require('../models/product');
 
-// Route to get all products
+/*
+====================================
+GET ALL PRODUCTS
+====================================
+*/
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();  // Retrieve all products
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: 'Error retrieving products', error: err });
+    const products = await Product.find();
+
+    console.log("Products fetched successfully");
+
+    res.status(200).json(products);
+
+  } catch (error) {
+    console.error("Product fetch error:", error);
+
+    res.status(500).json({
+      message: "Error retrieving products"
+    });
   }
 });
 
-// Route to add a new product
+/*
+====================================
+ADD NEW PRODUCT
+====================================
+*/
 router.post('/', async (req, res) => {
-  const { name, price, description, imageUrl } = req.body;
-
-  const newProduct = new Product({
-    name,
-    price,
-    description,
-    imageUrl,
-  });
 
   try {
-    await newProduct.save();  // Save the new product to the database
-    res.status(201).json(newProduct);
-  } catch (err) {
-    res.status(400).json({ message: 'Error adding product', error: err });
+
+    const { name, price, description, imageUrl } = req.body;
+
+    if (!name || !price || !description || !imageUrl) {
+      return res.status(400).json({
+        message: "All fields are required"
+      });
+    }
+
+    const newProduct = new Product({
+      name,
+      price,
+      description,
+      imageUrl
+    });
+
+    const savedProduct = await newProduct.save();
+
+    console.log("Product added:", savedProduct._id);
+
+    res.status(201).json(savedProduct);
+
+  } catch (error) {
+
+    console.error("Product save error:", error);
+
+    res.status(500).json({
+      message: "Error adding product"
+    });
   }
 });
 
-// Export the router
 module.exports = router;
