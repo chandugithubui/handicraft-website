@@ -16,17 +16,17 @@ const Products = () => {
   });
 
   const product = {
-    title: "Handcrafted Wooden Bowl",
-    price: 1200,
-    discountPrice: 1000,
-    description: "This handcrafted wooden bowl is made from sustainable wood.",
-    images: [
-      "/uploads/HandcraftedwoodenBowl.webp",
-      "/uploads/handcraftedwoodenBowl2.jpg",
-      "/uploads/handcraftedwoodenBowl3.webp"
-    ],
-    rating: 4.5
-  };
+  title: "Handcrafted Wooden Bowl",
+  price: 1200,
+  discountPrice: 1000,
+  description: "This handcrafted wooden bowl is made from sustainable wood.",
+  images: [
+    "/images/HandcraftedwoodenBowl.webp",
+    "/images/handcraftedwoodenBowl2.jpg",
+    "/images/handcraftedwoodenBowl3.webp"
+  ],
+  rating: 4.5
+};
 
   const handleAddToCart = () => {
     alert(`${quantity} item(s) added to the cart!`);
@@ -66,7 +66,7 @@ const Products = () => {
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={`${BACKEND_URL}${image}`}
+                   src={image}
                   alt={`Product ${index + 1}`}
                   style={{ height: "400px", objectFit: "cover" }}
                 />
