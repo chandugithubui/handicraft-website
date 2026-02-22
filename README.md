@@ -1,85 +1,101 @@
 🌿 Handicraft Hub – MERN E-Commerce Website
+===========================================
 
 A full-stack MERN application for showcasing and managing handcrafted products.
 
-Built using:
+Built using modern web technologies to provide a seamless shopping experience.
 
-⚛ React (Frontend)
+---
 
-🟢 Node.js + Express (Backend)
+## 🚀 Live Demo
 
-🍃 MongoDB Atlas (Database)
+🌐 Frontend:
+https://handicraft-website-sgak-git-main-chandan-sahoos-projects.vercel.app/
 
-☁ Deployed on Vercel + Render
+🔧 Backend API:
+https://handicraft-website.onrender.com/
 
-🚀 Live Demo
+---
 
-Frontend: (Add Vercel link after deployment)
-Backend API: (Add Render link after deployment)
+## 📸 Screenshots
 
-📌 Features
+### 🏠 Frontend Website View
 
-🛍 Product Listing
+![Frontend Website](screenshots/frontend.png)
 
-📂 Category Management
+---
 
-🖼 Image Upload & Display
+### 🔧 Backend API Response
 
-📬 Contact Form API
+![Backend API](screenshots/backend.png)
 
-🔍 RESTful API Integration
+---
 
-🌐 Cloud Database (MongoDB Atlas)
+## 📌 Features
 
-📦 Full CRUD Operations
+✅ Product Listing  
+✅ Category Management  
+✅ Image Upload & Display  
+✅ Contact Form API  
+✅ RESTful API Integration  
+✅ Cloud Database (MongoDB Atlas)  
+✅ Full CRUD Operations  
 
-🏗 Tech Stack
-Frontend
+---
 
-React
+## 🏗 Tech Stack
 
-Axios
+### Frontend
+- React  
+- Axios  
+- React Router  
+- CSS  
 
-React Router
+### Backend
+- Node.js  
+- Express.js  
+- MongoDB (Mongoose)  
+- CORS  
+- dotenv  
 
-CSS
+### Database
+- MongoDB Atlas (Cloud)
 
-Backend
+---
 
-Node.js
+## 📁 Project Structure
 
-Express.js
 
-MongoDB (Mongoose)
-
-CORS
-
-dotenv
-
-Database
-
-MongoDB Atlas (Cloud)
-
-📁 Project Structure
-handicraft-website/
-│
-├── client/        # React frontend
-├── server/        # Express backend
-│   ├── routes/
-│   ├── models/
-│   ├── uploads/
-│   └── index.js
-│
+HANDICRAFT-WEBSITE/
+├── public/
+├── screenshots/
+│ ├── frontend.png
+│ └── backend.png
+├── server/
+│ ├── routes/
+│ ├── models/
+│ ├── uploads/
+│ └── index.js
+├── src/
+├── .gitignore
+├── package.json
 └── README.md
-⚙️ Installation (Local Setup)
-1️⃣ Clone the Repository
+
+
+---
+
+## ⚙️ Installation (Local Setup)
+
+### Clone Repository
+
+```bash
 git clone https://github.com/chandugithubui/handicraft-website.git
 cd handicraft-website
-2️⃣ Backend Setup
+Backend Setup
 cd server
 npm install
 
-Create .env file inside server/:
+Create .env file inside server folder:
 
 MONGODB_URI=your_mongodb_connection_string
 PORT=5000
@@ -88,32 +104,34 @@ Run backend:
 
 node index.js
 
-Server runs on:
+Backend runs at:
 
 http://localhost:5000
-3️⃣ Frontend Setup
+Frontend Setup
 cd client
 npm install
 npm start
 
-Frontend runs on:
+Frontend runs at:
 
 http://localhost:3000
 🔌 API Endpoints
 Method	Endpoint	Description
 GET	/api/products	Get all products
-POST	/api/products	Add new product
+POST	/api/products	Add product
 GET	/api/categories	Get categories
 POST	/api/contacts	Submit contact form
 🌍 Deployment
 
 Frontend → Vercel
+
 Backend → Render
+
 Database → MongoDB Atlas
 
 🔐 Environment Variables
 
-Create a .env file in server folder:
+Create .env file in server folder:
 
 MONGODB_URI=your_atlas_connection_string
 PORT=5000
@@ -123,6 +141,7 @@ PORT=5000
 👨‍💻 Author
 
 Chandan Sahoo
+
 GitHub: https://github.com/chandugithubui
 
 📜 License
