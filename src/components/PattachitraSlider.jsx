@@ -21,7 +21,7 @@ const PattachitraSlider = () => {
 
   // Featured Handicrafts data
   const featuredHandicrafts = [
-    { id: 1, title: 'Handcrafted Wooden Bowl', price: '₹1200', image: '../images/HandcraftedwoodenBowl.webp' },
+    { id: 1, title: 'Handcrafted Wooden Bowl', price: '₹1200', image: '../images/HandcraftedWoodenBowl.webp' },
     { id: 2, title: 'Traditional Metal Lamp', price: '₹3500', image: '../images/metallamp.jpg' },
     { id: 3, title: 'Handpainted Wooden Tray', price: '₹2200', image: '../images/woodentray.jpg' },
     { id: 4, title: 'Decorative Clay Pot', price: '₹800', image: '../images/claypot.jpg' },
