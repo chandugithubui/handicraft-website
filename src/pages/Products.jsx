@@ -7,7 +7,6 @@ const Products = () => {
   const BACKEND_URL = "https://handicraft-website.onrender.com";
 
   const [quantity, setQuantity] = useState(1);
-  
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -22,15 +21,11 @@ const Products = () => {
     discountPrice: 1000,
     description: "This handcrafted wooden bowl is made from sustainable wood.",
     images: [
-      "/images/HandcraftedwoodenBowl.webp",
-      "/images/handcraftedwoodenBowl2.jpg",
-      "/images/handcraftedwoodenBowl3.webp"
+      "/uploads/HandcraftedwoodenBowl.webp",
+      "/uploads/handcraftedwoodenBowl2.jpg",
+      "/uploads/handcraftedwoodenBowl3.webp"
     ],
-    rating: 4.5,
-    reviews: [
-      { user: "John Doe", rating: 5, text: "Excellent quality!" },
-      { user: "Jane Smith", rating: 4, text: "Nice product." }
-    ]
+    rating: 4.5
   };
 
   const handleAddToCart = () => {
@@ -71,7 +66,7 @@ const Products = () => {
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={image}
+                  src={`${BACKEND_URL}${image}`}
                   alt={`Product ${index + 1}`}
                   style={{ height: "400px", objectFit: "cover" }}
                 />
