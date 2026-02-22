@@ -21,7 +21,7 @@ const Products = () => {
   discountPrice: 1000,
   description: "This handcrafted wooden bowl is made from sustainable wood.",
   images: [
-    "/images/HandcraftedwoodenBowl.webp",
+    "/images/HandcraftedWoodenBowl.webp",
     "/images/handcraftedwoodenBowl2.jpg",
     "/images/handcraftedwoodenBowl3.webp"
   ],
