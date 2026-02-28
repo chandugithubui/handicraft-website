@@ -17,7 +17,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/api/categories"); // Updated backend URL
+        const response = await axios.get("https://handicraft-website.onrender.com/api/categories"); // Updated backend URL
         setCategories(response.data); // Store the categories in state
       } catch (error) {
         console.error("Error fetching categories:", error);

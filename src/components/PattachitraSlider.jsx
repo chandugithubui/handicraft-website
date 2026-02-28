@@ -3,6 +3,8 @@ import Carousel from 'react-bootstrap/Carousel';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 
 const PattachitraSlider = () => {
+  const backendUrl = "https://handicraft-website.onrender.com";
+  
   // Initial list of all products with details
   const allProducts = [
     { 
@@ -10,7 +12,7 @@ const PattachitraSlider = () => {
       title: 'Teapot Painting', 
       category: 'Paintings', 
       price: '₹800', 
-      image: '../images/teapot.webp',
+      image: `${backendUrl}/uploads/teapot.webp`,
       description: 'Hand-painted traditional teapot featuring Pattachitra art. Perfect for tea lovers and art collectors.',
       material: 'Ceramic with natural colors',
       dimensions: '6 x 4 inches',
@@ -21,7 +23,7 @@ const PattachitraSlider = () => {
       title: 'Gift Items', 
       category: 'Gift Items', 
       price: '₹2000', 
-      image: '../images/GiftsItems.webp',
+      image: `${backendUrl}/uploads/GiftsItems.webp`,
       description: 'Exclusive gift set with handcrafted items. Ideal for special occasions and corporate gifts.',
       material: 'Mixed materials',
       dimensions: 'Varies',
@@ -32,7 +34,7 @@ const PattachitraSlider = () => {
       title: 'Glass Bottle', 
       category: 'Home Decor', 
       price: '₹1000', 
-      image: '../images/glassbottle.webp',
+      image: `${backendUrl}/uploads/glassbottle.webp`,
       description: 'Decorative glass bottle with traditional Pattachitra paintings. Beautiful home decor item.',
       material: 'Glass with natural pigments',
       dimensions: '12 x 6 inches',
@@ -43,7 +45,7 @@ const PattachitraSlider = () => {
       title: 'Elephant Painting', 
       category: 'Paintings', 
       price: '₹700', 
-      image: '../images/elephant.webp',
+      image: `${backendUrl}/uploads/elephant.webp`,
       description: 'Sacred elephant motif in traditional Pattachitra style. Symbol of wisdom and strength.',
       material: 'Treated cotton canvas',
       dimensions: '10 x 8 inches',
@@ -54,7 +56,7 @@ const PattachitraSlider = () => {
       title: 'Handcrafted Vase', 
       category: 'Home Decor', 
       price: '₹1200', 
-      image: '../images/handmadevase.webp',
+      image: `${backendUrl}/uploads/handmadevase.webp`,
       description: 'Beautiful handcrafted vase with intricate Pattachitra designs. Perfect for fresh flowers.',
       material: 'Terracotta with natural colors',
       dimensions: '10 x 5 inches',
@@ -65,7 +67,7 @@ const PattachitraSlider = () => {
       title: 'Wooden Toys', 
       category: 'Gift Items', 
       price: '₹600', 
-      image: '../images/toys.jpg',
+      image: `${backendUrl}/uploads/toys.jpg`,
       description: 'Traditional wooden toys with safe natural colors. Educational and decorative pieces.',
       material: 'Seasoned wood',
       dimensions: 'Varies',
@@ -76,7 +78,7 @@ const PattachitraSlider = () => {
       title: 'Pattachitra Wall Art', 
       category: 'Paintings', 
       price: '₹2500', 
-      image: '../images/pattachitrawall.jpg',
+      image: `${backendUrl}/uploads/pattachitrawall.jpg`,
       description: 'Large wall art piece depicting mythological scenes. Centerpiece for any room.',
       material: 'Canvas with natural pigments',
       dimensions: '24 x 18 inches',
@@ -87,7 +89,7 @@ const PattachitraSlider = () => {
       title: 'Wooden Coasters', 
       category: 'Home Decor', 
       price: '₹350', 
-      image: '../images/woodentoys.jpg',
+      image: `${backendUrl}/uploads/woodentoys.jpg`,
       description: 'Set of 6 wooden coasters with Pattachitra art. Protect your furniture in style.',
       material: 'Polished wood',
       dimensions: '4 x 4 inches each',
@@ -98,7 +100,7 @@ const PattachitraSlider = () => {
       title: 'Decorative Plate', 
       category: 'Home Decor', 
       price: '₹900', 
-      image: '../images/decorativeplate.webp',
+      image: `${backendUrl}/uploads/decorativeplate.webp`,
       description: 'Hand-painted decorative plate with traditional motifs. Wall hanging or table decor.',
       material: 'Ceramic',
       dimensions: '10 inches diameter',
@@ -109,7 +111,7 @@ const PattachitraSlider = () => {
       title: 'Carved Wooden Sculpture', 
       category: 'Gift Items', 
       price: '₹1800', 
-      image: '../images/carvedwooden.jpg',
+      image: `${backendUrl}/uploads/carvedwooden.jpg`,
       description: 'Intricately carved wooden sculpture showcasing traditional craftsmanship.',
       material: 'Seasoned teak wood',
       dimensions: '8 x 6 x 4 inches',
@@ -120,7 +122,7 @@ const PattachitraSlider = () => {
       title: 'Tiled Pattachitra Art', 
       category: 'Paintings', 
       price: '₹3500', 
-      image: '../images/tilledpattachitra.webp',
+      image: `${backendUrl}/uploads/tilledpattachitra.webp`,
       description: 'Premium tiled artwork with multiple Pattachitra scenes. Luxury home decor.',
       material: 'Natural stone tiles',
       dimensions: '36 x 24 inches',
@@ -131,7 +133,7 @@ const PattachitraSlider = () => {
       title: 'Handcrafted Wooden Box', 
       category: 'Gift Items', 
       price: '₹900', 
-      image: '../images/handcraftwooden.jpg',
+      image: `${backendUrl}/uploads/handcraftwooden.jpg`,
       description: 'Decorative wooden box with traditional paintings. Perfect for jewelry or keepsakes.',
       material: 'Seasoned wood',
       dimensions: '8 x 6 x 4 inches',
@@ -145,7 +147,7 @@ const PattachitraSlider = () => {
       id: 1, 
       title: 'Handcrafted Wooden Bowl', 
       price: '₹1200', 
-      image: '../images/HandcraftedwoodenBowl.webp',
+      image: `${backendUrl}/uploads/HandcraftedwoodenBowl.webp`,
       description: 'Traditional wooden bowl with intricate carvings. Perfect for serving snacks.',
       material: 'Seasoned wood',
       dimensions: '8 x 4 inches',
@@ -155,7 +157,7 @@ const PattachitraSlider = () => {
       id: 2, 
       title: 'Traditional Metal Lamp', 
       price: '₹3500', 
-      image: '../images/metallamp.jpg',
+      image: `${backendUrl}/uploads/metallamp.jpg`,
       description: 'Antique-style metal lamp with traditional designs. Creates warm ambiance.',
       material: 'Brass with glass',
       dimensions: '12 x 6 inches',
@@ -165,7 +167,7 @@ const PattachitraSlider = () => {
       id: 3, 
       title: 'Handpainted Wooden Tray', 
       price: '₹2200', 
-      image: '../images/woodentray.jpg',
+      image: `${backendUrl}/uploads/woodentray.jpg`,
       description: 'Elegant wooden tray with Pattachitra paintings. Perfect for serving guests.',
       material: 'Polished wood',
       dimensions: '16 x 12 inches',
@@ -175,7 +177,7 @@ const PattachitraSlider = () => {
       id: 4, 
       title: 'Decorative Clay Pot', 
       price: '₹800', 
-      image: '../images/claypot.jpg',
+      image: `${backendUrl}/uploads/claypot.jpg`,
       description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
       material: 'Terracotta',
       dimensions: '8 x 8 inches',
@@ -189,7 +191,7 @@ const PattachitraSlider = () => {
       id: 1, 
       title: 'Handcrafted Vase', 
       price: '₹1500', 
-      image: '../images/handcraftvase.jpg',
+      image: `${backendUrl}/uploads/handcraftvase.jpg`,
       artist: 'Jagannath',
       description: 'Elegant vase with traditional motifs. Perfect home decor piece.',
       material: 'Ceramic',
@@ -199,7 +201,7 @@ const PattachitraSlider = () => {
       id: 2, 
       title: 'Pattachitra Wall Art', 
       price: '₹5000', 
-      image: '../images/pattachitrawallpainting.webp',
+      image: `${backendUrl}/uploads/pattachitrawallpainting.webp`,
       artist: 'Archita',
       description: 'Large wall art depicting mythological stories. Museum quality piece.',
       material: 'Canvas with natural pigments',
@@ -209,7 +211,7 @@ const PattachitraSlider = () => {
       id: 3, 
       title: 'Handcrafted Wooden Box', 
       price: '₹900', 
-      image: '../images/woodenhandcraft.jpg',
+      image: `${backendUrl}/uploads/woodenhandcraft.jpg`,
       artist: 'Bandana',
       description: 'Decorative box with traditional paintings. Perfect for storing treasures.',
       material: 'Seasoned wood',
@@ -219,7 +221,7 @@ const PattachitraSlider = () => {
       id: 4, 
       title: 'Carved Wooden Sculpture', 
       price: '₹1000', 
-      image: '../images/sculpture.webp', 
+      image: `${backendUrl}/uploads/sculpture.webp`, 
       artist: 'Salini',
       description: 'Intricate sculpture showcasing traditional craftsmanship. Collector\'s item.',
       material: 'Teak wood',
@@ -238,7 +240,7 @@ const PattachitraSlider = () => {
     ? allProducts 
     : allProducts.filter((product) => product.category === selectedCategory);
 
-  // Handle opening the modal
+  // Handle opening modal
   const viewDetails = (product) => {
     setSelectedProduct(product);
     setShowModal(true);
@@ -254,7 +256,7 @@ const PattachitraSlider = () => {
     });
   };
 
-  // Close the modal
+  // Close modal
   const handleCloseModal = () => setShowModal(false);
 
   return (
@@ -262,19 +264,19 @@ const PattachitraSlider = () => {
     {/* PattachitraSlider Section */}
     <Carousel interval={3000}>
       <Carousel.Item>
-        <img className="d-block w-100 mt-3" src="../images/pattachitra1.jpg.jpg" alt="First slide" style={{ height: '500px', objectFit: 'cover', }} />
+        <img className="d-block w-100 mt-3" src={`${backendUrl}/uploads/pattachitra1.jpg.jpg`} alt="First slide" style={{ height: '500px', objectFit: 'cover', }} />
         <Carousel.Caption>
           <h3>Pattachitra Art 1</h3>
         </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
-        <img className="d-block w-100 mt-3" src="../images/pattachitra2.jpg.jpg" alt="Second slide" style={{ height: '500px', objectFit: 'cover',}} />
+        <img className="d-block w-100 mt-3" src={`${backendUrl}/uploads/pattachitra2.jpg.jpg`} alt="Second slide" style={{ height: '500px', objectFit: 'cover',}} />
         <Carousel.Caption>
           <h3>Pattachitra Art 2</h3>
         </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
-        <img className="d-block w-100 mt-3" src="../images/pattachitra3.jpg.jpg" alt="Third slide" style={{ height: '500px', objectFit: 'cover',}} />
+        <img className="d-block w-100 mt-3" src={`${backendUrl}/uploads/pattachitra3.jpg.jpg`} alt="Third slide" style={{ height: '500px', objectFit: 'cover',}} />
         <Carousel.Caption>
           <h3>Pattachitra Art 3</h3>
         </Carousel.Caption>
