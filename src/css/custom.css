@@ -1,0 +1,380 @@
+/* Custom CSS for Handicraft Website */
+
+/* Product Card Styles */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  overflow: hidden;
+  background: white;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.product-image {
+  transition: transform 0.3s ease;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Image Placeholder Styles */
+.image-placeholder {
+  background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%, #e0e0e0);
+  background-size: 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Header Styles */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.navbar-brand img {
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+  transform: rotate(5deg) scale(1.1);
+}
+
+/* Cart Badge Animation */
+.badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Hero Section Styles */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4rem 0;
+  margin-bottom: 3rem;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+/* Footer Styles */
+.footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 3rem 0 1rem;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Product Detail Page */
+.thumbnail-image {
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.thumbnail-image:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.main-product-image {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Checkout Form */
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Order Summary Card */
+.position-sticky {
+  top: 20px;
+}
+
+/* Contact Page Improvements */
+.contact-card {
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.space-y-4 > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-card {
+    margin-bottom: 1rem;
+  }
+  
+  .hero-section {
+    padding: 2rem 0;
+    min-height: 40vh;
+  }
+  
+  .position-sticky {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
+
+/* Artisan Badge */
+.artisan-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Category Card */
+.category-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-card img {
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover img {
+  transform: scale(1.1);
+}
+
+/* Testimonial Card */
+.testimonial-card {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  border: none;
+  border-radius: 15px;
+  padding: 2rem;
+}
+
+/* Feature Icons */
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Price Display */
+.price-display {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+
+.discount-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Quantity Selector */
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quantity-selector button {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Star Rating */
+.star-rating {
+  color: #f39c12;
+}
+
+.star-rating .text-secondary {
+  color: #bdc3c7;
+}
+
+/* Success Message */
+.success-message {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #155724;
+  padding: 1rem;
+  border-radius: 10px;
+  border: none;
+}
+
+/* Error Message */
+.error-message {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 10px;
+  border: none;
+}
+
+/* Alert Improvements */
+.alert {
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #155724;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #721c24;
+}
+
+/* Form Improvements */
+.form-control-lg {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+}
+
+/* Card Improvements */
+.card {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}

@@ -1,0 +1,7 @@
+.custom-carousel-img {
+    height: 500px;
+    object-fit: cover;
+    width: 120%; /* Adjust width as per your need */
+    margin-left: -10%; /* Optionally, adjust the margin to center it better */
+  }
+  
