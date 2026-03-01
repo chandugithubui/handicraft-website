@@ -16,7 +16,10 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware to parse JSON data and enable CORS
 app.use(express.json()); 
-app.use(cors()); 
+app.use(cors({
+  origin: ['https://handicraft-website-fyao.vercel.app', 'http://localhost:3000'],
+  credentials: true
+})); 
 
 // MongoDB connection setup
 // MongoDB connection (without deprecated options)
