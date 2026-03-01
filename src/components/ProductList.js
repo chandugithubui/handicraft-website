@@ -263,7 +263,7 @@ const ProductList = () => {
     <Container className="py-4">
       {/* Cart Counter and Alert */}
       <div className="text-center mb-4">
-        <h2 className="fw-bold">All Products</h2>
+        <h2 className="fw-bold">All Products (16 Items)</h2>
         <p className="text-muted">Discover authentic, handcrafted treasures from Raghurajpur artisans</p>
         
         {/* Cart Counter */}
