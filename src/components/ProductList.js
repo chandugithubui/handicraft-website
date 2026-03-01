@@ -30,26 +30,16 @@ const ProductList = () => {
     },
     { 
       _id: 2, 
-      name: 'Gift Items', 
+      name: 'Handcrafted Wooden Bowl', 
       price: 2000, 
-      image: '/images/GiftsItems.webp',
-      description: 'Exclusive gift set with handcrafted items. Ideal for special occasions and corporate gifts.',
-      category: 'Gift Items',
+      image: '/images/HandcraftedWoodenBowl.webp',
+      description: 'Beautiful handcrafted wooden bowl with traditional Pattachitra art. Perfect for serving snacks or decoration.',
+      category: 'Home Decor',
       rating: 4.8,
-      reviews: 8
+      reviews: 15
     },
     { 
       _id: 3, 
-      name: 'Glass Bottle', 
-      price: 1000, 
-      image: '/images/glassbottle.webp',
-      description: 'Decorative glass bottle with traditional Pattachitra paintings. Beautiful home decor item.',
-      category: 'Home Decor',
-      rating: 4.3,
-      reviews: 6
-    },
-    { 
-      _id: 4, 
       name: 'Elephant Painting', 
       price: 700, 
       image: '/images/elephant.webp',
@@ -59,17 +49,57 @@ const ProductList = () => {
       reviews: 15
     },
     { 
-      _id: 5, 
+      _id: 4, 
       name: 'Handcrafted Vase', 
       price: 1200, 
-      image: '/images/handmadevase.webp',
+      image: '/images/handcraftvase.jpg',
       description: 'Beautiful handcrafted vase with intricate Pattachitra designs. Perfect for fresh flowers.',
       category: 'Home Decor',
       rating: 4.6,
       reviews: 9
     },
     { 
+      _id: 5, 
+      name: 'Decorative Plate', 
+      price: 1500, 
+      image: '/images/decorativeplate.webp',
+      description: 'Decorative plate with traditional Pattachitra art. Beautiful wall decor piece.',
+      category: 'Home Decor',
+      rating: 4.5,
+      reviews: 8
+    },
+    { 
       _id: 6, 
+      name: 'Clay Pot', 
+      price: 800, 
+      image: '/images/claypot.jpg',
+      description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
+      category: 'Home Decor',
+      rating: 4.4,
+      reviews: 6
+    },
+    { 
+      _id: 7, 
+      name: 'Pattachitra Art', 
+      price: 1200, 
+      image: '/images/pattachitra1.jpg.jpg',
+      description: 'Traditional Pattachitra art with vibrant colors and intricate details. Authentic Odisha craftsmanship.',
+      category: 'Paintings',
+      rating: 4.9,
+      reviews: 20
+    },
+    { 
+      _id: 8, 
+      name: 'Wooden Sculpture', 
+      price: 3000, 
+      image: '/images/sculpture.webp',
+      description: 'Hand-carved wooden sculpture with traditional Pattachitra designs. Elegant home decor piece.',
+      category: 'Sculptures',
+      rating: 4.6,
+      reviews: 12
+    },
+    { 
+      _id: 9, 
       name: 'Coconut Shell Art', 
       price: 600, 
       image: '/images/coconut.webp',
@@ -79,27 +109,17 @@ const ProductList = () => {
       reviews: 7
     },
     { 
-      _id: 7, 
-      name: 'Fish Motif Painting', 
-      price: 900, 
-      image: '/images/fish.webp',
-      description: 'Traditional fish motif representing prosperity and abundance in Odisha culture.',
-      category: 'Paintings',
-      rating: 4.4,
-      reviews: 11
-    },
-    { 
-      _id: 8, 
-      name: 'Tribal Art Wall Hanging', 
-      price: 1500, 
+      _id: 10, 
+      name: 'Tribal Wall Art', 
+      price: 1800, 
       image: '/images/tribal.webp',
-      description: 'Tribal-inspired wall hanging with authentic patterns. Cultural heritage piece.',
+      description: 'Tribal-inspired wall art with authentic patterns. Cultural heritage piece.',
       category: 'Home Decor',
       rating: 4.7,
       reviews: 13
     },
     { 
-      _id: 9, 
+      _id: 11, 
       name: 'Pattachitra Coasters', 
       price: 400, 
       image: '/images/coaster.webp',
@@ -109,8 +129,8 @@ const ProductList = () => {
       reviews: 8
     },
     { 
-      _id: 10, 
-      name: 'Peacock Feather Art', 
+      _id: 12, 
+      name: 'Peacock Art', 
       price: 1100, 
       image: '/images/peacock.webp',
       description: 'Elegant peacock feather design in traditional style. Symbol of beauty and grace.',
@@ -119,17 +139,7 @@ const ProductList = () => {
       reviews: 16
     },
     { 
-      _id: 11, 
-      name: 'Bamboo Craft Items', 
-      price: 800, 
-      image: '/images/bamboo.webp',
-      description: 'Sustainable bamboo craft with traditional Odisha designs. Eco-friendly decor.',
-      category: 'Home Decor',
-      rating: 4.5,
-      reviews: 10
-    },
-    { 
-      _id: 12, 
+      _id: 13, 
       name: 'Sun God Painting', 
       price: 1300, 
       image: '/images/sun.webp',
@@ -137,16 +147,6 @@ const ProductList = () => {
       category: 'Paintings',
       rating: 4.6,
       reviews: 12
-    },
-    { 
-      _id: 13, 
-      name: 'Clay Art Set', 
-      price: 700, 
-      image: '/images/clayart.webp',
-      description: 'Handcrafted clay art set with traditional designs. Perfect for gifting.',
-      category: 'Home Decor',
-      rating: 4.4,
-      reviews: 9
     },
     { 
       _id: 14, 
@@ -160,23 +160,23 @@ const ProductList = () => {
     },
     { 
       _id: 15, 
-      name: 'Pattachitra Clock', 
-      price: 1600, 
-      image: '/images/clock.webp',
-      description: 'Functional wall clock with Pattachitra art. Combines tradition with utility.',
+      name: 'Handicraft Toys', 
+      price: 800, 
+      image: '/images/toys.jpg',
+      description: 'Traditional handicraft toys with natural materials. Safe for children and educational.',
       category: 'Home Decor',
-      rating: 4.8,
-      reviews: 14
+      rating: 4.4,
+      reviews: 10
     },
     { 
       _id: 16, 
-      name: 'Decorative Clay Pot', 
-      price: 800, 
-      image: '/images/claypot.jpg',
-      description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
+      name: 'Wooden Craft Set', 
+      price: 1500, 
+      image: '/images/woodenhandcraft.jpg',
+      description: 'Complete set of wooden handicraft items. Perfect for gifting and home decoration.',
       category: 'Home Decor',
-      rating: 4.4,
-      reviews: 6
+      rating: 4.7,
+      reviews: 14
     }
   ];
 
