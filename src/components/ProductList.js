@@ -1,8 +1,9 @@
 // src/components/ProductList.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Alert, Modal } from 'react-bootstrap';
 import { useCart } from '../context/CartContext';
 import { FaShoppingCart, FaEye, FaCheck } from 'react-icons/fa';
+import axios from 'axios';
 
 const ProductList = () => {
   const { addToCart } = useCart();
@@ -16,119 +17,25 @@ const ProductList = () => {
   const [localCart, setLocalCart] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   
-  // Use the same product data from PattachitraSlider with proper structure
-  const allProducts = [
-    { 
-      _id: 1, 
-      name: 'Teapot Painting', 
-      price: 800, 
-      image: '/images/teapot.webp',
-      description: 'Hand-painted traditional teapot featuring Pattachitra art. Perfect for tea lovers and art collectors.',
-      category: 'Paintings',
-      rating: 4.5,
-      reviews: 12
-    },
-    { 
-      _id: 2, 
-      name: 'Handcrafted Wooden Bowl', 
-      price: 2000, 
-      image: '/images/HandcraftedWoodenBowl.webp',
-      description: 'Beautiful handcrafted wooden bowl with traditional Pattachitra art. Perfect for serving snacks or decoration.',
-      category: 'Home Decor',
-      rating: 4.8,
-      reviews: 15
-    },
-    { 
-      _id: 5, 
-      name: 'Decorative Plate', 
-      price: 1500, 
-      image: '/images/decorativeplate.webp',
-      description: 'Decorative plate with traditional Pattachitra art. Beautiful wall decor piece.',
-      category: 'Home Decor',
-      rating: 4.5,
-      reviews: 8
-    },
-    { 
-      _id: 7, 
-      name: 'Pattachitra Art', 
-      price: 1200, 
-      image: '/images/pattachitra1.jpg.jpg',
-      description: 'Traditional Pattachitra art with vibrant colors and intricate details. Authentic Odisha craftsmanship.',
-      category: 'Paintings',
-      rating: 4.9,
-      reviews: 20
-    },
-    { 
-      _id: 8, 
-      name: 'Wooden Sculpture', 
-      price: 3000, 
-      image: '/images/sculpture.webp',
-      description: 'Hand-carved wooden sculpture with traditional Pattachitra designs. Elegant home decor piece.',
-      category: 'Sculptures',
-      rating: 4.6,
-      reviews: 12
-    },
-    { 
-      _id: 9, 
-      name: 'Coconut Shell Art', 
-      price: 600, 
-      image: '/images/coconut.webp',
-      description: 'Eco-friendly coconut shell art with traditional motifs. Sustainable home decor.',
-      category: 'Home Decor',
-      rating: 4.5,
-      reviews: 7
-    },
-    { 
-      _id: 10, 
-      name: 'Tribal Wall Art', 
-      price: 1800, 
-      image: '/images/tribal.webp',
-      description: 'Tribal-inspired wall art with authentic patterns. Cultural heritage piece.',
-      category: 'Home Decor',
-      rating: 4.7,
-      reviews: 13
-    },
-    { 
-      _id: 11, 
-      name: 'Peacock Art', 
-      price: 1100, 
-      image: '/images/peacock.webp',
-      description: 'Elegant peacock feather design in traditional style. Symbol of beauty and grace.',
-      category: 'Paintings',
-      rating: 4.8,
-      reviews: 16
-    },
-    { 
-      _id: 13, 
-      name: 'Traditional Mask', 
-      price: 1800, 
-      image: '/images/mask.webp',
-      description: 'Traditional Odisha tribal mask with authentic craftsmanship. Cultural artifact.',
-      category: 'Home Decor',
-      rating: 4.9,
-      reviews: 7
-    },
-    { 
-      _id: 15, 
-      name: 'Handicraft Toys', 
-      price: 800, 
-      image: '/images/toys.jpg',
-      description: 'Traditional handicraft toys with natural materials. Safe for children and educational.',
-      category: 'Home Decor',
-      rating: 4.4,
-      reviews: 10
-    },
-    { 
-      _id: 16, 
-      name: 'Wooden Craft Set', 
-      price: 1500, 
-      image: '/images/woodenhandcraft.jpg',
-      description: 'Complete set of wooden handicraft items. Perfect for gifting and home decoration.',
-      category: 'Home Decor',
-      rating: 4.7,
-      reviews: 14
-    }
-  ];
+  // Backend data states
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`);
+        setProducts(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, []);
 
   const handleAddToCart = (product) => {
     // Convert product data to match the cart context format
@@ -238,100 +145,117 @@ const ProductList = () => {
         )}
       </div>
       
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {allProducts.map((product) => (
-          <Col key={product._id} className="d-flex">
-            <Card className={`h-100 product-card shadow-sm`}>
-              <div className="position-relative">
-                <Card.Img
-                  variant="top"
-                  src={product.image}
-                  alt={product.name}
-                  style={{ height: '200px', objectFit: 'cover' }}
-                  className="product-image"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300x200/cccccc/666666?text=Product+Image';
-                  }}
-                />
-                
-                {/* Added to Cart Indicator */}
-                {addedProducts.has(product._id) && (
-                  <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-success bg-opacity-75">
-                    <div className="text-white text-center">
-                      <FaCheck size={32} className="mb-2" />
-                      <div className="fw-bold">Added to Cart!</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <Card.Body className="d-flex flex-column">
-                <Card.Title className="fs-6 fw-bold text-truncate" title={product.name}>
-                  {product.name}
-                </Card.Title>
-                
-                <Card.Text className="text-muted small flex-grow-1">
-                  {product.description && product.description.length > 80
-                    ? `${product.description.substring(0, 80)}...`
-                    : product.description}
-                </Card.Text>
-
-                {product.rating && (
-                  <div className="mb-2">
-                    <div className="d-flex align-items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-warning me-1 ${i < Math.floor(product.rating) ? '' : 'text-secondary'}`}
-                          style={{ fontSize: '12px' }}
-                        >
-                          ★
-                        </span>
-                      ))}
-                      <span className="text-muted small ms-1">({product.reviews || 0})</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mb-3">
-                  <span className="fw-bold text-primary fs-5">₹{product.price}</span>
-                </div>
-
-                <div className="mt-auto d-flex gap-2">
-                  <Button
-                    variant={addedProducts.has(product._id) ? "success" : "primary"}
-                    size="sm"
-                    onClick={() => handleAddToCart(product)}
-                    className="flex-fill d-flex align-items-center justify-content-center gap-1"
-                    disabled={addedProducts.has(product._id)}
-                  >
-                    {addedProducts.has(product._id) ? (
-                      <>
-                        <FaCheck size={12} />
-                        Added
-                      </>
-                    ) : (
-                      <>
-                        <FaShoppingCart size={12} />
-                        Add to Cart
-                      </>
-                    )}
-                  </Button>
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2 text-muted">Loading products...</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-5">
+          <p className="text-muted">No products found. Please check your connection.</p>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+          {products.map((product) => (
+            <Col key={product._id} className="d-flex">
+              <Card className={`h-100 product-card shadow-sm`}>
+                <div className="position-relative">
+                  <Card.Img
+                    variant="top"
+                    src={product.image}
+                    alt={product.name}
+                    style={{ height: '200px', objectFit: 'cover' }}
+                    className="product-image"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/300x200/cccccc/666666?text=Product+Image';
+                    }}
+                  />
                   
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => handleViewDetails(product)}
-                    className="d-flex align-items-center justify-content-center"
-                  >
-                    <FaEye size={12} />
-                  </Button>
+                  {/* Added to Cart Indicator */}
+                  {addedProducts.has(product._id) && (
+                    <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-success bg-opacity-75">
+                      <div className="text-white text-center">
+                        <FaCheck size={32} className="mb-2" />
+                        <div className="fw-bold">Added to Cart!</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+                
+                <Card.Body className="d-flex flex-column">
+                  <Card.Title className="fs-6 fw-bold text-truncate" title={product.name}>
+                    {product.name}
+                  </Card.Title>
+                  
+                  <Card.Text className="text-muted small flex-grow-1">
+                    {product.description && product.description.length > 80
+                      ? `${product.description.substring(0, 80)}...`
+                      : product.description}
+                  </Card.Text>
+
+                  {product.rating && (
+                    <div className="mb-2">
+                      <div className="d-flex align-items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-warning me-1 ${i < Math.floor(product.rating) ? '' : 'text-secondary'}`}
+                            style={{ fontSize: '12px' }}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="text-muted small ms-1">({product.reviews || 0})</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <span className="fw-bold text-primary fs-5">₹{product.price}</span>
+                  </div>
+
+                  <div className="mt-auto d-flex gap-2">
+                    <Button
+                      variant={addedProducts.has(product._id) ? "success" : "primary"}
+                      size="sm"
+                      onClick={() => handleAddToCart(product)}
+                      className="flex-fill d-flex align-items-center justify-content-center gap-1"
+                      disabled={addedProducts.has(product._id)}
+                    >
+                      {addedProducts.has(product._id) ? (
+                        <>
+                          <FaCheck size={12} />
+                          Added
+                        </>
+                      ) : (
+                        <>
+                          <FaShoppingCart size={12} />
+                          Add to Cart
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => handleViewDetails(product)}
+                      className="d-flex align-items-center justify-content-center"
+                    >
+                      <FaEye size={12} />
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
       
       {/* Product Details Modal */}
       {selectedProduct && (
