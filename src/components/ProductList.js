@@ -292,9 +292,9 @@ const ProductList = () => {
       </div>
       
       {/* Products Grid */}
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+      <Row xs={1} sm={2} md={3} lg={4} className="g-4 products-grid">
         {allProducts.map((product) => (
-          <Col key={product._id} className="d-flex">
+          <Col key={product._id} className="d-flex product-col">
             <Card className={`h-100 product-card shadow-sm`}>
               <div className="position-relative">
                 <Card.Img
@@ -320,18 +320,18 @@ const ProductList = () => {
               </div>
               
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="fs-6 fw-bold text-truncate" title={product.name}>
+                <Card.Title className="fs-6 fw-bold text-truncate product-title" title={product.name}>
                   {product.name}
                 </Card.Title>
                 
-                <Card.Text className="text-muted small flex-grow-1">
+                <Card.Text className="text-muted small flex-grow-1 product-description">
                   {product.description && product.description.length > 80
                     ? `${product.description.substring(0, 80)}...`
                     : product.description}
                 </Card.Text>
 
                 {product.rating && (
-                  <div className="mb-2">
+                  <div className="mb-2 product-rating">
                     <div className="d-flex align-items-center">
                       {[...Array(5)].map((_, i) => (
                         <span
@@ -347,16 +347,16 @@ const ProductList = () => {
                   </div>
                 )}
 
-                <div className="mb-3">
+                <div className="mb-3 product-price">
                   <span className="fw-bold text-primary fs-5">₹{product.price}</span>
                 </div>
 
-                <div className="mt-auto d-flex gap-2">
+                <div className="mt-auto d-flex gap-2 product-actions">
                   <Button
                     variant={addedProducts.has(product._id) ? "success" : "primary"}
                     size="sm"
                     onClick={() => handleAddToCart(product)}
-                    className="flex-fill d-flex align-items-center justify-content-center gap-1"
+                    className="flex-fill d-flex align-items-center justify-content-center gap-1 add-to-cart-btn"
                     disabled={addedProducts.has(product._id)}
                   >
                     {addedProducts.has(product._id) ? (
@@ -376,7 +376,7 @@ const ProductList = () => {
                     variant="outline-secondary"
                     size="sm"
                     onClick={() => handleViewDetails(product)}
-                    className="d-flex align-items-center justify-content-center"
+                    className="d-flex align-items-center justify-content-center view-details-btn"
                   >
                     <FaEye size={12} />
                   </Button>

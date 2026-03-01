@@ -12,6 +12,7 @@ import Cart from './pages/Cart';  // Import Cart page
 import ProductDetail from './pages/ProductDetail';  // Import ProductDetail page
 import Checkout from './pages/Checkout';  // Import Checkout page
 import OrderConfirmation from './pages/OrderConfirmation';  // Import OrderConfirmation page
+import './css/mobile-responsive.css';  // Import mobile responsive styles
 
 const App = () => {
   return (

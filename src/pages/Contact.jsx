@@ -44,7 +44,7 @@ const Contact = () => {
   };
 
   return (
-    <Container className="py-5">
+    <Container className="py-5 contact-page">
       {/* Header Section */}
       <div className="text-center mb-5">
         <h1 className="display-5 fw-bold mb-3">Get in Touch</h1>
@@ -57,7 +57,7 @@ const Contact = () => {
       {showAlert && (
         <Alert 
           variant={responseMessage.includes('success') ? 'success' : 'danger'} 
-          className="mb-4"
+          className="mb-4 contact-alert"
           onClose={() => setShowAlert(false)}
           dismissible
         >
@@ -68,7 +68,7 @@ const Contact = () => {
       <Row>
         {/* Contact Form */}
         <Col lg={8} className="mb-4 mb-lg-0">
-          <Card className="border-0 shadow-sm h-100">
+          <Card className="border-0 shadow-sm h-100 contact-form-card">
             <Card.Body className="p-4">
               <h4 className="mb-4">Send us a Message</h4>
               <Form onSubmit={handleSubmit}>
@@ -82,7 +82,7 @@ const Contact = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="form-control-lg"
+                      className="form-control-lg contact-input"
                     />
                   </Col>
                   <Col md={6} className="mb-3">
@@ -94,7 +94,7 @@ const Contact = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="form-control-lg"
+                      className="form-control-lg contact-input"
                     />
                   </Col>
                 </Row>
@@ -108,7 +108,7 @@ const Contact = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="form-control-lg"
+                      className="form-control-lg contact-input"
                     />
                   </Col>
                   <Col md={6} className="mb-3">
@@ -119,7 +119,7 @@ const Contact = () => {
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      className="form-control-lg"
+                      className="form-control-lg contact-input"
                     />
                   </Col>
                 </Row>
@@ -134,7 +134,7 @@ const Contact = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
-                    className="form-control-lg"
+                    className="form-control-lg contact-textarea"
                   />
                 </Form.Group>
 
@@ -142,8 +142,8 @@ const Contact = () => {
                   variant="primary" 
                   type="submit" 
                   size="lg"
+                  className="w-100 contact-submit-btn"
                   disabled={isSubmitting}
-                  className="px-5"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
@@ -153,107 +153,64 @@ const Contact = () => {
         </Col>
 
         {/* Contact Information */}
-        <Col lg={4}>
-          <div className="space-y-4">
-            {/* Visit Our Workshop */}
-            <Card className="border-0 shadow-sm mb-4">
-              <Card.Body className="p-4">
+        <Col lg={4} className="mb-4">
+          <Card className="border-0 shadow-sm h-100 contact-info-card">
+            <Card.Body className="p-4 text-center contact-info">
+              <h4 className="mb-4">Contact Information</h4>
+              
+              <div className="mb-4">
                 <div className="d-flex align-items-center mb-3">
-                  <div className="feature-icon me-3">
-                    <FaMapMarkerAlt />
+                  <FaMapMarkerAlt className="text-primary me-3" size={20} />
+                  <div>
+                    <h5 className="mb-1">Visit Our Workshop</h5>
+                    <p className="mb-0">Raghurajpur, Puri District<br />Odisha, India - 752012</p>
                   </div>
-                  <h5 className="mb-0">Visit Our Workshop</h5>
                 </div>
-                <p className="text-muted mb-2">
-                  <strong>Handicraft Hub</strong><br />
-                  Raghurajpur Heritage Village<br />
-                  Puri, Odisha - 752012<br />
-                  India
-                </p>
-                <Button variant="outline-primary" size="sm" className="w-100">
-                  Get Directions
-                </Button>
-              </Card.Body>
-            </Card>
-
-            {/* Contact Information */}
-            <Card className="border-0 shadow-sm mb-4">
-              <Card.Body className="p-4">
+                
                 <div className="d-flex align-items-center mb-3">
-                  <div className="feature-icon me-3">
-                    <FaPhone />
+                  <FaPhone className="text-primary me-3" size={20} />
+                  <div>
+                    <h5 className="mb-1">Call Us</h5>
+                    <p className="mb-0">+91 98765 43210</p>
                   </div>
-                  <h5 className="mb-0">Call Us</h5>
                 </div>
-                <p className="text-muted mb-2">
-                  <strong>Phone:</strong> +91 70084 12345<br />
-                  <strong>WhatsApp:</strong> +91 70084 12345
-                </p>
-                <Button variant="outline-success" size="sm" className="w-100">
-                  <FaWhatsapp className="me-2" />
-                  WhatsApp Us
-                </Button>
-              </Card.Body>
-            </Card>
-
-            {/* Email */}
-            <Card className="border-0 shadow-sm mb-4">
-              <Card.Body className="p-4">
-                <div className="d-flex align-items-center mb-3">
-                  <div className="feature-icon me-3">
-                    <FaEnvelope />
+                
+                <div className="d-flex align-items-center mb-4">
+                  <FaEnvelope className="text-primary me-3" size={20} />
+                  <div>
+                    <h5 className="mb-1">Email Us</h5>
+                    <p className="mb-0">handicraft@example.com</p>
                   </div>
-                  <h5 className="mb-0">Email Us</h5>
                 </div>
-                <p className="text-muted mb-2">
-                  <strong>General:</strong> info@handicrafthub.com<br />
-                  <strong>Orders:</strong> orders@handicrafthub.com<br />
-                  <strong>Support:</strong> support@handicrafthub.com
-                </p>
-                <Button variant="outline-info" size="sm" className="w-100">
-                  Send Email
-                </Button>
-              </Card.Body>
-            </Card>
-
-            {/* Working Hours */}
-            <Card className="border-0 shadow-sm mb-4">
-              <Card.Body className="p-4">
-                <div className="d-flex align-items-center mb-3">
-                  <div className="feature-icon me-3">
-                    <FaClock />
+                
+                <div className="d-flex align-items-center mb-4">
+                  <FaClock className="text-primary me-3" size={20} />
+                  <div>
+                    <h5 className="mb-1">Working Hours</h5>
+                    <p className="mb-0">Mon - Sat: 9:00 AM - 6:00 PM<br />Sunday: Closed</p>
                   </div>
-                  <h5 className="mb-0">Working Hours</h5>
                 </div>
-                <p className="text-muted mb-0">
-                  <strong>Monday - Saturday:</strong> 9:00 AM - 6:00 PM<br />
-                  <strong>Sunday:</strong> 10:00 AM - 4:00 PM<br />
-                  <small className="text-primary">Workshop visits by appointment only</small>
-                </p>
-              </Card.Body>
-            </Card>
+              </div>
 
-            {/* Social Media */}
-            <Card className="border-0 shadow-sm">
-              <Card.Body className="p-4">
+              <div className="social-links text-center">
                 <h5 className="mb-3">Follow Us</h5>
-                <p className="text-muted small mb-3">
-                  Stay updated with our latest Pattachitra artworks and artisan stories
-                </p>
-                <div className="d-flex gap-2">
-                  <Button variant="primary" size="sm" className="flex-fill">
-                    <FaFacebook />
-                  </Button>
-                  <Button variant="danger" size="sm" className="flex-fill">
-                    <FaInstagram />
-                  </Button>
-                  <Button variant="info" size="sm" className="flex-fill">
-                    <FaTwitter />
-                  </Button>
+                <div className="d-flex justify-content-center gap-3">
+                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                    <FaFacebook size={24} className="text-primary" />
+                  </a>
+                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                    <FaInstagram size={24} className="text-danger" />
+                  </a>
+                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                    <FaTwitter size={24} className="text-info" />
+                  </a>
+                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="social-link">
+                    <FaWhatsapp size={24} className="text-success" />
+                  </a>
                 </div>
-              </Card.Body>
-            </Card>
-          </div>
+              </div>
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
     </Container>
