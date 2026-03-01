@@ -27,10 +27,14 @@ const ProductList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching data from:', process.env.REACT_APP_API_URL);
         const [productsResponse, categoriesResponse] = await Promise.all([
           axios.get(`${process.env.REACT_APP_API_URL}/api/products`),
           axios.get(`${process.env.REACT_APP_API_URL}/api/categories`)
         ]);
+        
+        console.log('Products response:', productsResponse.data);
+        console.log('Categories response:', categoriesResponse.data);
         
         setProducts(productsResponse.data);
         setCategories(categoriesResponse.data);
@@ -195,6 +199,13 @@ const ProductList = () => {
             <span className="visually-hidden">Loading...</span>
           </div>
           <p className="mt-2 text-muted">Loading products...</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-5">
+          <p className="text-muted">No products found. Please check your connection.</p>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </div>
       ) : (
         <Row xs={1} sm={2} md={3} lg={4} className="g-4">
