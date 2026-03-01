@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { FaShoppingCart, FaEye, FaCheck } from 'react-icons/fa';
 
 const ProductList = () => {
+  console.log('ProductList component loaded - showing 16 products');
   const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
