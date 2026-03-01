@@ -35,6 +35,7 @@ const ProductList = () => {
         
         console.log('Products response:', productsResponse.data);
         console.log('Categories response:', categoriesResponse.data);
+        console.log('Categories length:', categoriesResponse.data.length);
         
         setProducts(productsResponse.data);
         setCategories(categoriesResponse.data);
@@ -215,7 +216,7 @@ const ProductList = () => {
               <div className="position-relative">
                 <Card.Img
                   variant="top"
-                  src={product.image}
+                  src={product.image.startsWith('http') ? product.image : `${process.env.REACT_APP_API_URL}${product.image}`}
                   alt={product.name}
                   style={{ height: '200px', objectFit: 'cover' }}
                   className="product-image"
@@ -314,7 +315,7 @@ const ProductList = () => {
             <Row>
               <Col md={6}>
                 <img
-                  src={selectedProduct.image}
+                  src={selectedProduct.image.startsWith('http') ? selectedProduct.image : `${process.env.REACT_APP_API_URL}${selectedProduct.image}`}
                   alt={selectedProduct.name}
                   style={{
                     width: '100%',
