@@ -5,7 +5,6 @@ import { useCart } from '../context/CartContext';
 import { FaShoppingCart, FaEye, FaCheck } from 'react-icons/fa';
 
 const ProductList = () => {
-  console.log('ProductList component loaded - showing 16 products');
   const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -264,7 +263,7 @@ const ProductList = () => {
     <Container className="py-4">
       {/* Cart Counter and Alert */}
       <div className="text-center mb-4">
-        <h2 className="fw-bold">All Products (16 Items)</h2>
+        <h2 className="fw-bold">All Products</h2>
         <p className="text-muted">Discover authentic, handcrafted treasures from Raghurajpur artisans</p>
         
         {/* Cart Counter */}
@@ -289,7 +288,6 @@ const ProductList = () => {
         )}
       </div>
       
-      {/* Products Grid - No Loading State */}
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {allProducts.map((product) => (
           <Col key={product._id} className="d-flex">
