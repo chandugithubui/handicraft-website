@@ -1,8 +1,9 @@
 // src/components/ProductList.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Alert, Modal } from 'react-bootstrap';
 import { useCart } from '../context/CartContext';
 import { FaShoppingCart, FaEye, FaCheck } from 'react-icons/fa';
+import axios from 'axios';
 
 const ProductList = () => {
   const { addToCart } = useCart();
@@ -16,169 +17,40 @@ const ProductList = () => {
   const [localCart, setLocalCart] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   
-  // Use the same product data from PattachitraSlider with proper structure
-  const allProducts = [
-    { 
-      _id: 1, 
-      name: 'Teapot Painting', 
-      price: 800, 
-      image: '/images/teapot.webp',
-      description: 'Hand-painted traditional teapot featuring Pattachitra art. Perfect for tea lovers and art collectors.',
-      category: 'Paintings',
-      rating: 4.5,
-      reviews: 12
-    },
-    { 
-      _id: 2, 
-      name: 'Gift Items', 
-      price: 2000, 
-      image: '/images/GiftsItems.webp',
-      description: 'Exclusive gift set with handcrafted items. Ideal for special occasions and corporate gifts.',
-      category: 'Gift Items',
-      rating: 4.8,
-      reviews: 8
-    },
-    { 
-      _id: 3, 
-      name: 'Glass Bottle', 
-      price: 1000, 
-      image: '/images/glassbottle.webp',
-      description: 'Decorative glass bottle with traditional Pattachitra paintings. Beautiful home decor item.',
-      category: 'Home Decor',
-      rating: 4.3,
-      reviews: 6
-    },
-    { 
-      _id: 4, 
-      name: 'Elephant Painting', 
-      price: 700, 
-      image: '/images/elephant.webp',
-      description: 'Sacred elephant motif in traditional Pattachitra style. Symbol of wisdom and strength.',
-      category: 'Paintings',
-      rating: 4.7,
-      reviews: 15
-    },
-    { 
-      _id: 5, 
-      name: 'Handcrafted Vase', 
-      price: 1200, 
-      image: '/images/handmadevase.webp',
-      description: 'Beautiful handcrafted vase with intricate Pattachitra designs. Perfect for fresh flowers.',
-      category: 'Home Decor',
-      rating: 4.6,
-      reviews: 10
-    },
-    { 
-      _id: 6, 
-      name: 'Wooden Toys', 
-      price: 600, 
-      image: '/images/toys.jpg',
-      description: 'Traditional wooden toys with safe natural colors. Educational and decorative pieces.',
-      category: 'Gift Items',
-      rating: 4.4,
-      reviews: 9
-    },
-    { 
-      _id: 7, 
-      name: 'Pattachitra Wall Art', 
-      price: 2500, 
-      image: '/images/pattachitrawall.jpg',
-      description: 'Large wall art piece depicting mythological scenes. Centerpiece for any room.',
-      category: 'Paintings',
-      rating: 5.0,
-      reviews: 20
-    },
-    { 
-      _id: 8, 
-      name: 'Wooden Coasters', 
-      price: 350, 
-      image: '/images/woodentoys.jpg',
-      description: 'Set of 6 wooden coasters with Pattachitra art. Protect your furniture in style.',
-      category: 'Home Decor',
-      rating: 4.2,
-      reviews: 7
-    },
-    { 
-      _id: 9, 
-      name: 'Decorative Plate', 
-      price: 900, 
-      image: '/images/decorativeplate.webp',
-      description: 'Hand-painted decorative plate with traditional motifs. Wall hanging or table decor.',
-      category: 'Home Decor',
-      rating: 4.5,
-      reviews: 11
-    },
-    { 
-      _id: 10, 
-      name: 'Carved Wooden Sculpture', 
-      price: 1800, 
-      image: '/images/carvedwooden.jpg',
-      description: 'Intricately carved wooden sculpture showcasing traditional craftsmanship.',
-      category: 'Gift Items',
-      rating: 4.8,
-      reviews: 13
-    },
-    { 
-      _id: 11, 
-      name: 'Tiled Pattachitra Art', 
-      price: 3500, 
-      image: '/images/tilledpattachitra.webp',
-      description: 'Premium tiled artwork with multiple Pattachitra scenes. Luxury home decor.',
-      category: 'Paintings',
-      rating: 4.9,
-      reviews: 18
-    },
-    { 
-      _id: 12, 
-      name: 'Handcrafted Wooden Box', 
-      price: 900, 
-      image: '/images/handcraftwooden.jpg',
-      description: 'Decorative wooden box with traditional paintings. Perfect for jewelry or keepsakes.',
-      category: 'Gift Items',
-      rating: 4.6,
-      reviews: 8
-    },
-    { 
-      _id: 13, 
-      name: 'Handcrafted Wooden Bowl', 
-      price: 1200, 
-      image: '/images/HandcraftedWoodenBowl.webp',
-      description: 'Traditional wooden bowl with intricate carvings. Perfect for serving snacks.',
-      category: 'Home Decor',
-      rating: 4.7,
-      reviews: 12
-    },
-    { 
-      _id: 14, 
-      name: 'Traditional Metal Lamp', 
-      price: 3500, 
-      image: '/images/metallamp.jpg',
-      description: 'Antique-style metal lamp with traditional designs. Creates warm ambiance.',
-      category: 'Home Decor',
-      rating: 4.9,
-      reviews: 16
-    },
-    { 
-      _id: 15, 
-      name: 'Handpainted Wooden Tray', 
-      price: 2200, 
-      image: '/images/woodentray.jpg',
-      description: 'Elegant wooden tray with Pattachitra paintings. Perfect for serving guests.',
-      category: 'Home Decor',
-      rating: 4.8,
-      reviews: 14
-    },
-    { 
-      _id: 16, 
-      name: 'Decorative Clay Pot', 
-      price: 800, 
-      image: '/images/claypot.jpg',
-      description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
-      category: 'Home Decor',
-      rating: 4.4,
-      reviews: 6
-    }
-  ];
+  // Backend data states
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch products and categories from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API_URL}/api/products`),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/categories`)
+        ]);
+        
+        setProducts(productsResponse.data);
+        setCategories(categoriesResponse.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  // Filter products by category
+  const filteredProducts = selectedCategory === 'All' 
+    ? products 
+    : products.filter(product => {
+        const category = categories.find(cat => cat._id === product.category);
+        return category && category.name === selectedCategory;
+      });
 
   const handleAddToCart = (product) => {
     // Convert the product data to match the cart context format
@@ -288,8 +160,45 @@ const ProductList = () => {
         )}
       </div>
       
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {allProducts.map((product) => (
+      {/* Category Filter Buttons */}
+      <div className="text-center mb-4">
+        <div className="d-flex justify-content-center flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === 'All' ? 'primary' : 'outline-primary'}
+            size="sm"
+            onClick={() => setSelectedCategory('All')}
+            className="px-3"
+          >
+            All Products
+          </Button>
+          {categories.map(category => (
+            <Button
+              key={category._id}
+              variant={selectedCategory === category.name ? 'primary' : 'outline-primary'}
+              size="sm"
+              onClick={() => setSelectedCategory(category.name)}
+              className="px-3"
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
+        <p className="text-muted small mt-2">
+          Showing {filteredProducts.length} {selectedCategory === 'All' ? 'products' : selectedCategory.toLowerCase()}
+        </p>
+      </div>
+      
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2 text-muted">Loading products...</p>
+        </div>
+      ) : (
+        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+          {filteredProducts.map((product) => (
           <Col key={product._id} className="d-flex">
             <Card className={`h-100 product-card shadow-sm`}>
               <div className="position-relative">
@@ -382,6 +291,7 @@ const ProductList = () => {
           </Col>
         ))}
       </Row>
+      )}
       
       {/* Product Details Modal */}
       {selectedProduct && (
@@ -411,7 +321,9 @@ const ProductList = () => {
                 <p className="text-muted mb-4">{selectedProduct.description}</p>
                 
                 <div className="mb-3">
-                  <strong>Category:</strong> {selectedProduct.category}
+                  <strong>Category:</strong> {
+                    categories.find(cat => cat._id === selectedProduct.category)?.name || 'Unknown'
+                  }
                 </div>
                 
                 {selectedProduct.rating && (
