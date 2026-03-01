@@ -39,26 +39,6 @@ const ProductList = () => {
       reviews: 15
     },
     { 
-      _id: 3, 
-      name: 'Elephant Painting', 
-      price: 700, 
-      image: '/images/elephant.webp',
-      description: 'Sacred elephant motif in traditional Pattachitra style. Symbol of wisdom and strength.',
-      category: 'Paintings',
-      rating: 4.7,
-      reviews: 15
-    },
-    { 
-      _id: 4, 
-      name: 'Handcrafted Vase', 
-      price: 1200, 
-      image: '/images/handcraftvase.jpg',
-      description: 'Beautiful handcrafted vase with intricate Pattachitra designs. Perfect for fresh flowers.',
-      category: 'Home Decor',
-      rating: 4.6,
-      reviews: 9
-    },
-    { 
       _id: 5, 
       name: 'Decorative Plate', 
       price: 1500, 
@@ -67,16 +47,6 @@ const ProductList = () => {
       category: 'Home Decor',
       rating: 4.5,
       reviews: 8
-    },
-    { 
-      _id: 6, 
-      name: 'Clay Pot', 
-      price: 800, 
-      image: '/images/claypot.jpg',
-      description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
-      category: 'Home Decor',
-      rating: 4.4,
-      reviews: 6
     },
     { 
       _id: 7, 
@@ -120,16 +90,6 @@ const ProductList = () => {
     },
     { 
       _id: 11, 
-      name: 'Pattachitra Coasters', 
-      price: 400, 
-      image: '/images/coaster.webp',
-      description: 'Set of 6 coasters with traditional Pattachitra art. Practical and beautiful.',
-      category: 'Home Decor',
-      rating: 4.3,
-      reviews: 8
-    },
-    { 
-      _id: 12, 
       name: 'Peacock Art', 
       price: 1100, 
       image: '/images/peacock.webp',
@@ -140,16 +100,6 @@ const ProductList = () => {
     },
     { 
       _id: 13, 
-      name: 'Sun God Painting', 
-      price: 1300, 
-      image: '/images/sun.webp',
-      description: 'Traditional Sun God motif in vibrant colors. Represents energy and life.',
-      category: 'Paintings',
-      rating: 4.6,
-      reviews: 12
-    },
-    { 
-      _id: 14, 
       name: 'Traditional Mask', 
       price: 1800, 
       image: '/images/mask.webp',
