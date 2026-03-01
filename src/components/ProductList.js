@@ -5,6 +5,8 @@ import { useCart } from '../context/CartContext';
 import { FaShoppingCart, FaEye, FaCheck } from 'react-icons/fa';
 
 const ProductList = () => {
+  // Debug: Log when component renders
+  console.log('ProductList component rendering...');
   const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -70,113 +72,113 @@ const ProductList = () => {
     },
     { 
       _id: 6, 
-      name: 'Coconut Shell Art', 
-      price: 600, 
-      image: '/images/coconut.webp',
-      description: 'Eco-friendly coconut shell art with traditional motifs. Sustainable home decor.',
+      name: 'Decorative Plate', 
+      price: 1500, 
+      image: '/images/decorativeplate.webp',
+      description: 'Decorative plate with traditional Pattachitra art. Beautiful wall decor piece.',
       category: 'Home Decor',
       rating: 4.5,
-      reviews: 7
-    },
-    { 
-      _id: 7, 
-      name: 'Fish Motif Painting', 
-      price: 900, 
-      image: '/images/fish.webp',
-      description: 'Traditional fish motif representing prosperity and abundance in Odisha culture.',
-      category: 'Paintings',
-      rating: 4.4,
-      reviews: 11
-    },
-    { 
-      _id: 8, 
-      name: 'Tribal Art Wall Hanging', 
-      price: 1500, 
-      image: '/images/tribal.webp',
-      description: 'Tribal-inspired wall hanging with authentic patterns. Cultural heritage piece.',
-      category: 'Home Decor',
-      rating: 4.7,
-      reviews: 13
-    },
-    { 
-      _id: 9, 
-      name: 'Pattachitra Coasters', 
-      price: 400, 
-      image: '/images/coaster.webp',
-      description: 'Set of 6 coasters with traditional Pattachitra art. Practical and beautiful.',
-      category: 'Home Decor',
-      rating: 4.3,
       reviews: 8
     },
     { 
-      _id: 10, 
-      name: 'Peacock Feather Art', 
-      price: 1100, 
-      image: '/images/peacock.webp',
-      description: 'Elegant peacock feather design in traditional style. Symbol of beauty and grace.',
-      category: 'Paintings',
-      rating: 4.8,
-      reviews: 16
-    },
-    { 
-      _id: 11, 
-      name: 'Bamboo Craft Items', 
-      price: 800, 
-      image: '/images/bamboo.webp',
-      description: 'Sustainable bamboo craft with traditional Odisha designs. Eco-friendly decor.',
-      category: 'Home Decor',
-      rating: 4.5,
-      reviews: 10
-    },
-    { 
-      _id: 12, 
-      name: 'Sun God Painting', 
-      price: 1300, 
-      image: '/images/sun.webp',
-      description: 'Traditional Sun God motif in vibrant colors. Represents energy and life.',
-      category: 'Paintings',
-      rating: 4.6,
-      reviews: 12
-    },
-    { 
-      _id: 13, 
-      name: 'Clay Art Set', 
-      price: 700, 
-      image: '/images/clayart.webp',
-      description: 'Handcrafted clay art set with traditional designs. Perfect for gifting.',
-      category: 'Home Decor',
-      rating: 4.4,
-      reviews: 9
-    },
-    { 
-      _id: 14, 
-      name: 'Traditional Mask', 
-      price: 1800, 
-      image: '/images/mask.webp',
-      description: 'Traditional Odisha tribal mask with authentic craftsmanship. Cultural artifact.',
-      category: 'Home Decor',
-      rating: 4.9,
-      reviews: 7
-    },
-    { 
-      _id: 15, 
-      name: 'Pattachitra Clock', 
-      price: 1600, 
-      image: '/images/clock.webp',
-      description: 'Functional wall clock with Pattachitra art. Combines tradition with utility.',
-      category: 'Home Decor',
-      rating: 4.8,
-      reviews: 14
-    },
-    { 
-      _id: 16, 
-      name: 'Decorative Clay Pot', 
+      _id: 7, 
+      name: 'Clay Pot', 
       price: 800, 
       image: '/images/claypot.jpg',
       description: 'Traditional clay pot with earthy designs. Ideal for indoor plants.',
       category: 'Home Decor',
       rating: 4.4,
       reviews: 6
+    },
+    { 
+      _id: 8, 
+      name: 'Pattachitra Art 1', 
+      price: 1200, 
+      image: '/images/pattachitra1.jpg.jpg',
+      description: 'Traditional Pattachitra art with vibrant colors and intricate details. Authentic Odisha craftsmanship.',
+      category: 'Paintings',
+      rating: 4.9,
+      reviews: 20
+    },
+    { 
+      _id: 9, 
+      name: 'Wooden Sculpture', 
+      price: 3000, 
+      image: '/images/sculpture.webp',
+      description: 'Hand-carved wooden sculpture with traditional Pattachitra designs. Elegant home decor piece.',
+      category: 'Sculptures',
+      rating: 4.6,
+      reviews: 12
+    },
+    { 
+      _id: 10, 
+      name: 'Pattachitra Art 2', 
+      price: 1300, 
+      image: '/images/pattachitra2.jpg.jpg',
+      description: 'Traditional Pattachitra art showcasing mythological scenes. Beautiful cultural heritage piece.',
+      category: 'Paintings',
+      rating: 4.7,
+      reviews: 15
+    },
+    { 
+      _id: 11, 
+      name: 'Pattachitra Art 3', 
+      price: 1400, 
+      image: '/images/pattachitra3.jpg.jpg',
+      description: 'Traditional Pattachitra art with intricate details. Perfect for home decoration.',
+      category: 'Paintings',
+      rating: 4.8,
+      reviews: 18
+    },
+    { 
+      _id: 12, 
+      name: 'Pattachitra Wall Art', 
+      price: 1800, 
+      image: '/images/pattachitrawall.jpg',
+      description: 'Large Pattachitra wall art with traditional motifs. Stunning focal point for any room.',
+      category: 'Home Decor',
+      rating: 4.9,
+      reviews: 14
+    },
+    { 
+      _id: 13, 
+      name: 'Handcrafted Wood Bowl', 
+      price: 2000, 
+      image: '/images/HandcraftedWoodenBowl.webp',
+      description: 'Beautiful handcrafted wooden bowl with traditional designs. Perfect for serving or decoration.',
+      category: 'Home Decor',
+      rating: 4.8,
+      reviews: 15
+    },
+    { 
+      _id: 14, 
+      name: 'Carved Wood Art', 
+      price: 2500, 
+      image: '/images/carvedwooden.jpg',
+      description: 'Intricately carved wooden art piece with traditional Pattachitra designs.',
+      category: 'Sculptures',
+      rating: 4.7,
+      reviews: 12
+    },
+    { 
+      _id: 15, 
+      name: 'Handicraft Toys', 
+      price: 800, 
+      image: '/images/toys.jpg',
+      description: 'Traditional handicraft toys with natural materials. Safe for children and educational.',
+      category: 'Home Decor',
+      rating: 4.4,
+      reviews: 10
+    },
+    { 
+      _id: 16, 
+      name: 'Wooden Handcraft', 
+      price: 1500, 
+      image: '/images/woodenhandcraft.jpg',
+      description: 'Complete set of wooden handicraft items. Perfect for gifting and home decoration.',
+      category: 'Home Decor',
+      rating: 4.7,
+      reviews: 14
     }
   ];
 
@@ -261,10 +263,11 @@ const ProductList = () => {
 
   return (
     <Container className="py-4">
-      {/* Cart Counter and Alert */}
+      {/* Debug Info */}
       <div className="text-center mb-4">
         <h2 className="fw-bold">All Products</h2>
         <p className="text-muted">Discover authentic, handcrafted treasures from Raghurajpur artisans</p>
+        <p className="text-success">Debug: {allProducts.length} products loaded</p>
         
         {/* Cart Counter */}
         <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
@@ -288,6 +291,7 @@ const ProductList = () => {
         )}
       </div>
       
+      {/* Products Grid */}
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {allProducts.map((product) => (
           <Col key={product._id} className="d-flex">
