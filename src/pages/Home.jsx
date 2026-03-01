@@ -2,7 +2,7 @@ import React from 'react';
 import ProductList from '../components/ProductList'; // Import ProductList component
 import PattachitraSlider from '../components/PattachitraSlider'; // Import the PattachitraSlider
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
-import { FaHandSparkles, FaAward, FaTruck, FaShieldAlt } from 'react-icons/fa';
+import { FaHandSparkles, FaAward, FaTruck, FaShieldAlt, FaEye, FaShoppingCart } from 'react-icons/fa';
 
 const Home = () => {
   return (
@@ -40,6 +40,160 @@ const Home = () => {
           </Row>
         </Container>
       </div>
+
+      {/* Pattachitra Slider */}
+      <Container className="py-4">
+        <PattachitraSlider />
+      </Container>
+
+      {/* Our Handicraft Collection Section */}
+      <Container className="py-5">
+        <Row className="text-center mb-5">
+          <Col>
+            <h2 className="fw-bold mb-3">Featured Collection</h2>
+            <p className="text-muted">Discover our curated selection of authentic Pattachitra art and traditional handicrafts</p>
+          </Col>
+        </Row>
+        
+        <Row className="g-4">
+          <Col md={6} lg={3} className="d-flex">
+            <Card className="border-0 shadow-sm h-100 flex-fill collection-card">
+              <div className="position-relative overflow-hidden">
+                <Card.Img 
+                  variant="top" 
+                  src="/images/pattachitrawall.jpg" 
+                  style={{ height: '250px', objectFit: 'cover' }}
+                  className="collection-img"
+                />
+                <div className="collection-overlay">
+                  <Badge bg="danger" className="position-absolute top-0 end-0 m-2">New</Badge>
+                </div>
+              </div>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="h5">Pattachitra Wall Art</Card.Title>
+                <Card.Text className="text-muted flex-grow-1">
+                  Traditional wall paintings depicting mythological stories and cultural heritage.
+                </Card.Text>
+                <div className="d-flex justify-content-between align-items-center mt-auto">
+                  <span className="h5 text-primary mb-0">₹2,500</span>
+                  <div className="d-flex gap-2">
+                    <Button variant="outline-primary" size="sm">
+                      <FaEye className="me-1" /> View
+                    </Button>
+                    <Button variant="primary" size="sm">
+                      <FaShoppingCart className="me-1" /> Add
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          <Col md={6} lg={3} className="d-flex">
+            <Card className="border-0 shadow-sm h-100 flex-fill collection-card">
+              <div className="position-relative overflow-hidden">
+                <Card.Img 
+                  variant="top" 
+                  src="/images/handmadevase.webp" 
+                  style={{ height: '250px', objectFit: 'cover' }}
+                  className="collection-img"
+                />
+                <div className="collection-overlay">
+                  <Badge bg="success" className="position-absolute top-0 end-0 m-2">Popular</Badge>
+                </div>
+              </div>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="h5">Handcrafted Vase</Card.Title>
+                <Card.Text className="text-muted flex-grow-1">
+                  Elegant terracotta vase with intricate Pattachitra designs for home decor.
+                </Card.Text>
+                <div className="d-flex justify-content-between align-items-center mt-auto">
+                  <span className="h5 text-primary mb-0">₹1,200</span>
+                  <div className="d-flex gap-2">
+                    <Button variant="outline-primary" size="sm">
+                      <FaEye className="me-1" /> View
+                    </Button>
+                    <Button variant="primary" size="sm">
+                      <FaShoppingCart className="me-1" /> Add
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          <Col md={6} lg={3} className="d-flex">
+            <Card className="border-0 shadow-sm h-100 flex-fill collection-card">
+              <div className="position-relative overflow-hidden">
+                <Card.Img 
+                  variant="top" 
+                  src="/images/teapot.webp" 
+                  style={{ height: '250px', objectFit: 'cover' }}
+                  className="collection-img"
+                />
+              </div>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="h5">Teapot Painting</Card.Title>
+                <Card.Text className="text-muted flex-grow-1">
+                  Hand-painted ceramic teapot featuring traditional Pattachitra art motifs.
+                </Card.Text>
+                <div className="d-flex justify-content-between align-items-center mt-auto">
+                  <span className="h5 text-primary mb-0">₹800</span>
+                  <div className="d-flex gap-2">
+                    <Button variant="outline-primary" size="sm">
+                      <FaEye className="me-1" /> View
+                    </Button>
+                    <Button variant="primary" size="sm">
+                      <FaShoppingCart className="me-1" /> Add
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          
+          <Col md={6} lg={3} className="d-flex">
+            <Card className="border-0 shadow-sm h-100 flex-fill collection-card">
+              <div className="position-relative overflow-hidden">
+                <Card.Img 
+                  variant="top" 
+                  src="/images/carvedwooden.jpg" 
+                  style={{ height: '250px', objectFit: 'cover' }}
+                  className="collection-img"
+                />
+                <div className="collection-overlay">
+                  <Badge bg="warning" className="position-absolute top-0 end-0 m-2">Limited</Badge>
+                </div>
+              </div>
+              <Card.Body className="d-flex flex-column">
+                <Card.Title className="h5">Wooden Sculpture</Card.Title>
+                <Card.Text className="text-muted flex-grow-1">
+                  Intricately carved teak wood sculpture showcasing traditional craftsmanship.
+                </Card.Text>
+                <div className="d-flex justify-content-between align-items-center mt-auto">
+                  <span className="h5 text-primary mb-0">₹1,800</span>
+                  <div className="d-flex gap-2">
+                    <Button variant="outline-primary" size="sm">
+                      <FaEye className="me-1" /> View
+                    </Button>
+                    <Button variant="primary" size="sm">
+                      <FaShoppingCart className="me-1" /> Add
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        
+        <Row className="text-center mt-5">
+          <Col>
+            <Button variant="outline-primary" size="lg" href="#products">
+              View All Products
+            </Button>
+          </Col>
+        </Row>
+      </Container>
 
       {/* Features Section */}
       <Container className="py-5">
@@ -104,11 +258,6 @@ const Home = () => {
             </Card>
           </Col>
         </Row>
-      </Container>
-
-      {/* Pattachitra Slider */}
-      <Container className="py-4">
-        <PattachitraSlider />
       </Container>
 
       {/* Products Section */}

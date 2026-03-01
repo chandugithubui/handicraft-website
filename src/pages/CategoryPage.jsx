@@ -3,30 +3,38 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
 const CategoryPage = () => {
-  const { categoryId } = useParams(); // Get categoryId from URL
+  const { categoryId } = useParams();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
 
-  // Fetch category and products based on categoryId
+  const API = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const fetchCategoryAndProducts = async () => {
       try {
         // Fetch category details
-        const categoryResponse = await axios.get(`http://localhost:5000/api/categories/${categoryId}`);
+        const categoryResponse = await axios.get(
+          `${API}/api/categories/${categoryId}`
+        );
         setCategory(categoryResponse.data);
 
         // Fetch products belonging to this category
-        const productsResponse = await axios.get(`http://localhost:5000/api/products?category=${categoryId}`);
+        const productsResponse = await axios.get(
+          `${API}/api/products?category=${categoryId}`
+        );
         setProducts(productsResponse.data);
+
       } catch (error) {
         console.error('Error fetching category or products:', error);
       }
     };
 
-    fetchCategoryAndProducts();
-  }, [categoryId]); // Re-run the effect when categoryId changes
+    if (API) {
+      fetchCategoryAndProducts();
+    }
+  }, [categoryId, API]);
 
-  if (!category) return <div>Loading...</div>; // Loading state
+  if (!category) return <div>Loading...</div>;
 
   return (
     <div>
