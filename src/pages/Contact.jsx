@@ -30,7 +30,7 @@ const Contact = () => {
     setShowAlert(false);
 
     try {
-      const response = await axios.post('https://handicraft-website.onrender.com/api/contacts', formData);
+      await axios.post('https://handicraft-website.onrender.com/api/contacts', formData);
       setResponseMessage('Message sent successfully! We will get back to you soon.');
       setShowAlert(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });

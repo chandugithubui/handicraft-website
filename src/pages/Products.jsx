@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';  // Import axios for HTTP requests
 
 const Product = () => {
-  const { productId } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [showDetails, setShowDetails] = useState(false);  // State to manage View Details modal visibility
   const [selectedProduct, setSelectedProduct] = useState(null); // State to manage selected related product
@@ -92,7 +91,7 @@ const Product = () => {
                 <img
                   className="d-block w-100"
                   src={image}
-                  alt={`Product Image ${index + 1}`}
+                  alt={`Product ${index + 1}`}
                   style={{ height: '400px', objectFit: 'cover' }}
                 />
               </Carousel.Item>

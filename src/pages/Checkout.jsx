@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Card, ListGroup } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaArrowLeft, FaLock, FaCreditCard } from 'react-icons/fa';
+import { FaArrowLeft, FaLock } from 'react-icons/fa';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();

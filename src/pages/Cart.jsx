@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button, Image, Alert, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Image, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { FaTrash, FaPlus, FaMinus, FaShoppingCart } from 'react-icons/fa';
