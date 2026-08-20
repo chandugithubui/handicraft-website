@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 const Product = require('./models/product');
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+
+// Load .env file manually
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+  console.log('Loaded .env from:', envPath);
+} else {
+  console.error('.env file not found at:', envPath);
+}
 
 // MongoDB connection - use the same as in .env
 const MONGODB_URI = process.env.MONGODB_URI;

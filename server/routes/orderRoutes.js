@@ -3,8 +3,8 @@ const router = express.Router();
 const Order = require('../models/order');
 const { auth } = require('../middleware/auth');
 
-// Create new order (auth optional - allows guest checkout)
-router.post('/', async (req, res) => {
+// Create new order (requires authentication)
+router.post('/', auth, async (req, res) => {
   try {
     const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
 
@@ -17,11 +17,8 @@ router.post('/', async (req, res) => {
       );
     }
 
-    // If user is authenticated, include user ID, otherwise create guest order
-    const userId = req.user?.userId || null;
-
     const order = new Order({
-      user: userId,
+      user: req.user.userId,
       items,
       shippingAddress,
       paymentMethod: paymentMethod || 'COD',

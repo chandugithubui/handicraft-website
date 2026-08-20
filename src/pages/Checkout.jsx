@@ -5,17 +5,12 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/orderService';
-import { createPaymentIntent } from '../services/paymentService';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import StripePaymentForm from '../components/StripePaymentForm';
+import RazorpayPaymentForm from '../components/RazorpayPaymentForm';
 import './Checkout.css';
-
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_key');
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { token } = useAuth();
+  const { token, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -31,7 +26,20 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Container className="checkout-container">
+        <Alert variant="warning">
+          Please <Link to="/login">login</Link> to proceed with checkout
+        </Alert>
+        <Link to="/cart">
+          <Button variant="primary">Back to Cart</Button>
+        </Link>
+      </Container>
+    );
+  }
 
   const handleChange = (e) => {
     setShippingAddress({
@@ -67,8 +75,7 @@ const Checkout = () => {
         totalAmount: getCartTotal()
       };
 
-      // Use token if authenticated, otherwise send without auth
-      await createOrder(orderData, token || null);
+      await createOrder(orderData, token);
       clearCart();
       navigate('/order-success');
     } catch (err) {
@@ -78,15 +85,11 @@ const Checkout = () => {
     }
   };
 
-  const handleCardPayment = async (paymentMethod) => {
+  const handleRazorpayPayment = async (paymentResponse) => {
     setLoading(true);
     setError('');
 
     try {
-      // Create payment intent
-      const { clientSecret } = await createPaymentIntent(getCartTotal(), token);
-      setClientSecret(clientSecret);
-
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
@@ -96,8 +99,9 @@ const Checkout = () => {
           image: item.image
         })),
         shippingAddress,
-        paymentMethod: 'Card',
-        totalAmount: getCartTotal()
+        paymentMethod: 'Razorpay',
+        totalAmount: getCartTotal(),
+        paymentId: paymentResponse.razorpay_payment_id
       };
 
       await createOrder(orderData, token);
@@ -244,35 +248,22 @@ const Checkout = () => {
                   />
                   <Form.Check
                     type="radio"
-                    label="Credit/Debit Card"
+                    label="Razorpay (Cards, UPI, Net Banking)"
                     name="paymentMethod"
-                    id="card"
-                    value="Card"
-                    checked={paymentMethod === 'Card'}
+                    id="razorpay"
+                    value="Razorpay"
+                    checked={paymentMethod === 'Razorpay'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   />
                 </Form.Group>
 
-                {paymentMethod === 'Card' && (
+                {paymentMethod === 'Razorpay' && (
                   <div className="mt-4">
-                    {clientSecret ? (
-                      <Elements stripe={stripePromise}>
-                        <StripePaymentForm
-                          amount={getCartTotal()}
-                          onSuccess={handleCardPayment}
-                          onError={(err) => setError(err)}
-                        />
-                      </Elements>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        className="w-100"
-                        onClick={() => handleCardPayment()}
-                        disabled={loading}
-                      >
-                        {loading ? 'Initializing...' : 'Continue to Payment'}
-                      </Button>
-                    )}
+                    <RazorpayPaymentForm
+                      amount={getCartTotal()}
+                      onSuccess={handleRazorpayPayment}
+                      onError={(err) => setError(err)}
+                    />
                   </div>
                 )}
 
