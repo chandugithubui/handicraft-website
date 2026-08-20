@@ -39,8 +39,43 @@
   .orders-container {
     padding: 20px 0;
   }
-  
+
   .orders-title {
     font-size: 1.5rem;
+  }
+
+  .orders-card th,
+  .orders-card td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .orders-container {
+    padding: 15px 0;
+  }
+
+  .orders-title {
+    font-size: 1.3rem;
+  }
+
+  .orders-card {
+    overflow-x: auto;
+  }
+
+  .orders-card table {
+    min-width: 600px;
+  }
+
+  .orders-card th,
+  .orders-card td {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  .orders-card .badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
 }

@@ -7,8 +7,53 @@
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
+@media (max-width: 991px) {
+  .product-card {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    margin-bottom: 15px;
+  }
+
+  .card-img-top {
+    height: 200px !important;
+  }
+
+  .product-card .card-title {
+    font-size: 1rem;
+  }
+
+  .product-card .card-text {
+    font-size: 0.9rem;
+  }
+
+  .product-card .price {
+    font-size: 1.1rem;
+  }
+}
+
 @media (max-width: 576px) {
   .card-img-top {
     height: 180px !important;
+  }
+
+  .product-card .card-title {
+    font-size: 0.95rem;
+  }
+
+  .product-card .card-text {
+    font-size: 0.85rem;
+  }
+
+  .product-card .price {
+    font-size: 1rem;
+  }
+
+  .product-card .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
   }
 }

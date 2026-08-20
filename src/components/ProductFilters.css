@@ -28,3 +28,54 @@
 .product-filters .accordion-body {
   padding: 12px 16px;
 }
+
+/* Mobile Responsive */
+@media (max-width: 991px) {
+  .product-filters {
+    position: static;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-filters .accordion-button {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .product-filters .accordion-body {
+    padding: 10px 12px;
+  }
+
+  .product-filters .form-check {
+    margin-bottom: 8px;
+  }
+
+  .product-filters .form-check-label {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-filters .card-header {
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  .product-filters .accordion-button {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .product-filters .accordion-body {
+    padding: 8px 10px;
+  }
+
+  .product-filters .form-control {
+    font-size: 0.85rem;
+  }
+
+  .product-filters .form-range {
+    height: 0.8rem;
+  }
+}

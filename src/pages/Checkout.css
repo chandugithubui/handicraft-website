@@ -16,3 +16,38 @@
   background-color: #d35400;
   border-color: #d35400;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 20px 15px;
+  }
+
+  .order-summary {
+    position: static;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .checkout-container {
+    padding: 15px 10px;
+  }
+
+  .checkout-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .order-summary .btn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .form-control {
+    font-size: 0.9rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+  }
+}
