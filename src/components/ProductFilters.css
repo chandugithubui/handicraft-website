@@ -58,8 +58,8 @@
 
 @media (max-width: 576px) {
   .product-filters .card-header {
-    font-size: 1rem;
-    padding: 12px;
+    font-size: 0.95rem;
+    padding: 10px;
   }
 
   .product-filters .accordion-button {
@@ -73,9 +73,24 @@
 
   .product-filters .form-control {
     font-size: 0.85rem;
+    padding: 8px;
   }
 
   .product-filters .form-range {
     height: 0.8rem;
+  }
+
+  .product-filters .form-check {
+    margin-bottom: 6px;
+  }
+
+  .product-filters .form-check-label {
+    font-size: 0.8rem;
+  }
+
+  .product-filters .btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.85rem;
   }
 }

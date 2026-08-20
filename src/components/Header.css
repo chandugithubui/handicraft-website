@@ -352,87 +352,102 @@
 
 @media (max-width: 576px) {
   .header-slider {
-    height: 200px;
+    height: 180px;
   }
 
   .slider-image {
-    height: 200px;
+    height: 180px;
+  }
+
+  .slider-content {
+    padding: 20px 0;
   }
 
   .slider-content h1 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    line-height: 1.3;
   }
 
   .slider-content p {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 
   .logo-text {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .logo-subtitle {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     letter-spacing: 1px;
   }
 
   .main-navbar {
-    padding: 8px 0;
+    padding: 6px 0;
+  }
+
+  .main-navbar .navbar-brand {
+    padding: 0;
   }
 
   .search-form {
-    margin: 10px 0;
+    margin: 8px 0;
   }
 
   .search-input-wrapper {
-    padding: 4px 12px;
+    padding: 3px 10px;
   }
 
   .search-input {
-    font-size: 0.8rem;
-  }
-
-  .search-input::placeholder {
     font-size: 0.75rem;
   }
 
+  .search-input::placeholder {
+    font-size: 0.7rem;
+  }
+
   .search-btn {
-    padding: 0 5px;
+    padding: 0 4px;
   }
 
   .main-navbar .nav-link,
   .nav-dropdown {
-    padding: 10px 12px !important;
-    font-size: 0.95rem;
+    padding: 8px 10px !important;
+    font-size: 0.9rem;
   }
 
   .icon-link {
-    padding: 6px !important;
+    padding: 5px !important;
   }
 
   .cart-badge {
-    font-size: 0.6rem;
-    padding: 2px 4px;
-    right: -3px;
+    font-size: 0.55rem;
+    padding: 2px 3px;
+    right: -2px;
   }
 
   .user-dropdown {
-    padding: 8px !important;
+    padding: 6px !important;
   }
 
   .user-name {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .btn-register {
-    padding: 5px 12px !important;
-    font-size: 0.85rem;
+    padding: 4px 10px !important;
+    font-size: 0.8rem;
   }
 
   .dropdown-item {
-    padding: 10px 15px !important;
-    font-size: 0.9rem;
+    padding: 8px 12px !important;
+    font-size: 0.85rem;
+  }
+
+  .main-navbar .navbar-collapse {
+    padding: 15px;
+    margin-top: 8px;
   }
 }
 
