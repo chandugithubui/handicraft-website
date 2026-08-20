@@ -15,7 +15,7 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ||
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { isAuthenticated, token } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const [shippingAddress, setShippingAddress] = useState({
