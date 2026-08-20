@@ -1,0 +1,18 @@
+.checkout-container {
+  padding: 40px 20px;
+}
+
+.order-summary {
+  position: sticky;
+  top: 20px;
+}
+
+.order-summary .btn-primary {
+  background-color: #e67e22;
+  border-color: #e67e22;
+}
+
+.order-summary .btn-primary:hover {
+  background-color: #d35400;
+  border-color: #d35400;
+}

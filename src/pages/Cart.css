@@ -1,0 +1,30 @@
+.cart-container {
+  padding: 40px 20px;
+}
+
+.cart-item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+}
+
+.cart-summary {
+  position: sticky;
+  top: 20px;
+}
+
+.cart-summary .btn-primary {
+  background-color: #e67e22;
+  border-color: #e67e22;
+}
+
+.cart-summary .btn-primary:hover {
+  background-color: #d35400;
+  border-color: #d35400;
+}

@@ -1,0 +1,30 @@
+.product-filters {
+  position: sticky;
+  top: 20px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-filters .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+.product-filters .accordion-item {
+  border: none;
+}
+
+.product-filters .accordion-button {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+}
+
+.product-filters .accordion-button:not(.collapsed) {
+  background-color: #fff3e0;
+  color: #e67e22;
+}
+
+.product-filters .accordion-body {
+  padding: 12px 16px;
+}

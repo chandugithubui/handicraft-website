@@ -1,35 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Container, Form, Button, FormControl, Badge, Dropdown } from "react-bootstrap";
+import { Navbar, Nav, Container, Form, Button, FormControl, Badge, Dropdown, Carousel } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { FaShoppingCart, FaUserCircle } from "react-icons/fa"; // For cart and user icons
-import axios from "axios"; // To fetch categories from the backend
+import { FaShoppingCart, FaUserCircle, FaSignInAlt, FaSignOutAlt, FaSearch, FaBars } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import "./Header.css";
 
 const Header = () => {
-  // State to manage categories and search query
-  const [categories, setCategories] = useState([]);
+  const { user, isAuthenticated, logout } = useAuth();
+  const { getCartItemCount } = useCart();
+
+  // State to manage search query
   const [searchQuery, setSearchQuery] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Cart state (for demo purposes, you can replace this with a context or global state)
-  const [cart] = useState([  // Only using 'cart' as it's not being modified here
-    { id: 1, name: "Handcrafted Wooden Bowl", quantity: 1 },
-    { id: 2, name: "Traditional Metal Lamp", quantity: 2 },
-  ]); // Example cart with items
-
-  // Fetch categories from the backend API
+  // Handle scroll effect
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/categories"); // Change this to your actual backend URL
-        setCategories(response.data); // Store the categories in state
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
     };
-    fetchCategories();
-  }, []); // Only run once on mount
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Get the number of items in the cart
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartItemCount = getCartItemCount();
 
   // Handle search input change
   const handleSearchChange = (event) => {
@@ -39,80 +34,144 @@ const Header = () => {
   // Handle search submit
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    console.log("Searching for:", searchQuery);
-    // Implement search logic here (perhaps redirect or filter products)
+    if (searchQuery.trim()) {
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+    }
   };
 
+  // Artistic slider images
+  const sliderImages = [
+    'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1920&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1920&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1920&h=400&fit=crop'
+  ];
+
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
-      <Container>
-        {/* Logo Section */}
-        <Navbar.Brand as={Link} to="/">
-          <img
-            src="/images/logo.jpg" // Replace with the path to your logo
-            alt="Handicraft Hub Logo"
-            style={{ width: "150px", height: "50px", marginRight: "10px" }}
-          />
-          Handicraft Hub
-        </Navbar.Brand>
+    <>
+      {/* Artistic Slider */}
+      <div className="header-slider">
+        <Carousel fade interval={5000} indicators={false} controls={false}>
+          {sliderImages.map((image, index) => (
+            <Carousel.Item key={index}>
+              <div className="slider-image" style={{ backgroundImage: `url(${image})` }}>
+                <div className="slider-overlay">
+                  <Container>
+                    <div className="slider-content">
+                      <h1>Handcrafted with Love</h1>
+                      <p>Discover authentic Indian handicrafts from skilled artisans</p>
+                    </div>
+                  </Container>
+                </div>
+              </div>
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      </div>
 
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          {/* Navigation Links */}
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/about">About</Nav.Link>
-            <Nav.Link as={Link} to="/products">Products</Nav.Link>
-            <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
+      {/* Navigation Bar */}
+      <Navbar 
+        className={`main-navbar ${isScrolled ? 'scrolled' : ''}`} 
+        expand="lg"
+        sticky="top"
+      >
+        <Container>
+          {/* Logo Section */}
+          <Navbar.Brand as={Link} to="/" className="brand-logo">
+            <span className="logo-text">Handicraft Hub</span>
+            <span className="logo-subtitle">Artisan Treasures</span>
+          </Navbar.Brand>
 
-            {/* Categories Dropdown */}
-            <Dropdown>
-              <Dropdown.Toggle variant="success" id="categories-dropdown">
-                Categories
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {categories.map((category) => (
-                  <Dropdown.Item key={category._id} as={Link} to={`/category/${category._id}`}>
-                    {category.name}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </Nav>
+          <Navbar.Toggle aria-controls="basic-navbar-nav">
+            <FaBars />
+          </Navbar.Toggle>
+          
+          <Navbar.Collapse id="basic-navbar-nav">
+            {/* Navigation Links */}
+            <Nav className="me-auto">
+              <Nav.Link as={Link} to="/">Home</Nav.Link>
+              <Nav.Link as={Link} to="/about">About</Nav.Link>
+              <Nav.Link as={Link} to="/products">Products</Nav.Link>
+              <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
 
-          {/* Search Bar */}
-          <Form className="d-flex" onSubmit={handleSearchSubmit}>
-            <FormControl
-              type="search"
-              placeholder="Search for products"
-              className="me-2"
-              aria-label="Search"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            <Button variant="outline-success" type="submit">Search</Button>
-          </Form>
+              {/* Categories Dropdown */}
+              <Dropdown>
+                <Dropdown.Toggle variant="link" className="nav-dropdown">
+                  Categories
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/products?category=Paintings">Paintings</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/products?category=Palm Leaf">Palm Leaf</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/products?category=Sarees">Sarees</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/products?category=Wooden Crafts">Wooden Crafts</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Nav>
 
-          {/* Shopping Cart & User Profile Icons */}
-          <Nav>
-            {/* Shopping Cart with Dynamic Badge */}
-            <Nav.Link as={Link} to="/cart" className="d-flex align-items-center">
-              <FaShoppingCart size={24} />
-              {cartItemCount > 0 && (
-                <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
-                  {cartItemCount}
-                </Badge>
+            {/* Search Bar */}
+            <Form className="search-form" onSubmit={handleSearchSubmit}>
+              <div className="search-input-wrapper">
+                <FormControl
+                  type="search"
+                  placeholder="Search products..."
+                  className="search-input"
+                  aria-label="Search"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                <Button variant="link" type="submit" className="search-btn">
+                  <FaSearch />
+                </Button>
+              </div>
+            </Form>
+
+            {/* Shopping Cart & User Profile Icons */}
+            <Nav className="nav-icons">
+              {/* Shopping Cart with Dynamic Badge */}
+              <Nav.Link as={Link} to="/cart" className="icon-link">
+                <FaShoppingCart size={22} />
+                {cartItemCount > 0 && (
+                  <Badge pill bg="danger" className="cart-badge">
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Nav.Link>
+
+              {/* User Authentication */}
+              {isAuthenticated ? (
+                <Dropdown>
+                  <Dropdown.Toggle variant="link" className="user-dropdown">
+                    <FaUserCircle size={22} />
+                    <span className="user-name">{user?.name?.split(' ')[0]}</span>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu align="end">
+                    <Dropdown.Item as={Link} to="/profile">My Profile</Dropdown.Item>
+                    <Dropdown.Item as={Link} to="/orders">My Orders</Dropdown.Item>
+                    {user?.role === 'admin' && (
+                      <Dropdown.Item as={Link} to="/admin">Admin Dashboard</Dropdown.Item>
+                    )}
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={logout}>
+                      <FaSignOutAlt className="me-2" />
+                      Logout
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <>
+                  <Nav.Link as={Link} to="/login" className="icon-link">
+                    <FaSignInAlt size={20} />
+                    <span className="ms-2">Login</span>
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/register" className="btn-register">
+                    Register
+                  </Nav.Link>
+                </>
               )}
-            </Nav.Link>
-
-            {/* User Profile Icon */}
-            <Nav.Link as={Link} to="/profile" className="d-flex align-items-center">
-              <FaUserCircle size={24} />
-            </Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </>
   );
 };
 

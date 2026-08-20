@@ -4,9 +4,10 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5000/api/products';  // Make sure to match the correct backend URL
 
 // Get all products
-export const getProducts = async () => {
+export const getProducts = async (queryParams = '') => {
   try {
-    const response = await axios.get(API_URL);
+    const url = queryParams ? `${API_URL}${queryParams}` : API_URL;
+    const response = await axios.get(url);
     return response.data;  // Return the data to the component
   } catch (error) {
     console.error("Error fetching products", error);

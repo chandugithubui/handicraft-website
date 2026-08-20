@@ -1,0 +1,65 @@
+.review-section {
+  margin-top: 30px;
+}
+
+.rating-summary h2 {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #e67e22;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star-filled {
+  color: #ffc107;
+}
+
+.star-empty {
+  color: #e4e5e9;
+}
+
+.star-input {
+  display: flex;
+  gap: 5px;
+  font-size: 1.5rem;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.star-label {
+  width: 60px;
+  font-size: 0.9rem;
+}
+
+.progress {
+  flex: 1;
+  margin: 0 10px;
+  height: 8px;
+}
+
+.progress-bar {
+  background-color: #e67e22;
+}
+
+.count-label {
+  width: 30px;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.review-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+
+.review-form {
+  background-color: #f8f9fa;
+  border: none;
+}

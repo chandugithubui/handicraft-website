@@ -1,0 +1,23 @@
+.order-success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.order-success-container .card {
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.order-success-container .btn-primary {
+  background-color: #e67e22;
+  border-color: #e67e22;
+}
+
+.order-success-container .btn-primary:hover {
+  background-color: #d35400;
+  border-color: #d35400;
+}
