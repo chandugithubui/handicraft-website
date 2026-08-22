@@ -50,7 +50,7 @@ const Cart = () => {
                         <div className="d-flex align-items-center">
                           {item.image && (
                             <img
-                              src={`http://localhost:5000/uploads/${item.image}`}
+                              src={`https://handicraft-website.onrender.com/uploads/${item.image}`}
                               alt={item.name}
                               className="cart-item-image me-3"
                             />

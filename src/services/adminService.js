@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://handicraft-website.onrender.com/api';
 
 export const getAdminStats = async (token) => {
   const response = await axios.get(`${API_URL}/admin/stats`, {
