@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 export const register = async (name, email, password) => {
-  const response = await axios.post(`${API_URL}/auth/register`, {
+  const response = await axios.post(`${API_URL}/api/auth/register`, {
     name,
     email,
     password
@@ -12,7 +12,7 @@ export const register = async (name, email, password) => {
 };
 
 export const login = async (email, password) => {
-  const response = await axios.post(`${API_URL}/auth/login`, {
+  const response = await axios.post(`${API_URL}/api/auth/login`, {
     email,
     password
   });
@@ -20,7 +20,7 @@ export const login = async (email, password) => {
 };
 
 export const getProfile = async (token) => {
-  const response = await axios.get(`${API_URL}/auth/profile`, {
+  const response = await axios.get(`${API_URL}/api/auth/profile`, {
     headers: {
       Authorization: `Bearer ${token}`
     }

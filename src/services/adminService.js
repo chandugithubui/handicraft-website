@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 export const getAdminStats = async (token) => {
-  const response = await axios.get(`${API_URL}/admin/stats`, {
+  const response = await axios.get(`${API_URL}/api/admin/stats`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -12,7 +12,7 @@ export const getAdminStats = async (token) => {
 };
 
 export const getAllOrders = async (token) => {
-  const response = await axios.get(`${API_URL}/admin/orders`, {
+  const response = await axios.get(`${API_URL}/api/admin/orders`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -21,7 +21,7 @@ export const getAllOrders = async (token) => {
 };
 
 export const getAllUsers = async (token) => {
-  const response = await axios.get(`${API_URL}/admin/users`, {
+  const response = await axios.get(`${API_URL}/api/admin/users`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -31,7 +31,7 @@ export const getAllUsers = async (token) => {
 
 export const updateOrderStatus = async (orderId, orderStatus, token) => {
   const response = await axios.patch(
-    `${API_URL}/orders/${orderId}/status`,
+    `${API_URL}/api/orders/${orderId}/status`,
     { orderStatus },
     {
       headers: {

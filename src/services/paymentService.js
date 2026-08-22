@@ -4,7 +4,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 export const createRazorpayOrder = async (amount) => {
   const response = await axios.post(
-    `${API_URL}/payment/create-order`,
+    `${API_URL}/api/payment/create-order`,
     { amount }
   );
   return response.data;
@@ -12,7 +12,7 @@ export const createRazorpayOrder = async (amount) => {
 
 export const verifyRazorpayPayment = async (paymentData) => {
   const response = await axios.post(
-    `${API_URL}/payment/verify-payment`,
+    `${API_URL}/api/payment/verify-payment`,
     paymentData
   );
   return response.data;
