@@ -12,11 +12,11 @@ const CategoryPage = () => {
     const fetchCategoryAndProducts = async () => {
       try {
         // Fetch category details
-        const categoryResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories/${categoryId}`);
+        const categoryResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/categories/${categoryId}`);
         setCategory(categoryResponse.data);
 
         // Fetch products belonging to this category
-        const productsResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/products?category=${categoryId}`);
+        const productsResponse = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products?category=${categoryId}`);
         setProducts(productsResponse.data);
       } catch (error) {
         console.error('Error fetching category or products:', error);

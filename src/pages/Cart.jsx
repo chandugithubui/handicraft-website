@@ -50,7 +50,7 @@ const Cart = () => {
                         <div className="d-flex align-items-center">
                           {item.image && (
                             <img
-                              src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/uploads/${item.image}`}
+                              src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/uploads/${item.image}`}
                               alt={item.name}
                               className="cart-item-image me-3"
                             />
