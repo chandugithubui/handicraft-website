@@ -24,8 +24,12 @@ const PORT = process.env.PORT || 5000;
    MIDDLEWARE
 =========================== */
 
-// Enable CORS
-app.use(cors());
+// Enable CORS - allow all origins for production
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Parse JSON
 app.use(express.json());
