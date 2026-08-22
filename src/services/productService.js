@@ -1,7 +1,7 @@
 // src/services/productService.js
 import axios from 'axios';
 
-const API_URL = 'https://handicraft-website.onrender.com/api/products';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/products';
 
 // Get all products
 export const getProducts = async (queryParams = '') => {
