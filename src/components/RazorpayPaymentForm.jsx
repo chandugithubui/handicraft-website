@@ -17,7 +17,7 @@ const RazorpayPaymentForm = ({ amount, onSuccess, onError }) => {
   const handlePayment = async () => {
     try {
       // Create Razorpay order
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/payment/create-order`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ const RazorpayPaymentForm = ({ amount, onSuccess, onError }) => {
         order_id: orderData.orderId,
         handler: async function (response) {
           // Verify payment on server
-          const verifyResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/payment/verify-payment`, {
+          const verifyResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/payment/verify-payment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
