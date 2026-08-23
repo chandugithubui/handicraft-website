@@ -2,11 +2,14 @@
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+console.log('API_URL in productService:', API_URL);
+console.log('REACT_APP_API_URL env var:', process.env.REACT_APP_API_URL);
 
 // Get all products
 export const getProducts = async (queryParams = '') => {
   try {
     const url = queryParams ? `${API_URL}/products${queryParams}` : `${API_URL}/products`;
+    console.log('Fetching from URL:', url);
     const response = await axios.get(url);
     return response.data;  // Return the data to the component
   } catch (error) {
