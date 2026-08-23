@@ -15,6 +15,12 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
   const fetchCategories = async () => {
     try {
       const getApiUrl = () => {
+        // Check if we're in local development
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1') {
+          return 'http://localhost:5000/api';
+        }
+        // Check if we're in production (Vercel deployment)
         if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
             window.location.hostname.includes('vercel.app')) {
           return 'https://handicraft-website.onrender.com/api';
