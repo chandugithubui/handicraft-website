@@ -14,7 +14,15 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories`);
+      const getApiUrl = () => {
+        if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+            window.location.hostname.includes('vercel.app')) {
+          return 'https://handicraft-website.onrender.com/api';
+        }
+        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      };
+      const API_URL = getApiUrl();
+      const response = await axios.get(`${API_URL}/categories`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);

@@ -21,7 +21,15 @@ const Orders = () => {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/orders/my-orders`, {
+        const getApiUrl = () => {
+          if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+              window.location.hostname.includes('vercel.app')) {
+            return 'https://handicraft-website.onrender.com/api';
+          }
+          return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        };
+        const API_URL = getApiUrl();
+        const response = await axios.get(`${API_URL}/orders/my-orders`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setOrders(response.data);

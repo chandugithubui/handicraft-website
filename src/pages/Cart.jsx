@@ -50,7 +50,16 @@ const Cart = () => {
                         <div className="d-flex align-items-center">
                           {item.image && (
                             <img
-                              src={`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/uploads/${item.image}`}
+                              src={`${(() => {
+                                const getApiUrl = () => {
+                                  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+                                      window.location.hostname.includes('vercel.app')) {
+                                    return 'https://handicraft-website.onrender.com/api';
+                                  }
+                                  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+                                };
+                                return getApiUrl();
+                              })()}/uploads/${item.image}`}
                               alt={item.name}
                               className="cart-item-image me-3"
                             />

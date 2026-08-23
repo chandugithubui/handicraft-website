@@ -16,8 +16,16 @@ const RazorpayPaymentForm = ({ amount, onSuccess, onError }) => {
 
   const handlePayment = async () => {
     try {
+      const getApiUrl = () => {
+        if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+            window.location.hostname.includes('vercel.app')) {
+          return 'https://handicraft-website.onrender.com/api';
+        }
+        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      };
+      const API_URL = getApiUrl();
       // Create Razorpay order
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/payment/create-order`, {
+      const response = await fetch(`${API_URL}/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +48,7 @@ const RazorpayPaymentForm = ({ amount, onSuccess, onError }) => {
         order_id: orderData.orderId,
         handler: async function (response) {
           // Verify payment on server
-          const verifyResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/payment/verify-payment`, {
+          const verifyResponse = await fetch(`${API_URL}/payment/verify-payment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
