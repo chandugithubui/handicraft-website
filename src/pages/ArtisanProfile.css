@@ -1,0 +1,394 @@
+.artisan-profile-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-light);
+}
+
+/* Hero Section */
+.artisan-hero {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-terracotta) 100%);
+  padding: var(--spacing-12) 0;
+  margin-bottom: var(--spacing-12);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-6);
+  transition: opacity var(--transition-normal);
+}
+
+.back-link:hover {
+  opacity: 0.8;
+}
+
+.back-icon {
+  font-size: var(--font-size-lg);
+}
+
+.artisan-hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-12);
+  align-items: center;
+}
+
+.artisan-hero-image {
+  position: relative;
+}
+
+.artisan-hero-image img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+}
+
+.artisan-hero-info {
+  color: var(--color-white);
+}
+
+.craft-badge-hero {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-4);
+}
+
+.artisan-name-hero {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-4);
+  line-height: 1.2;
+}
+
+.artisan-location-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-6);
+  opacity: 0.9;
+}
+
+.location-icon {
+  font-size: var(--font-size-lg);
+}
+
+.artisan-stats-hero {
+  display: flex;
+  gap: var(--spacing-6);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.stat-icon {
+  font-size: var(--font-size-lg);
+}
+
+/* Story Section */
+.artisan-story-section {
+  background: var(--color-white);
+  padding: var(--spacing-10);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--spacing-10);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+  margin-bottom: var(--spacing-6);
+}
+
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-charcoal);
+  margin-bottom: var(--spacing-2);
+}
+
+.section-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-charcoal-light);
+}
+
+.artisan-story-full {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-charcoal-light);
+}
+
+/* Craft Process Section */
+.craft-process-section {
+  background: linear-gradient(135deg, rgba(110, 23, 23, 0.03) 0%, rgba(110, 23, 23, 0.01) 100%);
+  padding: var(--spacing-10);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--spacing-10);
+}
+
+.craft-process-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-6);
+}
+
+.process-step {
+  position: relative;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-terracotta) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-4);
+  box-shadow: var(--shadow-md);
+}
+
+.step-content {
+  background: var(--color-white);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.process-step:hover .step-content {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.step-image {
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-3);
+}
+
+.step-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.step-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-charcoal);
+  margin-bottom: var(--spacing-2);
+}
+
+.step-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-charcoal-light);
+  line-height: var(--line-height-normal);
+}
+
+/* Gallery Section */
+.artisan-gallery-section {
+  margin-bottom: var(--spacing-10);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-6);
+}
+
+.gallery-product-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.gallery-product-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.gallery-product-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+}
+
+.gallery-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.gallery-product-card:hover .gallery-product-image img {
+  transform: scale(1.05);
+}
+
+.gallery-product-info {
+  padding: var(--spacing-4);
+}
+
+.gallery-product-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-charcoal);
+  margin-bottom: var(--spacing-2);
+  line-height: 1.3;
+}
+
+.gallery-product-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-charcoal-light);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.gallery-product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.meta-label {
+  color: var(--color-charcoal-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.meta-value {
+  color: var(--color-charcoal);
+  font-weight: var(--font-weight-semibold);
+}
+
+.gallery-product-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.add-to-cart-btn,
+.view-details-btn {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+/* Products Section */
+.artisan-products-section {
+  background: linear-gradient(135deg, rgba(110, 23, 23, 0.05) 0%, rgba(110, 23, 23, 0.02) 100%);
+  padding: var(--spacing-10);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  margin-bottom: var(--spacing-10);
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-6);
+}
+
+.btn-icon {
+  font-size: var(--font-size-lg);
+}
+
+/* Not Found */
+.artisan-not-found {
+  text-align: center;
+  padding: var(--spacing-16) 0;
+}
+
+.artisan-not-found h2 {
+  font-size: var(--font-size-3xl);
+  color: var(--color-charcoal);
+  margin-bottom: var(--spacing-6);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .artisan-hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .artisan-hero-image {
+    display: flex;
+    justify-content: center;
+  }
+
+  .artisan-hero-image img {
+    max-width: 300px;
+  }
+
+  .artisan-location-hero {
+    justify-content: center;
+  }
+
+  .artisan-stats-hero {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .artisan-hero {
+    padding: var(--spacing-8) 0;
+  }
+
+  .artisan-name-hero {
+    font-size: var(--font-size-3xl);
+  }
+
+  .artisan-story-section,
+  .artisan-products-section {
+    padding: var(--spacing-6);
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .artisan-stats-hero {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+  }
+}

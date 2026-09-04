@@ -21,3 +21,15 @@
   background-color: #d35400;
   border-color: #d35400;
 }
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .order-success-container {
+    padding: var(--spacing-4);
+    min-height: 50vh;
+  }
+
+  .order-success-container .card {
+    max-width: 100%;
+  }
+}

@@ -57,3 +57,12 @@ export const updateOrderStatus = async (orderId, orderStatus, token) => {
   );
   return response.data;
 };
+
+export const getAllContacts = async (token) => {
+  const response = await axios.get(`${API_URL}/admin/contacts`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+};

@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Row, Col, Accordion } from 'react-bootstrap';
-import { FaFilter, FaTimes } from 'react-icons/fa';
-import axios from 'axios';
+import { FiFilter, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import './ProductFilters.css';
+
+// Local categories matching product categories
+const localCategories = [
+  { _id: 'pattachitra', name: 'Pattachitra', slug: 'pattachitra' },
+  { _id: 'palm-leaf', name: 'Palm Leaf', slug: 'palm-leaf' },
+  { _id: 'sarees', name: 'Sarees', slug: 'sarees' },
+  { _id: 'wooden', name: 'Wooden Crafts', slug: 'wooden' },
+  { _id: 'sculptures', name: 'Sculptures', slug: 'sculptures' },
+  { _id: 'decor', name: 'Home Decor', slug: 'decor' },
+  { _id: 'gifts', name: 'Gifts', slug: 'gifts' }
+];
 
 const ProductFilters = ({ onFilterChange, activeFilters }) => {
   const [categories, setCategories] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({
+    category: true,
+    material: false,
+    price: false
+  });
+  
   const materials = ['Wood', 'Metal', 'Clay', 'Fabric', 'Stone', 'Bamboo'];
 
   useEffect(() => {
-    fetchCategories();
+    // Use local categories instead of fetching from backend
+    setCategories(localCategories);
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const getApiUrl = () => {
-        // Check if we're in local development
-        if (window.location.hostname === 'localhost' || 
-            window.location.hostname === '127.0.0.1') {
-          return 'http://localhost:5000/api';
-        }
-        // Check if we're in production (Vercel deployment)
-        if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-            window.location.hostname.includes('vercel.app')) {
-          return 'https://handicraft-website.onrender.com/api';
-        }
-        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      };
-      const API_URL = getApiUrl();
-      const response = await axios.get(`${API_URL}/categories`);
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -48,102 +48,129 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
   );
 
   return (
-    <Card className="product-filters">
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <span><FaFilter className="me-2" />Filters</span>
+    <div className="product-filters">
+      <div className="filters-header">
+        <h3 className="filters-title">
+          <FiFilter className="filters-icon" />
+          Filters
+        </h3>
         {hasActiveFilters && (
-          <Button variant="link" size="sm" onClick={clearFilters}>
-            <FaTimes className="me-1" />Clear All
-          </Button>
+          <button className="clear-filters-btn" onClick={clearFilters}>
+            <FiX className="clear-icon" />
+            Clear All
+          </button>
         )}
-      </Card.Header>
-      <Card.Body>
-        <Accordion defaultActiveKey="0">
-          {/* Category Filter */}
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>Category</Accordion.Header>
-            <Accordion.Body>
-              <Form.Check
-                type="radio"
-                label="All Categories"
-                name="category"
-                id="category-all"
-                checked={!activeFilters.category}
-                onChange={() => handleFilterChange('category', '')}
-                className="mb-2"
-              />
-              {categories.map((category) => (
-                <Form.Check
-                  key={category._id}
+      </div>
+
+      <div className="filters-content">
+        {/* Category Filter */}
+        <div className="filter-section">
+          <button 
+            className="filter-section-header"
+            onClick={() => toggleSection('category')}
+          >
+            <span>Category</span>
+            {expandedSections.category ? <FiChevronUp /> : <FiChevronDown />}
+          </button>
+          {expandedSections.category && (
+            <div className="filter-section-content">
+              <label className="filter-option">
+                <input
                   type="radio"
-                  label={category.name}
                   name="category"
-                  id={`category-${category._id}`}
-                  checked={activeFilters.category === category.name}
-                  onChange={() => handleFilterChange('category', category.name)}
-                  className="mb-2"
+                  checked={!activeFilters.category}
+                  onChange={() => handleFilterChange('category', '')}
                 />
+                <span>All Categories</span>
+              </label>
+              {categories.map((category) => (
+                <label key={category._id} className="filter-option">
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={activeFilters.category === category.slug}
+                    onChange={() => handleFilterChange('category', category.slug)}
+                  />
+                  <span>{category.name}</span>
+                </label>
               ))}
-            </Accordion.Body>
-          </Accordion.Item>
+            </div>
+          )}
+        </div>
 
-          {/* Material Filter */}
-          <Accordion.Item eventKey="1">
-            <Accordion.Header>Material</Accordion.Header>
-            <Accordion.Body>
-              <Form.Check
-                type="radio"
-                label="All Materials"
-                name="material"
-                id="material-all"
-                checked={!activeFilters.material}
-                onChange={() => handleFilterChange('material', '')}
-                className="mb-2"
-              />
-              {materials.map((material) => (
-                <Form.Check
-                  key={material}
+        {/* Material Filter */}
+        <div className="filter-section">
+          <button 
+            className="filter-section-header"
+            onClick={() => toggleSection('material')}
+          >
+            <span>Material</span>
+            {expandedSections.material ? <FiChevronUp /> : <FiChevronDown />}
+          </button>
+          {expandedSections.material && (
+            <div className="filter-section-content">
+              <label className="filter-option">
+                <input
                   type="radio"
-                  label={material}
                   name="material"
-                  id={`material-${material}`}
-                  checked={activeFilters.material === material}
-                  onChange={() => handleFilterChange('material', material)}
-                  className="mb-2"
+                  checked={!activeFilters.material}
+                  onChange={() => handleFilterChange('material', '')}
                 />
+                <span>All Materials</span>
+              </label>
+              {materials.map((material) => (
+                <label key={material} className="filter-option">
+                  <input
+                    type="radio"
+                    name="material"
+                    checked={activeFilters.material === material}
+                    onChange={() => handleFilterChange('material', material)}
+                  />
+                  <span>{material}</span>
+                </label>
               ))}
-            </Accordion.Body>
-          </Accordion.Item>
+            </div>
+          )}
+        </div>
 
-          {/* Price Range Filter */}
-          <Accordion.Item eventKey="2">
-            <Accordion.Header>Price Range</Accordion.Header>
-            <Accordion.Body>
-              <Row>
-                <Col md={6}>
-                  <Form.Label>Min Price</Form.Label>
-                  <Form.Control
+        {/* Price Range Filter */}
+        <div className="filter-section">
+          <button 
+            className="filter-section-header"
+            onClick={() => toggleSection('price')}
+          >
+            <span>Price Range</span>
+            {expandedSections.price ? <FiChevronUp /> : <FiChevronDown />}
+          </button>
+          {expandedSections.price && (
+            <div className="filter-section-content">
+              <div className="price-inputs">
+                <div className="price-input-group">
+                  <label>Min Price</label>
+                  <input
                     type="number"
                     placeholder="₹0"
                     value={activeFilters.minPrice || ''}
                     onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                    className="price-input"
                   />
-                </Col>
-                <Col md={6}>
-                  <Form.Label>Max Price</Form.Label>
-                  <Form.Control
+                </div>
+                <div className="price-input-group">
+                  <label>Max Price</label>
+                  <input
                     type="number"
                     placeholder="₹10000"
                     value={activeFilters.maxPrice || ''}
                     onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                    className="price-input"
                   />
-                </Col>
-              </Row>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </Card.Body>
-    </Card>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

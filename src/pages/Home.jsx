@@ -1,101 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
+import HeroSection from '../components/HeroSection';
+import BenefitsStrip from '../components/BenefitsStrip';
+import CategorySection from '../components/CategorySection';
+import ArtisanStorySection from '../components/ArtisanStorySection';
+import ProductModal from '../components/ProductModal';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { FaShoppingBag, FaHeart, FaStar, FaTruck, FaShieldAlt, FaHeadset, FaLeaf, FaAward, FaPlay } from 'react-icons/fa';
+import { FaShoppingBag, FaHeart, FaStar, FaAward, FaLeaf, FaShieldAlt, FaTruck, FaHeadset } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleViewDetails = (product) => {
+    setSelectedProduct(product);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+  };
   return (
     <div className="home-page">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-video-bg">
-          <video autoPlay muted loop playsInline className="hero-video">
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-potter-making-a-ceramic-vase-32808-large.mp4" type="video/mp4" />
-          </video>
-        </div>
-        <div className="hero-overlay">
-          <Container>
-            <Row className="align-items-center">
-              <Col lg={7} className="hero-content">
-                <div className="hero-badge">✨ Handcrafted with Love</div>
-                <h1 className="hero-title">Discover the Art of Indian Handicrafts</h1>
-                <p className="hero-subtitle">Each piece tells a unique story of tradition, crafted by skilled artisans using techniques passed down through generations. Bring home a piece of India's rich cultural heritage.</p>
-                <div className="hero-buttons">
-                  <Link to="/products" className="btn btn-primary btn-hero">
-                    <FaShoppingBag className="me-2" /> Shop Now
-                  </Link>
-                  <Link to="/products" className="btn btn-outline-light btn-hero ms-3">
-                    <FaPlay className="me-2" /> Watch Story
-                  </Link>
-                </div>
-                <div className="hero-stats">
-                  <div className="stat-item">
-                    <h3>500+</h3>
-                    <p>Artisans</p>
-                  </div>
-                  <div className="stat-item">
-                    <h3>10K+</h3>
-                    <p>Products</p>
-                  </div>
-                  <div className="stat-item">
-                    <h3>50K+</h3>
-                    <p>Happy Customers</p>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-      </section>
+      {/* New Hero Section */}
+      <HeroSection />
 
-      {/* Categories Section */}
-      <section className="categories-section py-5">
+      {/* New Benefits Strip */}
+      <BenefitsStrip />
+
+      {/* New Category Section */}
+      <CategorySection />
+
+      {/* Artisan Story Section */}
+      <ArtisanStorySection />
+
+      {/* Best Sellers Section */}
+      <section className="featured-section py-5">
         <Container>
           <div className="section-header text-center mb-5">
-            <h2 className="section-title">Shop by Category</h2>
-            <p className="section-subtitle">Explore our diverse collection of traditional handicrafts</p>
-          </div>
-          <Row>
-            {[
-              { name: 'Paintings', image: '/images/pattachitrawall.jpg', count: '6+' },
-              { name: 'Palm Leaf', image: '/images/pattachitra1.jpg.jpeg', count: '4+' },
-              { name: 'Sarees', image: '/images/handcraftedwoodenBowl2.jpg', count: '2+' },
-              { name: 'Wooden Crafts', image: '/images/HandcraftedWoodenBowl.webp', count: '5+' },
-            ].map((category, index) => (
-              <Col md={6} lg={3} key={index} className="mb-4">
-                <Link to={`/products?category=${category.name}`} className="category-card">
-                  <Card className="category-card-inner">
-                    <div className="category-image-wrapper">
-                      <Card.Img variant="top" src={category.image} alt={category.name} />
-                      <div className="category-overlay">
-                        <h3>{category.name}</h3>
-                        <p>{category.count} Products</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              </Col>
-            ))}
-          </Row>
-        </Container>
-      </section>
-
-      {/* Featured Products Section */}
-      <section className="featured-section py-5 bg-light">
-        <Container>
-          <div className="section-header text-center mb-5">
-            <h2 className="section-title">Featured Products</h2>
+            <h2 className="section-title">Best Sellers</h2>
             <p className="section-subtitle">Handpicked treasures from our artisans</p>
           </div>
           <Row>
             {[
-              { id: 1, name: 'Pattachitra Wall Art - Lord Jagannath', price: '₹3,500', image: '/images/pattachitra1.jpg.jpg', rating: 4.9, slug: 'pattachitra-lord-jagannath' },
-              { id: 2, name: 'Palm Leaf Engraving - Radha Krishna', price: '₹2,800', image: '/images/pattachitra1.jpg.jpeg', rating: 4.8, slug: 'palm-leaf-radha-krishna' },
-              { id: 3, name: 'Handpainted Saree - Pattachitra Border', price: '₹8,500', image: '/images/handcraftedwoodenBowl2.jpg', rating: 4.9, slug: 'handpainted-saree' },
-              { id: 4, name: 'Handcrafted Wooden Bowl', price: '₹1,200', image: '/images/HandcraftedWoodenBowl.webp', rating: 4.9, slug: 'wooden-bowl' },
+              { id: 1, name: 'Pattachitra Wall Art', price: '₹3,500', image: '/images/pattachitra1.jpg.jpg', rating: 4.9, slug: 'pattachitra-lord-jagannath' },
+              { id: 2, name: 'Palm Leaf Engraving', price: '₹2,800', image: '/images/pattachitra2.jpg.jpg', rating: 4.8, slug: 'palm-leaf-radha-krishna' },
+              { id: 3, name: 'Wooden Bowl', price: '₹1,200', image: '/images/HandcraftedWoodenBowl.webp', rating: 4.9, slug: 'wooden-bowl' },
+              { id: 4, name: 'Decorative Plate', price: '₹950', image: '/images/decorativeplate.webp', rating: 4.7, slug: 'decorative-plate' },
+              { id: 5, name: 'Handcrafted Vase', price: '₹1,800', image: '/images/handmadevase.webp', rating: 4.8, slug: 'handcrafted-vase' },
+              { id: 6, name: 'Wooden Tray', price: '₹1,400', image: '/images/woodentray.jpg', rating: 4.6, slug: 'wooden-tray' },
+              { id: 7, name: 'Glass Bottle', price: '₹2,200', image: '/images/glassbottle.webp', rating: 4.9, slug: 'glass-bottle' },
+              { id: 8, name: 'Teapot', price: '₹1,600', image: '/images/teapot.webp', rating: 4.7, slug: 'teapot' },
             ].map((product, index) => (
-              <Col md={6} lg={3} key={index} className="mb-4">
+              <Col xs={6} sm={6} md={6} lg={3} key={index} className="mb-4">
                 <Card className="product-card h-100">
                   <div className="product-image-wrapper">
                     <Card.Img variant="top" src={product.image} alt={product.name} />
@@ -111,7 +70,7 @@ const Home = () => {
                       <span>{product.rating}</span>
                     </div>
                     <Card.Text className="product-price">{product.price}</Card.Text>
-                    <Link to="/products" className="btn btn-primary w-100">View Details</Link>
+                    <Button onClick={() => handleViewDetails(product)} className="btn btn-primary w-100">View Details</Button>
                   </Card.Body>
                 </Card>
               </Col>
@@ -123,34 +82,41 @@ const Home = () => {
         </Container>
       </section>
 
+      {/* Promotional Banner Section */}
+      <section className="promo-banner-section">
+        <div className="promo-banner">
+          <div className="promo-content">
+            <h2 className="promo-title">Special Offer: 20% Off on All Pattachitra Art</h2>
+            <p className="promo-subtitle">Use code: CRAFT20 at checkout</p>
+            <Link to="/products?category=Pattachitra" className="btn btn-primary btn-lg promo-btn">Shop Now</Link>
+          </div>
+        </div>
+      </section>
+
       {/* Why Choose Us Section */}
       <section className="features-section py-5">
-        <Container>
-          <div className="section-header text-center mb-5">
-            <h2 className="section-title">Why Choose Us</h2>
-            <p className="section-subtitle">What makes Handicraft Hub special</p>
-          </div>
-          <Row>
-            {[
-              { icon: <FaTruck />, title: 'Free Shipping', description: 'Free shipping on orders above ₹999' },
-              { icon: <FaShieldAlt />, title: 'Secure Payment', description: '100% secure payment options' },
-              { icon: <FaHeadset />, title: '24/7 Support', description: 'Dedicated customer support' },
-              { icon: <FaLeaf />, title: 'Eco-Friendly', description: 'Sustainable and natural materials' },
-              { icon: <FaAward />, title: 'Authentic Quality', description: 'Genuine handcrafted products' },
-              { icon: <FaHeart />, title: 'Artisan Support', description: 'Directly supporting local artisans' },
-            ].map((feature, index) => (
-              <Col md={6} lg={4} key={index} className="mb-4">
-                <Card className="feature-card h-100 text-center">
-                  <Card.Body>
-                    <div className="feature-icon">{feature.icon}</div>
-                    <h4 className="feature-title">{feature.title}</h4>
-                    <p className="feature-description">{feature.description}</p>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Container>
+        <div className="features-header">
+          <h2 className="section-title">Why Choose Us</h2>
+          <p className="section-subtitle">Every purchase tells a story</p>
+        </div>
+        <div className="features-grid">
+          {[
+            { icon: <FaTruck />, title: 'Free Shipping', description: 'Free shipping on orders above ₹999' },
+            { icon: <FaShieldAlt />, title: 'Secure Payment', description: '100% secure payment options' },
+            { icon: <FaHeadset />, title: '24/7 Support', description: 'Dedicated customer support' },
+            { icon: <FaLeaf />, title: 'Eco-Friendly', description: 'Sustainable and natural materials' },
+            { icon: <FaAward />, title: 'Authentic Quality', description: 'Genuine handcrafted products' },
+            { icon: <FaHeart />, title: 'Artisan Support', description: 'Directly supporting local artisans' },
+          ].map((feature, index) => (
+            <div key={index} className="feature-card">
+              <div className="feature-icon-wrapper">
+                {feature.icon}
+              </div>
+              <h3 className="feature-title">{feature.title}</h3>
+              <p className="feature-description">{feature.description}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Testimonials Section */}
@@ -205,6 +171,13 @@ const Home = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Product Modal */}
+      <ProductModal 
+        show={showModal} 
+        onHide={handleCloseModal} 
+        product={selectedProduct} 
+      />
     </div>
   );
 };

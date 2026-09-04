@@ -1,159 +1,193 @@
 import React from 'react';
-import { Container, Card, Row, Col, Button, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
+import { FiShoppingBag, FiTrash2, FiMinus, FiPlus, FiArrowLeft, FiCheck } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import './Cart.css';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
 
+  const getApiUrl = () => {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+    if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+        window.location.hostname.includes('vercel.app')) {
+      return 'https://handicraft-website.onrender.com/api';
+    }
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  };
+
+  const getImageUrl = (image) => {
+    if (!image) return '/images/placeholder.jpg';
+    if (image.startsWith('http')) return image;
+    return `${getApiUrl()}/uploads/${image}`;
+  };
+
   if (cartItems.length === 0) {
     return (
-      <Container className="cart-container">
-        <Card className="text-center p-5">
-          <FaShoppingCart size={64} className="mb-3 text-muted" />
-          <h3>Your cart is empty</h3>
-          <p className="text-muted">Add some beautiful handicrafts to your cart!</p>
-          <Link to="/products">
-            <Button variant="primary" className="mt-3">
-              <FaArrowLeft className="me-2" />
+      <div className="cart-page">
+        <div className="container">
+          <div className="cart-empty">
+            <div className="empty-icon">
+              <FiShoppingBag />
+            </div>
+            <h2 className="empty-title">Your cart is empty</h2>
+            <p className="empty-description">Add some beautiful handicrafts to your cart!</p>
+            <Link to="/products" className="btn btn-primary btn-lg">
+              <FiArrowLeft className="btn-icon" />
               Continue Shopping
-            </Button>
-          </Link>
-        </Card>
-      </Container>
+            </Link>
+          </div>
+        </div>
+      </div>
     );
   }
 
+  const subtotal = getCartTotal();
+  const shipping = subtotal >= 999 ? 0 : 99;
+  const total = subtotal + shipping;
+
   return (
-    <Container className="cart-container">
-      <h2 className="mb-4">Shopping Cart</h2>
-      <Row>
-        <Col md={8}>
-          <Card>
-            <Card.Body>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cartItems.map((item) => (
-                    <tr key={item._id}>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          {item.image && (
-                            <img
-                              src={`${(() => {
-                                const getApiUrl = () => {
-                                  // Check if we're in local development
-                                  if (window.location.hostname === 'localhost' || 
-                                      window.location.hostname === '127.0.0.1') {
-                                    return 'http://localhost:5000/api';
-                                  }
-                                  // Check if we're in production (Vercel deployment)
-                                  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-                                      window.location.hostname.includes('vercel.app')) {
-                                    return 'https://handicraft-website.onrender.com/api';
-                                  }
-                                  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-                                };
-                                return getApiUrl();
-                              })()}/uploads/${item.image}`}
-                              alt={item.name}
-                              className="cart-item-image me-3"
-                            />
-                          )}
-                          <div>
-                            <h6 className="mb-0">{item.name}</h6>
-                            <small className="text-muted">{item.category}</small>
-                          </div>
-                        </div>
-                      </td>
-                      <td>₹{item.price}</td>
-                      <td>
-                        <div className="quantity-control">
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                          >
-                            -
-                          </Button>
-                          <span className="mx-2">{item.quantity}</span>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                          >
-                            +
-                          </Button>
-                        </div>
-                      </td>
-                      <td>₹{item.price * item.quantity}</td>
-                      <td>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => removeFromCart(item._id)}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="cart-summary">
-            <Card.Body>
-              <h5>Order Summary</h5>
-              <hr />
-              <div className="d-flex justify-content-between mb-2">
-                <span>Subtotal</span>
-                <span>₹{getCartTotal()}</span>
+    <div className="cart-page">
+      <div className="container">
+        <div className="cart-header">
+          <h1 className="cart-title">Shopping Cart</h1>
+          <p className="cart-subtitle">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
+        </div>
+
+        <div className="cart-layout">
+          {/* Cart Items */}
+          <div className="cart-items">
+            {cartItems.map((item) => (
+              <div key={item._id} className="cart-item">
+                <div className="cart-item-image">
+                  <img 
+                    src={getImageUrl(item.image)} 
+                    alt={item.name}
+                    onError={(e) => {
+                      e.target.src = '/images/placeholder.jpg';
+                    }}
+                  />
+                </div>
+                
+                <div className="cart-item-details">
+                  <div className="cart-item-header">
+                    <h3 className="cart-item-name">{item.name}</h3>
+                    <button 
+                      className="cart-item-remove"
+                      onClick={() => removeFromCart(item._id)}
+                      aria-label="Remove item"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                  
+                  <p className="cart-item-category">{item.category || 'Handicraft'}</p>
+                  
+                  <div className="cart-item-price">₹{item.price.toLocaleString()}</div>
+                  
+                  <div className="cart-item-quantity">
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      <FiMinus />
+                    </button>
+                    <span className="quantity-value">{item.quantity}</span>
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                      disabled={item.stock && item.quantity >= item.stock}
+                    >
+                      <FiPlus />
+                    </button>
+                  </div>
+                  
+                  <div className="cart-item-total">
+                    Total: ₹{(item.price * item.quantity).toLocaleString()}
+                  </div>
+                </div>
               </div>
-              <div className="d-flex justify-content-between mb-2">
-                <span>Shipping</span>
-                <span className="text-success">Free</span>
+            ))}
+          </div>
+
+          {/* Cart Summary */}
+          <div className="cart-summary">
+            <div className="summary-card">
+              <h3 className="summary-title">Order Summary</h3>
+              
+              <div className="summary-row">
+                <span className="summary-label">Subtotal</span>
+                <span className="summary-value">₹{subtotal.toLocaleString()}</span>
               </div>
-              <hr />
-              <div className="d-flex justify-content-between mb-3">
-                <strong>Total</strong>
-                <strong>₹{getCartTotal()}</strong>
+              
+              <div className="summary-row">
+                <span className="summary-label">Shipping</span>
+                <span className="summary-value">
+                  {shipping === 0 ? (
+                    <span className="free-shipping">
+                      <FiCheck className="free-icon" />
+                      Free
+                    </span>
+                  ) : (
+                    `₹${shipping}`
+                  )}
+                </span>
               </div>
-              <Link to="/checkout">
-                <Button variant="primary" className="w-100 mb-2">
-                  Proceed to Checkout
-                </Button>
+              
+              {shipping > 0 && (
+                <div className="shipping-note">
+                  Add ₹{(999 - subtotal).toLocaleString()} more for free shipping!
+                </div>
+              )}
+              
+              <div className="summary-divider"></div>
+              
+              <div className="summary-row summary-total">
+                <span className="summary-label total-label">Total</span>
+                <span className="summary-value total-value">₹{total.toLocaleString()}</span>
+              </div>
+              
+              <Link to="/checkout" className="btn btn-primary btn-lg checkout-btn">
+                Proceed to Checkout
               </Link>
-              <Button
-                variant="outline-danger"
-                className="w-100"
+              
+              <button 
+                className="btn btn-outline btn-lg clear-cart-btn"
                 onClick={clearCart}
               >
                 Clear Cart
-              </Button>
-              <div className="mt-3 text-center">
-                <Link to="/products" className="text-decoration-none">
-                  <FaArrowLeft className="me-1" />
+              </button>
+              
+              <div className="continue-shopping">
+                <Link to="/products">
+                  <FiArrowLeft className="continue-icon" />
                   Continue Shopping
                 </Link>
               </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            </div>
+            
+            {/* Trust Badges */}
+            <div className="trust-badges">
+              <div className="trust-badge">
+                <span className="badge-icon">✓</span>
+                <span className="badge-text">Secure Checkout</span>
+              </div>
+              <div className="trust-badge">
+                <span className="badge-icon">✓</span>
+                <span className="badge-text">Free Returns</span>
+              </div>
+              <div className="trust-badge">
+                <span className="badge-icon">✓</span>
+                <span className="badge-text">Authentic Products</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

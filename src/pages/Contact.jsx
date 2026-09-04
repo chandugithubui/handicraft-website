@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import axios from 'axios'; // Import axios for making API requests
-import './Contact.css'; // Import the custom CSS file for styling
+import { FiMail, FiMapPin, FiPhone, FiSend, FiMessageSquare, FiFacebook, FiInstagram, FiTwitter } from 'react-icons/fi';
+import axios from 'axios';
+import './Contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +13,17 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
 
-  // Handle input field changes
+  const getApiUrl = () => {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+    if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+        window.location.hostname.includes('vercel.app')) {
+      return 'https://handicraft-website.onrender.com/api';
+    }
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -22,19 +32,14 @@ const Contact = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page reload
-
+    e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await axios.post(
-      'https://handicraft-website.onrender.com/api/contacts',
-       formData
-      );
+      await axios.post(`${getApiUrl()}/contacts`, formData);
       setResponseMessage('Message sent successfully!');
-      setFormData({ name: '', email: '', message: '' }); // Clear form after submission
+      setFormData({ name: '', email: '', message: '' });
     } catch (error) {
       setResponseMessage('There was an error submitting your message. Please try again.');
       console.error(error);
@@ -44,82 +49,170 @@ const Contact = () => {
   };
 
   return (
-    <Container className="mt-5">
-      <h2 className="contact-heading">Contact Us</h2>
-      <Row>
-        {/* Left Column - Contact Form */}
-        <Col md={6}>
-          <Card className="contact-form-card">
-            <Card.Body>
-              <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="name">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
+    <div className="contact-page">
+      {/* Hero Section */}
+      <div className="contact-hero">
+        <div className="hero-background">
+          <img src="/images/homepagedesign.png" alt="Handicraft background" className="hero-bg-image" />
+          <div className="hero-overlay"></div>
+        </div>
+        <div className="container">
+          <div className="hero-content">
+            <h1 className="hero-title">Connect With Us</h1>
+            <p className="hero-subtitle">
+              Every conversation begins a new story. Reach out to us and let's create something beautiful together.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container">
+        <div className="contact-layout">
+          {/* Contact Form */}
+          <div className="contact-form-section">
+            <div className="form-card">
+              <div className="form-header">
+                <div className="form-icon">
+                  <FiSend />
+                </div>
+                <h2 className="form-title">Send us a Message</h2>
+                <p className="form-subtitle">We'd love to hear from you. Fill out the form below.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="contact-form">
+                <div className="form-group">
+                  <label className="form-label">Your Name</label>
+                  <input
                     type="text"
-                    placeholder="Enter your name"
-                    required
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="email" className="mt-3">
-                  <Form.Label>Email Address</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Enter your email"
+                    className="form-input"
                     required
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email Address</label>
+                  <input
+                    type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="message" className="mt-3">
-                  <Form.Label>Message</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    placeholder="Your message"
+                    className="form-input"
                     required
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Your Message</label>
+                  <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
+                    className="form-input form-textarea"
+                    required
+                    placeholder="How can we help you?"
+                    rows={6}
                   />
-                </Form.Group>
+                </div>
 
-                <Button variant="success" type="submit" className="submit-btn" disabled={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </Button>
-              </Form>
-              {responseMessage && <p className="response-message">{responseMessage}</p>}
-            </Card.Body>
-          </Card>
-        </Col>
+                <button
+                  type="submit"
+                  className="btn btn-primary submit-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                  <FiSend className="btn-icon" />
+                </button>
 
-        {/* Right Column - Contact Info (Address, Social Media, etc.) */}
-        <Col md={6}>
-          <Card className="contact-info-card">
-            <Card.Body>
-              <h4>Our Location</h4>
-              <p><strong>Handicraft Hub</strong></p>
-              <p>Address: XYZ Street, ABC City, 12345</p>
-              <p>Phone: +1 (123) 456-7890</p>
-              <p>Email: contact@handicrafthub.com</p>
+                {responseMessage && (
+                  <div className={`response-message ${responseMessage.includes('success') ? 'success' : 'error'}`}>
+                    {responseMessage}
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
 
-              <h4>Follow Us</h4>
-              <p>Stay connected with us on social media:</p>
-              <ul>
-                <li><a href="https://facebook.com/HandicraftHub" target="_blank" rel="noopener noreferrer">Facebook: @HandicraftHub</a></li>
-                <li><a href="https://instagram.com/HandicraftHub" target="_blank" rel="noopener noreferrer">Instagram: @HandicraftHub</a></li>
-                <li><a href="https://twitter.com/HandicraftHub" target="_blank" rel="noopener noreferrer">Twitter: @HandicraftHub</a></li>
-              </ul>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+          {/* Contact Info */}
+          <div className="contact-info-section">
+            <div className="info-card">
+              <div className="info-header">
+                <h2 className="info-title">Get in Touch</h2>
+                <p className="info-subtitle">We're here to help you</p>
+              </div>
+
+              <div className="info-items">
+                <div className="info-item">
+                  <div className="info-icon">
+                    <FiMapPin />
+                  </div>
+                  <div className="info-content">
+                    <h3 className="info-label">Our Location</h3>
+                    <p className="info-text">Handicraft Hub HQ</p>
+                    <p className="info-text">Craft Street, Artisan District</p>
+                    <p className="info-text">Mumbai, Maharashtra 400001</p>
+                  </div>
+                </div>
+
+                <div className="info-item">
+                  <div className="info-icon">
+                    <FiMail />
+                  </div>
+                  <div className="info-content">
+                    <h3 className="info-label">Email Us</h3>
+                    <p className="info-text">support@handicrafthub.com</p>
+                    <p className="info-text">orders@handicrafthub.com</p>
+                  </div>
+                </div>
+
+                <div className="info-item">
+                  <div className="info-icon">
+                    <FiPhone />
+                  </div>
+                  <div className="info-content">
+                    <h3 className="info-label">Call Us</h3>
+                    <p className="info-text">+91 98765 43210</p>
+                    <p className="info-text">Mon - Sat, 9am - 6pm IST</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media */}
+              <div className="social-section">
+                <h3 className="social-title">Follow Our Journey</h3>
+                <div className="social-links">
+                  <a href="https://facebook.com/HandicraftHub" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook">
+                    <FiFacebook />
+                  </a>
+                  <a href="https://instagram.com/HandicraftHub" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Instagram">
+                    <FiInstagram />
+                  </a>
+                  <a href="https://twitter.com/HandicraftHub" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Twitter">
+                    <FiTwitter />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Support Card */}
+            <div className="support-card">
+              <div className="support-icon">
+                <FiMessageSquare />
+              </div>
+              <h3 className="support-title">Need Quick Help?</h3>
+              <p className="support-text">
+                Check our FAQ section for instant answers about orders, shipping, returns, and more.
+              </p>
+              <a href="/faq" className="btn btn-outline support-btn">Visit FAQ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -20,6 +20,7 @@ const ReviewSection = ({ productId }) => {
     comment: ''
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReviews();
   }, [productId]);

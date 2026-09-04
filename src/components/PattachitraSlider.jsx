@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 
@@ -36,10 +36,10 @@ const PattachitraSlider = () => {
   ];
 
   // State for category selection, modal visibility, cart items, and product details
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [showModal, setShowModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [selectedCategory, setSelectedCategory] = React.useState('All');
+  const [showModal, setShowModal] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState(null);
+  const [cartItems, setCartItems] = React.useState([]);
 
   // Filter products based on selected category
   const filteredProducts = selectedCategory === 'All' 

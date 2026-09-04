@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const Order = require('../models/order');
 const Product = require('../models/product');
+const Contact = require('../models/contact');
 const { adminAuth } = require('../middleware/auth');
 
 // Get dashboard statistics
@@ -56,6 +57,17 @@ router.get('/users', adminAuth, async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error('Get users error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all contacts
+router.get('/contacts', adminAuth, async (req, res) => {
+  try {
+    const contacts = await Contact.find().sort({ date: -1 });
+    res.json(contacts);
+  } catch (error) {
+    console.error('Get contacts error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
