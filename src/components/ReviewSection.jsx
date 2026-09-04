@@ -7,6 +7,7 @@ import './ReviewSection.css';
 
 const ReviewSection = ({ productId }) => {
   const { isAuthenticated, token } = useAuth();
+
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -20,15 +21,13 @@ const ReviewSection = ({ productId }) => {
     comment: ''
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchReviews();
-  }, [productId]);
-
+  // Fetch reviews for the current product
   const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
+
       const data = await getProductReviews(productId);
+
       setReviews(data.reviews);
       setAverageRating(data.averageRating);
       setTotalReviews(data.totalReviews);
@@ -39,12 +38,15 @@ const ReviewSection = ({ productId }) => {
     }
   }, [productId]);
 
+  // Fetch reviews whenever the product changes
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
 
+  // Submit a new review
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError('');
     setSuccess('');
 
@@ -62,37 +64,75 @@ const ReviewSection = ({ productId }) => {
         },
         token
       );
+
       setSuccess('Review submitted successfully!');
-      setFormData({ rating: 5, comment: '' });
+
+      setFormData({
+        rating: 5,
+        comment: ''
+      });
+
       setShowForm(false);
+
+      // Refresh reviews after successful submission
       fetchReviews();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit review');
+      setError(
+        err.response?.data?.message || 'Failed to submit review'
+      );
     }
   };
 
+  // Render review stars
   const renderStars = (rating) => {
     const stars = [];
+
     for (let i = 1; i <= 5; i++) {
       if (i <= rating) {
-        stars.push(<FaStar key={i} className="star-filled" />);
+        stars.push(
+          <FaStar
+            key={i}
+            className="star-filled"
+          />
+        );
       } else if (i - 0.5 <= rating) {
-        stars.push(<FaStarHalfAlt key={i} className="star-filled" />);
+        stars.push(
+          <FaStarHalfAlt
+            key={i}
+            className="star-filled"
+          />
+        );
       } else {
-        stars.push(<FaRegStar key={i} className="star-empty" />);
+        stars.push(
+          <FaRegStar
+            key={i}
+            className="star-empty"
+          />
+        );
       }
     }
+
     return stars;
   };
 
+  // Render interactive star rating input
   const renderStarInput = () => {
     return (
       <div className="star-input">
         {[1, 2, 3, 4, 5].map((star) => (
           <FaStar
             key={star}
-            className={star <= formData.rating ? 'star-filled' : 'star-empty'}
-            onClick={() => setFormData({ ...formData, rating: star })}
+            className={
+              star <= formData.rating
+                ? 'star-filled'
+                : 'star-empty'
+            }
+            onClick={() =>
+              setFormData({
+                ...formData,
+                rating: star
+              })
+            }
             style={{ cursor: 'pointer' }}
           />
         ))}
@@ -100,43 +140,84 @@ const ReviewSection = ({ productId }) => {
     );
   };
 
+  // Loading state
   if (loading) {
-    return <div className="text-center my-3">Loading reviews...</div>;
+    return (
+      <div className="text-center my-3">
+        Loading reviews...
+      </div>
+    );
   }
 
   return (
     <div className="review-section">
       <Card className="mb-4">
         <Card.Body>
-          <h4 className="mb-3">Customer Reviews</h4>
-          
+
+          {/* Review Header */}
+          <h4 className="mb-3">
+            Customer Reviews
+          </h4>
+
           {/* Rating Summary */}
           <Row className="mb-4">
             <Col md={3} className="text-center">
               <div className="rating-summary">
-                <h2>{averageRating}</h2>
-                <div className="stars">{renderStars(averageRating)}</div>
-                <p className="text-muted">{totalReviews} reviews</p>
+
+                <h2>
+                  {averageRating}
+                </h2>
+
+                <div className="stars">
+                  {renderStars(averageRating)}
+                </div>
+
+                <p className="text-muted">
+                  {totalReviews} reviews
+                </p>
+
               </div>
             </Col>
+
             <Col md={9}>
+
               {/* Rating Distribution */}
               {[5, 4, 3, 2, 1].map((star) => {
-                const count = reviews.filter(r => Math.floor(r.rating) === star).length;
-                const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                const count = reviews.filter(
+                  (review) =>
+                    Math.floor(review.rating) === star
+                ).length;
+
+                const percentage =
+                  totalReviews > 0
+                    ? (count / totalReviews) * 100
+                    : 0;
+
                 return (
-                  <div key={star} className="rating-bar">
-                    <span className="star-label">{star} star</span>
+                  <div
+                    key={star}
+                    className="rating-bar"
+                  >
+                    <span className="star-label">
+                      {star} star
+                    </span>
+
                     <div className="progress">
                       <div
                         className="progress-bar"
-                        style={{ width: `${percentage}%` }}
+                        style={{
+                          width: `${percentage}%`
+                        }}
                       ></div>
                     </div>
-                    <span className="count-label">{count}</span>
+
+                    <span className="count-label">
+                      {count}
+                    </span>
                   </div>
                 );
               })}
+
             </Col>
           </Row>
 
@@ -146,10 +227,14 @@ const ReviewSection = ({ productId }) => {
           {isAuthenticated && (
             <Button
               variant="primary"
-              onClick={() => setShowForm(!showForm)}
+              onClick={() =>
+                setShowForm(!showForm)
+              }
               className="mb-3"
             >
-              {showForm ? 'Cancel' : 'Write a Review'}
+              {showForm
+                ? 'Cancel'
+                : 'Write a Review'}
             </Button>
           )}
 
@@ -157,28 +242,63 @@ const ReviewSection = ({ productId }) => {
           {showForm && (
             <Card className="review-form mb-4">
               <Card.Body>
-                <h5>Write a Review</h5>
-                {error && <Alert variant="danger">{error}</Alert>}
-                {success && <Alert variant="success">{success}</Alert>}
+
+                <h5>
+                  Write a Review
+                </h5>
+
+                {error && (
+                  <Alert variant="danger">
+                    {error}
+                  </Alert>
+                )}
+
+                {success && (
+                  <Alert variant="success">
+                    {success}
+                  </Alert>
+                )}
+
                 <Form onSubmit={handleSubmit}>
+
+                  {/* Rating */}
                   <Form.Group className="mb-3">
-                    <Form.Label>Rating</Form.Label>
+                    <Form.Label>
+                      Rating
+                    </Form.Label>
+
                     {renderStarInput()}
                   </Form.Group>
+
+                  {/* Review */}
                   <Form.Group className="mb-3">
-                    <Form.Label>Your Review</Form.Label>
+                    <Form.Label>
+                      Your Review
+                    </Form.Label>
+
                     <Form.Control
                       as="textarea"
                       rows={4}
                       value={formData.comment}
-                      onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          comment: e.target.value
+                        })
+                      }
                       required
                       placeholder="Share your experience with this product..."
                     />
                   </Form.Group>
-                  <Button type="submit" variant="primary">
+
+                  {/* Submit */}
+                  <Button
+                    type="submit"
+                    variant="primary"
+                  >
                     Submit Review
                   </Button>
+
                 </Form>
               </Card.Body>
             </Card>
@@ -186,27 +306,55 @@ const ReviewSection = ({ productId }) => {
 
           {/* Reviews List */}
           <div className="reviews-list">
+
             {reviews.length === 0 ? (
-              <p className="text-muted">No reviews yet. Be the first to review!</p>
+              <p className="text-muted">
+                No reviews yet. Be the first to review!
+              </p>
             ) : (
               reviews.map((review) => (
-                <Card key={review._id} className="review-card mb-3">
+                <Card
+                  key={review._id}
+                  className="review-card mb-3"
+                >
                   <Card.Body>
+
                     <div className="d-flex justify-content-between align-items-start">
+
                       <div>
-                        <h6 className="mb-1">{review.user?.name || 'Anonymous'}</h6>
-                        <div className="stars mb-2">{renderStars(review.rating)}</div>
+
+                        <h6 className="mb-1">
+                          {review.user?.name ||
+                            'Anonymous'}
+                        </h6>
+
+                        <div className="stars mb-2">
+                          {renderStars(
+                            review.rating
+                          )}
+                        </div>
+
                       </div>
+
                       <small className="text-muted">
-                        {new Date(review.createdAt).toLocaleDateString()}
+                        {new Date(
+                          review.createdAt
+                        ).toLocaleDateString()}
                       </small>
+
                     </div>
-                    <p className="mb-0">{review.comment}</p>
+
+                    <p className="mb-0">
+                      {review.comment}
+                    </p>
+
                   </Card.Body>
                 </Card>
               ))
             )}
+
           </div>
+
         </Card.Body>
       </Card>
     </div>
