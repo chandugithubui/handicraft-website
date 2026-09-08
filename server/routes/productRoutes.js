@@ -45,9 +45,9 @@ router.get('/', async (req, res) => {
       console.log('Filtering by category:', category);
     }
     
-    // Filter by material
+    // Filter by material (case-insensitive)
     if (material) {
-      query.material = material;
+      query.material = { $regex: new RegExp(`^${material}$`, 'i') };
     }
     
     // Filter by price range
@@ -61,7 +61,23 @@ router.get('/', async (req, res) => {
     const products = await Product.find(query);
     console.log('Products found:', products.length);
 
-    res.status(200).json(products);
+    // Fix image paths for deployment - ensure they work with frontend
+    const productsWithFixedImages = products.map(product => {
+      if (product.imageUrl) {
+        // Remove double extensions
+        let imageUrl = product.imageUrl;
+        if (imageUrl.endsWith('.jpg.jpg')) {
+          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
+        }
+        if (imageUrl.endsWith('.jpeg.jpeg')) {
+          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+        }
+        return { ...product.toObject(), imageUrl };
+      }
+      return product;
+    });
+
+    res.status(200).json(productsWithFixedImages);
 
   } catch (error) {
     console.error("Product fetch error:", error);
