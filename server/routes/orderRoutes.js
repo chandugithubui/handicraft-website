@@ -133,7 +133,23 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    res.json(order);
+    // Fix image paths for deployment
+    const fixedItems = order.items.map(item => {
+      if (item.image) {
+        let imageUrl = item.image;
+        // Remove double extensions
+        if (imageUrl.endsWith('.jpg.jpg')) {
+          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
+        }
+        if (imageUrl.endsWith('.jpeg.jpeg')) {
+          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+        }
+        return { ...item, image: imageUrl };
+      }
+      return item;
+    });
+
+    res.json({ ...order.toObject(), items: fixedItems });
   } catch (error) {
     console.error('Get order error:', error);
     res.status(500).json({ message: 'Server error' });

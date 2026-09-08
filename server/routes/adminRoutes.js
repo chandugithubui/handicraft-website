@@ -43,7 +43,26 @@ router.get('/orders', adminAuth, async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('user', 'name email');
 
-    res.json(orders);
+    // Fix image paths for deployment
+    const ordersWithFixedImages = orders.map(order => {
+      const fixedItems = order.items.map(item => {
+        if (item.image) {
+          let imageUrl = item.image;
+          // Remove double extensions
+          if (imageUrl.endsWith('.jpg.jpg')) {
+            imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
+          }
+          if (imageUrl.endsWith('.jpeg.jpeg')) {
+            imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+          }
+          return { ...item, image: imageUrl };
+        }
+        return item;
+      });
+      return { ...order.toObject(), items: fixedItems };
+    });
+
+    res.json(ordersWithFixedImages);
   } catch (error) {
     console.error('Get orders error:', error);
     res.status(500).json({ message: 'Server error' });
