@@ -23,7 +23,7 @@ const categoryData = {
     productCount: 3720,
     artisans: [
       { id: 1, name: 'Rakesh Prusty', slug: 'rakesh-prusty', image: '/images/rakesh.jpeg', specialty: 'Lord Jagannath Paintings', years: 25 },
-      { id: 2, name: 'Puspalata Jena', slug: 'puspalata-jena', image: '/images/puspalata.jpeg', specialty: 'Epic Narratives', years: 24 },
+      { id: 2, name: 'Jagannath Das', slug: 'jagannath-das', image: '/images/jaga.jpeg', specialty: 'Epic Narratives', years: 24 },
       { id: 3, name: 'Chandan Sahoo', slug: 'chandan-sahoo', image: '/images/chandan.jpeg', specialty: 'Decorative Artifacts', years: 26 }
     ],
     localProducts: [
@@ -63,7 +63,7 @@ const categoryData = {
     productCount: 450,
     artisans: [
       { id: 1, name: 'Rakesh Prusty', slug: 'rakesh-prusty', image: '/images/rakesh.jpeg', specialty: 'Lord Jagannath Paintings', years: 25 },
-      { id: 2, name: 'Puspalata Jena', slug: 'puspalata-jena', image: '/images/puspalata.jpeg', specialty: 'Epic Narratives', years: 24 }
+      { id: 2, name: 'Jagannath Das', slug: 'jagannath-das', image: '/images/jaga.jpeg', specialty: 'Epic Narratives', years: 24 }
     ]
   },
   'palm-leaf': {

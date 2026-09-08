@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiBox, FiShoppingBag, FiEye, FiPackage, FiClock, FiCheckCircle, FiXCircle, FiTruck } from 'react-icons/fi';
+import { FiBox, FiShoppingBag, FiEye, FiPackage, FiClock, FiCheckCircle, FiXCircle, FiTruck, FiChevronUp } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import './Orders.css';
@@ -10,6 +10,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -46,6 +47,19 @@ const Orders = () => {
     fetchOrders();
   }, [isAuthenticated, token]);
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/images/placeholder.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    if (imagePath.startsWith('/images/')) {
+      return imagePath;
+    }
+    // Handle double .jpg extension issue
+    if (imagePath.endsWith('.jpg.jpg')) {
+      return imagePath.replace('.jpg.jpg', '.jpg');
+    }
+    return `/images/${imagePath}`;
+  };
+
   const getStatusInfo = (status) => {
     const statusMap = {
       'Pending': { icon: <FiClock />, color: 'pending', label: 'Pending' },
@@ -55,17 +69,6 @@ const Orders = () => {
       'Cancelled': { icon: <FiXCircle />, color: 'cancelled', label: 'Cancelled' }
     };
     return statusMap[status] || { icon: <FiClock />, color: 'pending', label: status };
-  };
-
-  const getApiUrl = () => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api';
-    }
-    if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-        window.location.hostname.includes('vercel.app')) {
-      return 'https://handicraft-website.onrender.com/api';
-    }
-    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
   if (loading) {
@@ -156,8 +159,8 @@ const Orders = () => {
                     {order.items.slice(0, 3).map((item, index) => (
                       <div key={index} className="order-item-preview">
                         <div className="item-image">
-                          <img 
-                            src={item.image ? `${getApiUrl()}/uploads/${item.image}` : '/images/placeholder.jpg'}
+                          <img
+                            src={getImageUrl(item.image)}
                             alt={item.name}
                             onError={(e) => {
                               e.target.src = '/images/placeholder.jpg';
@@ -177,6 +180,42 @@ const Orders = () => {
                     )}
                   </div>
 
+                  {expandedOrder === order._id && (
+                    <div className="order-details-expanded">
+                      <div className="order-details-items">
+                        <h4>Order Items</h4>
+                        {order.items.map((item, index) => (
+                          <div key={index} className="order-detail-item">
+                            <div className="detail-item-image">
+                              <img
+                                src={getImageUrl(item.image)}
+                                alt={item.name}
+                                onError={(e) => {
+                                  e.target.src = '/images/placeholder.jpg';
+                                }}
+                              />
+                            </div>
+                            <div className="detail-item-info">
+                              <span className="detail-item-name">{item.name}</span>
+                              <span className="detail-item-qty">Quantity: {item.quantity}</span>
+                              <span className="detail-item-price">₹{item.price.toLocaleString()} each</span>
+                            </div>
+                            <div className="detail-item-total">
+                              ₹{(item.price * item.quantity).toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="order-details-shipping">
+                        <h4>Shipping Address</h4>
+                        <p>{order.shippingAddress?.fullName}</p>
+                        <p>{order.shippingAddress?.address}</p>
+                        <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}</p>
+                        <p>Phone: {order.shippingAddress?.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="order-card-footer">
                     <div className="order-total">
                       <span className="total-label">Total:</span>
@@ -185,9 +224,21 @@ const Orders = () => {
                     <div className="order-payment">
                       <span className="payment-label">{order.paymentMethod}</span>
                     </div>
-                    <button className="btn btn-outline view-order-btn">
-                      <FiEye className="btn-icon" />
-                      View Details
+                    <button
+                      className="btn btn-outline view-order-btn"
+                      onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                    >
+                      {expandedOrder === order._id ? (
+                        <>
+                          <FiChevronUp className="btn-icon" />
+                          Hide Details
+                        </>
+                      ) : (
+                        <>
+                          <FiEye className="btn-icon" />
+                          View Details
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

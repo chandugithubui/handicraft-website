@@ -7,21 +7,10 @@ import './Cart.css';
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
 
-  const getApiUrl = () => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api';
-    }
-    if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-        window.location.hostname.includes('vercel.app')) {
-      return 'https://handicraft-website.onrender.com/api';
-    }
-    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-  };
-
   const getImageUrl = (image) => {
     if (!image) return '/images/placeholder.jpg';
     if (image.startsWith('http')) return image;
-    return `${getApiUrl()}/uploads/${image}`;
+    return image;
   };
 
   if (cartItems.length === 0) {

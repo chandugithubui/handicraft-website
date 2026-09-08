@@ -341,12 +341,6 @@
    ========================================================= */
 
 .about-page .values-section {
-  margin-left: -100vw;
-  margin-right: -100vw;
-
-  padding-left: 100vw;
-  padding-right: 100vw;
-
   background-color: var(--color-white);
 }
 
@@ -596,12 +590,6 @@
    ========================================================= */
 
 .about-page .impact-section {
-  margin-left: -100vw;
-  margin-right: -100vw;
-
-  padding-left: 100vw;
-  padding-right: 100vw;
-
   background-color: var(--color-white);
 }
 
@@ -651,13 +639,16 @@
 
   font-family: var(--font-serif);
 
-  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
 
   line-height: 1;
 
   font-weight: var(--font-weight-bold);
 
   color: var(--color-primary);
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 

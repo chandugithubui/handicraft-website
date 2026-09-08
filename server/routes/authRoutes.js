@@ -9,8 +9,11 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    // Lowercase email for consistency
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
@@ -22,7 +25,7 @@ router.post('/register', async (req, res) => {
     // Create new user
     const user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       role: role || 'user'
     });
@@ -31,7 +34,7 @@ router.post('/register', async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user._id, email: normalizedEmail, role: user.role },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     );
@@ -57,8 +60,11 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Lowercase email for consistency
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -71,7 +77,7 @@ router.post('/login', async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user._id, email: normalizedEmail, role: user.role },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     );

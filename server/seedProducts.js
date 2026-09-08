@@ -24,198 +24,404 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Sample products with authentic Raghurajpur village art
+// Sample products with authentic Raghurajpur village art - 35 products matching frontend catalogue
 const sampleProducts = [
-  // Paintings Category - Pattachitra paintings only
+  // Pattachitra (5 products)
   {
-    name: 'Pattachitra Wall Art - Lord Jagannath',
-    price: 3500,
-    description: 'Authentic Pattachitra painting from Raghurajpur village, Odisha. Depicts Lord Jagannath, Balabhadra, and Subhadra. Hand-painted on treated cloth using natural mineral colors by village artisans.',
-    imageUrl: '/images/pattachitrawall.jpg',
-    category: 'Paintings',
-    material: 'Cloth',
+    name: 'Lord Jagannath Pattachitra',
+    price: 4500,
+    description: 'Traditional Pattachitra painting depicting Lord Jagannath with intricate details and natural colors',
+    imageUrl: '/images/pattachitra1.jpg.jpg',
+    category: 'pattachitra',
+    material: 'Fabric',
     stock: 10,
     rating: 4.9,
     numReviews: 45
   },
   {
-    name: 'Pattachitra Scroll - Ramayana',
-    price: 5500,
-    description: 'Large Pattachitra scroll narrating Ramayana episodes. Hand-painted by master artist from Raghurajpur using traditional techniques passed down through generations.',
-    imageUrl: '/images/pattachitrawallpainting.webp',
-    category: 'Paintings',
-    material: 'Cloth',
-    stock: 5,
-    rating: 5.0,
-    numReviews: 52
-  },
-  {
-    name: 'Pattachitra Painting - Tree of Life',
+    name: 'Jagannath Temple Scene',
     price: 3800,
-    description: 'Traditional Tree of Life Pattachitra painting. Symbolizes growth and prosperity. Hand-painted with natural colors on treated cloth by village artist.',
-    imageUrl: '/images/pattachitra1.jpg.jpg',
-    category: 'Paintings',
-    material: 'Cloth',
-    stock: 10,
-    rating: 4.9,
-    numReviews: 40
-  },
-  {
-    name: 'Pattachitra Wall Hanging',
-    price: 4200,
-    description: 'Large Pattachitra wall hanging featuring village life scenes. Vibrant colors and intricate details showcase the rich cultural heritage of Raghurajpur.',
-    imageUrl: '/images/pattachitra2.jpg.jpg',
-    category: 'Paintings',
-    material: 'Cloth',
+    description: 'Beautiful portrayal of Jagannath temple with traditional Pattachitra art style',
+    imageUrl: '/images/jagannathpainting.jpg',
+    category: 'pattachitra',
+    material: 'Fabric',
     stock: 12,
     rating: 4.8,
     numReviews: 35
   },
   {
-    name: 'Pattachitra Wall Painting',
-    price: 4500,
-    description: 'Traditional Pattachitra wall painting with intricate details. Features mythological scenes painted using natural colors.',
-    imageUrl: '/images/pattachitra3.jpg.jpg',
-    category: 'Paintings',
-    material: 'Cloth',
+    name: 'Kurma Avatar Painting',
+    price: 5200,
+    description: 'Mythological painting of Lord Vishnu in Kurma avatar form',
+    imageUrl: '/images/kurmaavatar.jpg',
+    category: 'pattachitra',
+    material: 'Fabric',
     stock: 8,
-    rating: 4.7,
+    rating: 4.9,
     numReviews: 28
   },
   {
-    name: 'Tiled Pattachitra Art',
-    price: 2800,
-    description: 'Beautiful tiled Pattachitra artwork. Each tile tells a different story from Odisha mythology.',
+    name: 'Tiled Pattachitra Panel',
+    price: 2500,
+    description: 'Beautiful tiled Pattachitra panel with traditional motifs',
     imageUrl: '/images/tilledpattachitra.webp',
-    category: 'Paintings',
-    material: 'Cloth',
+    category: 'pattachitra',
+    material: 'Fabric',
     stock: 15,
     rating: 4.6,
     numReviews: 22
   },
-
-  // Palm Leaf Art Category - Palm leaf engravings only
   {
-    name: 'Palm Leaf Engraving - Radha Krishna',
-    price: 2800,
-    description: 'Traditional Talapatra Chitra (palm leaf engraving) from Raghurajpur. Intricate carving on dried palm leaves depicting divine love of Radha Krishna.',
-    imageUrl: '/images/pattachitra1.jpg.jpeg',
-    category: 'Palm Leaf',
-    material: 'Palm Leaf',
-    stock: 15,
-    rating: 4.8,
-    numReviews: 38
-  },
-  {
-    name: 'Palm Leaf Engraving - Village Life',
-    price: 3200,
-    description: 'Palm leaf engraving depicting village life and daily activities of Raghurajpur artisans. Each stroke tells a story.',
-    imageUrl: '/images/pattachitra2.jpg.jpeg',
-    category: 'Palm Leaf',
-    material: 'Palm Leaf',
-    stock: 10,
-    rating: 4.7,
-    numReviews: 25
-  },
-  {
-    name: 'Palm Leaf Bookmark Set',
-    price: 600,
-    description: 'Set of 5 palm leaf bookmarks with traditional engravings. Each bookmark features different motifs from Odisha culture.',
-    imageUrl: '/images/pattachitra3.jpg.jpeg',
-    category: 'Palm Leaf',
-    material: 'Palm Leaf',
-    stock: 40,
-    rating: 4.6,
-    numReviews: 22
-  },
-  {
-    name: 'Palm Leaf Lamp Shade',
-    price: 2200,
-    description: 'Unique lamp shade made from engraved palm leaves. Creates beautiful patterns when lit. Traditional craft with modern utility.',
-    imageUrl: '/images/metallamp.jpg',
-    category: 'Palm Leaf',
-    material: 'Palm Leaf',
-    stock: 10,
-    rating: 4.7,
-    numReviews: 18
-  },
-
-  // Sarees Category - Handwoven sarees only
-  {
-    name: 'Handpainted Saree - Pattachitra Border',
-    price: 8500,
-    description: 'Beautiful cotton saree with hand-painted Pattachitra border. Each motif tells a story from Odisha mythology. Painted by Raghurajpur women artisans.',
-    imageUrl: '/images/handmadevase.webp',
-    category: 'Sarees',
-    material: 'Cotton',
-    stock: 8,
-    rating: 4.9,
-    numReviews: 28
-  },
-  {
-    name: 'Handwoven Saree - Ikat Pattern',
+    name: 'Pattachitra Wall Art',
     price: 6500,
-    description: 'Traditional Odisha Ikat saree with handwoven patterns. Natural dyes used for vibrant colors. Woven by skilled weavers from nearby villages.',
-    imageUrl: '/images/handcraftedwoodenBowl3.webp',
-    category: 'Sarees',
-    material: 'Silk Blend',
-    stock: 12,
-    rating: 4.8,
-    numReviews: 32
+    description: 'Large Pattachitra wall painting depicting Hindu mythology',
+    imageUrl: '/images/pattachitrawall.jpg',
+    category: 'pattachitra',
+    material: 'Fabric',
+    stock: 5,
+    rating: 5.0,
+    numReviews: 52
   },
 
-  // Wooden Crafts Category - Wooden handicrafts
+  // Palm Leaf (4 products)
   {
-    name: 'Handcrafted Wooden Bowl',
-    price: 1200,
-    description: 'Beautiful wooden bowl handcrafted by skilled artisans using traditional techniques. Perfect for serving or decoration.',
-    imageUrl: '/images/HandcraftedWoodenBowl.webp',
-    category: 'Wooden Crafts',
-    material: 'Wood',
-    stock: 20,
-    rating: 4.9,
-    numReviews: 30
-  },
-  {
-    name: 'Wooden Mask - Traditional',
+    name: 'Palm Leaf Tray',
     price: 1800,
-    description: 'Hand-carved wooden mask from Raghurajpur artisans. Used in traditional dance performances. Features intricate carvings and natural finish.',
-    imageUrl: '/images/sculpture.webp',
-    category: 'Wooden Crafts',
-    material: 'Wood',
-    stock: 15,
-    rating: 4.7,
-    numReviews: 25
-  },
-  {
-    name: 'Wooden Sculpture - Village Scene',
-    price: 4500,
-    description: 'Hand-carved wooden sculpture depicting village life. Shows artisans at work in Raghurajpur. Detailed carving by master craftsman.',
-    imageUrl: '/images/elephant.webp',
-    category: 'Wooden Crafts',
-    material: 'Wood',
-    stock: 5,
-    rating: 4.9,
-    numReviews: 15
-  },
-  {
-    name: 'Wooden Tray - Traditional',
-    price: 1500,
-    description: 'Hand-carved wooden tray with traditional motifs. Perfect for serving or decorative use.',
+    description: 'Intricately engraved palm leaf tray with traditional patterns',
     imageUrl: '/images/woodentray.jpg',
-    category: 'Wooden Crafts',
-    material: 'Wood',
+    category: 'palm-leaf',
+    material: 'Bamboo',
     stock: 18,
     rating: 4.6,
     numReviews: 20
   },
   {
-    name: 'Wooden Toys Set',
-    price: 800,
-    description: 'Set of hand-carved wooden toys. Traditional designs passed down through generations.',
-    imageUrl: '/images/woodentoys.jpg',
-    category: 'Wooden Crafts',
+    name: 'Palm Leaf Teapot Design',
+    price: 1200,
+    description: 'Artistic engraving of traditional teapot on palm leaf',
+    imageUrl: '/images/teapot.webp',
+    category: 'palm-leaf',
+    material: 'Bamboo',
+    stock: 20,
+    rating: 4.5,
+    numReviews: 18
+  },
+  {
+    name: 'Pattachitra Wall Painting',
+    price: 2200,
+    description: 'Palm leaf wall art with traditional Pattachitra motifs',
+    imageUrl: '/images/pattachitrawallpainting.webp',
+    category: 'palm-leaf',
+    material: 'Bamboo',
+    stock: 15,
+    rating: 4.7,
+    numReviews: 25
+  },
+  {
+    name: 'Pattachitra Art Panel',
+    price: 2800,
+    description: 'Traditional Pattachitra art on palm leaf panel',
+    imageUrl: '/images/pattachitra1.jpg.jpeg',
+    category: 'palm-leaf',
+    material: 'Bamboo',
+    stock: 15,
+    rating: 4.8,
+    numReviews: 38
+  },
+
+  // Sarees (3 products)
+  {
+    name: 'Handwoven Sambalpuri Saree',
+    price: 8500,
+    description: 'Traditional handwoven Sambalpuri saree with ikat patterns',
+    imageUrl: '/images/pattachitra2.jpg.jpg',
+    category: 'sarees',
+    material: 'Fabric',
+    stock: 8,
+    rating: 4.9,
+    numReviews: 28
+  },
+  {
+    name: 'Traditional Ikat Saree',
+    price: 7200,
+    description: 'Beautiful ikat saree with traditional Odisha patterns',
+    imageUrl: '/images/pattachitra2.jpg.jpeg',
+    category: 'sarees',
+    material: 'Fabric',
+    stock: 12,
+    rating: 4.8,
+    numReviews: 32
+  },
+  {
+    name: 'Bomkai Handloom Saree',
+    price: 9200,
+    description: 'Authentic Bomkai handloom saree with temple border',
+    imageUrl: '/images/pattachitra3.jpg.jpg',
+    category: 'sarees',
+    material: 'Fabric',
+    stock: 6,
+    rating: 4.9,
+    numReviews: 15
+  },
+
+  // Wooden Crafts (6 products)
+  {
+    name: 'Decorative Wooden Plate',
+    price: 2200,
+    description: 'Hand-carved decorative plate with floral patterns',
+    imageUrl: '/images/decorativeplate.webp',
+    category: 'wooden',
     material: 'Wood',
+    stock: 15,
+    rating: 4.7,
+    numReviews: 25
+  },
+  {
+    name: 'Handcrafted Wooden Vase',
+    price: 3500,
+    description: 'Elegant wooden vase with carved motifs',
+    imageUrl: '/images/handmadevase.webp',
+    category: 'wooden',
+    material: 'Wood',
+    stock: 10,
+    rating: 4.8,
+    numReviews: 30
+  },
+  {
+    name: 'Metal Lamp Stand',
+    price: 1800,
+    description: 'Traditional metal lamp with wooden base',
+    imageUrl: '/images/metallamp.jpg',
+    category: 'wooden',
+    material: 'Metal',
+    stock: 12,
+    rating: 4.6,
+    numReviews: 22
+  },
+  {
+    name: 'Handcrafted Wooden Bowl',
+    price: 2800,
+    description: 'Beautiful wooden bowl with intricate carvings',
+    imageUrl: '/images/handcraftedwoodenBowl2.jpg',
+    category: 'wooden',
+    material: 'Wood',
+    stock: 18,
+    rating: 4.7,
+    numReviews: 28
+  },
+  {
+    name: 'Carved Wooden Handcraft',
+    price: 3200,
+    description: 'Intricately carved wooden handicraft piece',
+    imageUrl: '/images/carvedwooden.jpg',
+    category: 'wooden',
+    material: 'Wood',
+    stock: 10,
+    rating: 4.8,
+    numReviews: 20
+  },
+  {
+    name: 'Wooden Handcraft Art',
+    price: 2900,
+    description: 'Traditional wooden handcraft with artistic carvings',
+    imageUrl: '/images/woodenhandcraft.jpg',
+    category: 'wooden',
+    material: 'Wood',
+    stock: 14,
+    rating: 4.7,
+    numReviews: 24
+  },
+
+  // Sculptures (4 products)
+  {
+    name: 'Brass Sculpture',
+    price: 4500,
+    description: 'Traditional brass sculpture with intricate details',
+    imageUrl: '/images/sculpture.webp',
+    category: 'sculptures',
+    material: 'Metal',
+    stock: 8,
+    rating: 4.9,
+    numReviews: 30
+  },
+  {
+    name: 'Elephant Figurine',
+    price: 3500,
+    description: 'Handcrafted elephant sculpture in traditional style',
+    imageUrl: '/images/elephant.webp',
+    category: 'sculptures',
+    material: 'Metal',
+    stock: 12,
+    rating: 4.7,
+    numReviews: 25
+  },
+  {
+    name: 'Decorative Toys',
+    price: 1500,
+    description: 'Traditional wooden toys set with hand-painted details',
+    imageUrl: '/images/toys.jpg',
+    category: 'sculptures',
+    material: 'Wood',
+    stock: 25,
+    rating: 4.5,
+    numReviews: 18
+  },
+  {
+    name: 'Wooden Toys Set',
+    price: 1800,
+    description: 'Traditional wooden toys for children',
+    imageUrl: '/images/woodentoys.jpg',
+    category: 'sculptures',
+    material: 'Wood',
+    stock: 25,
+    rating: 4.5,
+    numReviews: 18
+  },
+
+  // Home Decor (5 products)
+  {
+    name: 'Home Decor Vase',
+    price: 2900,
+    description: 'Elegant home decor vase with hand-painted design',
+    imageUrl: '/images/handcraftvase.jpg',
+    category: 'decor',
+    material: 'Clay',
+    stock: 15,
+    rating: 4.6,
+    numReviews: 22
+  },
+  {
+    name: 'Clay Pot',
+    price: 1200,
+    description: 'Traditional clay pottery with artistic design',
+    imageUrl: '/images/claypot.jpg',
+    category: 'decor',
+    material: 'Clay',
+    stock: 20,
+    rating: 4.5,
+    numReviews: 18
+  },
+  {
+    name: 'Glass Bottle Art',
+    price: 1800,
+    description: 'Hand-painted glass bottle with traditional motifs',
+    imageUrl: '/images/glassbottle.webp',
+    category: 'decor',
+    material: 'Clay',
+    stock: 18,
+    rating: 4.6,
+    numReviews: 20
+  },
+  {
+    name: 'Handcrafted Wooden Bowl Premium',
+    price: 3200,
+    description: 'Premium wooden bowl with artistic carvings',
+    imageUrl: '/images/handcraftedwoodenBowl3.webp',
+    category: 'decor',
+    material: 'Wood',
+    stock: 12,
+    rating: 4.8,
+    numReviews: 32
+  },
+  {
+    name: 'Handcrafted Wooden Bowl Classic',
+    price: 2400,
+    description: 'Classic wooden bowl for home decor',
+    imageUrl: '/images/HandcraftedWoodenBowl.webp',
+    category: 'decor',
+    material: 'Wood',
+    stock: 20,
+    rating: 4.9,
+    numReviews: 30
+  },
+
+  // Gifts (4 products)
+  {
+    name: 'Gift Items Set',
+    price: 3200,
+    description: 'Handcrafted gift collection with multiple items',
+    imageUrl: '/images/GiftsItems.webp',
+    category: 'gifts',
+    material: 'Wood',
+    stock: 15,
+    rating: 4.7,
+    numReviews: 25
+  },
+  {
+    name: 'Related Product Set',
+    price: 2800,
+    description: 'Curated gift set with related handicraft items',
+    imageUrl: '/images/relatedProduct.webp',
+    category: 'gifts',
+    material: 'Wood',
+    stock: 12,
+    rating: 4.6,
+    numReviews: 20
+  },
+  {
+    name: 'Traditional Craft Gift',
+    price: 3600,
+    description: 'Traditional handicraft gift collection',
+    imageUrl: '/images/pattachitra3.jpg.jpeg',
+    category: 'gifts',
+    material: 'Fabric',
+    stock: 10,
+    rating: 4.8,
+    numReviews: 22
+  },
+  {
+    name: 'Wooden Craft Gift Set',
+    price: 4200,
+    description: 'Wooden handicraft gift collection',
+    imageUrl: '/images/handcraftwooden.jpg',
+    category: 'gifts',
+    material: 'Wood',
+    stock: 8,
+    rating: 4.9,
+    numReviews: 28
+  },
+
+  // Additional products for better material distribution
+  {
+    name: 'Stone Sculpture',
+    price: 5500,
+    description: 'Traditional stone sculpture with intricate carvings',
+    imageUrl: '/images/sculpture.webp',
+    category: 'sculptures',
+    material: 'Stone',
+    stock: 5,
+    rating: 4.9,
+    numReviews: 15
+  },
+  {
+    name: 'Clay Decorative Pot',
+    price: 1600,
+    description: 'Handcrafted clay pot with traditional designs',
+    imageUrl: '/images/claypot.jpg',
+    category: 'decor',
+    material: 'Clay',
+    stock: 20,
+    rating: 4.5,
+    numReviews: 18
+  },
+  {
+    name: 'Metal Wall Art',
+    price: 2800,
+    description: 'Traditional metal wall art piece',
+    imageUrl: '/images/metallamp.jpg',
+    category: 'decor',
+    material: 'Metal',
+    stock: 10,
+    rating: 4.7,
+    numReviews: 25
+  },
+  {
+    name: 'Bamboo Basket',
+    price: 1400,
+    description: 'Handwoven bamboo basket for storage',
+    imageUrl: '/images/woodentray.jpg',
+    category: 'decor',
+    material: 'Bamboo',
     stock: 25,
     rating: 4.5,
     numReviews: 18

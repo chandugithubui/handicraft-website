@@ -7,11 +7,18 @@ import ProductModal from '../components/ProductModal';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { FaShoppingBag, FaHeart, FaStar, FaAward, FaLeaf, FaShieldAlt, FaTruck, FaHeadset } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import './Home.css';
 
 const Home = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
@@ -21,6 +28,65 @@ const Home = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedProduct(null);
+  };
+
+  const handleAddToCart = (product) => {
+    const productWithId = {
+      ...product,
+      _id: product.id.toString(),
+      price: parseInt(product.price.replace(/[^0-9]/g, ''))
+    };
+    addToCart(productWithId);
+  };
+
+  const handleWishlist = (product) => {
+    const productWithId = {
+      ...product,
+      _id: product.id.toString(),
+      price: parseInt(product.price.replace(/[^0-9]/g, ''))
+    };
+    addToWishlist(productWithId);
+  };
+
+  const handleNewsletterSubscribe = async (e) => {
+    e.preventDefault();
+    
+    // Email validation - more permissive regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newsletterEmail || !emailRegex.test(newsletterEmail)) {
+      setNewsletterStatus('error');
+      setNewsletterMessage('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000/api/newsletter/subscribe'
+        : 'https://handicraft-website.onrender.com/api/newsletter/subscribe';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setNewsletterStatus('success');
+        setNewsletterMessage(data.message);
+        setNewsletterEmail('');
+      } else {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.message || 'Subscription failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      setNewsletterStatus('error');
+      setNewsletterMessage('An error occurred. Please try again later.');
+    }
   };
   return (
     <div className="home-page">
@@ -59,8 +125,20 @@ const Home = () => {
                   <div className="product-image-wrapper">
                     <Card.Img variant="top" src={product.image} alt={product.name} />
                     <div className="product-actions">
-                      <Button variant="light" className="action-btn"><FaHeart /></Button>
-                      <Button variant="light" className="action-btn"><FaShoppingBag /></Button>
+                      <Button 
+                        variant="light" 
+                        className="action-btn"
+                        onClick={() => handleWishlist(product)}
+                      >
+                        <FaHeart className={isInWishlist(product.id.toString()) ? 'text-danger' : ''} />
+                      </Button>
+                      <Button 
+                        variant="light" 
+                        className="action-btn"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        <FaShoppingBag />
+                      </Button>
                     </div>
                   </div>
                   <Card.Body>
@@ -70,7 +148,7 @@ const Home = () => {
                       <span>{product.rating}</span>
                     </div>
                     <Card.Text className="product-price">{product.price}</Card.Text>
-                    <Button onClick={() => handleViewDetails(product)} className="btn btn-primary w-100">View Details</Button>
+                    <Button onClick={() => handleViewDetails(product)} className="btn btn-primary w-100 view-details-btn">View Details</Button>
                   </Card.Body>
                 </Card>
               </Col>
@@ -164,9 +242,26 @@ const Home = () => {
               <h2 className="newsletter-title">Subscribe to Our Newsletter</h2>
               <p className="newsletter-subtitle">Get updates on new arrivals, exclusive offers, and artisan stories</p>
               <div className="newsletter-form">
-                <input type="email" placeholder="Enter your email address" className="form-control newsletter-input" />
-                <Button variant="primary" className="newsletter-btn">Subscribe</Button>
+                <input 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  className="form-control newsletter-input"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                />
+                <Button 
+                  variant="primary" 
+                  className="newsletter-btn"
+                  onClick={handleNewsletterSubscribe}
+                >
+                  Subscribe
+                </Button>
               </div>
+              {newsletterMessage && (
+                <div className={`newsletter-message ${newsletterStatus}`}>
+                  {newsletterMessage}
+                </div>
+              )}
             </Col>
           </Row>
         </Container>

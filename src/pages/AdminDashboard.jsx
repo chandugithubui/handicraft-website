@@ -6,29 +6,32 @@ import { getAdminStats, getAllOrders, getAllUsers, getAllContacts, updateOrderSt
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const { user, isAuthenticated, token } = useAuth();
+  const { user, isAuthenticated, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [newsletters, setNewsletters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statsData, ordersData, usersData, contactsData] = await Promise.all([
+      const [statsData, ordersData, usersData, contactsData, newslettersData] = await Promise.all([
         getAdminStats(token),
         getAllOrders(token),
         getAllUsers(token),
-        getAllContacts(token)
+        getAllContacts(token),
+        fetchNewsletters()
       ]);
       setStats(statsData);
       setOrders(ordersData);
       setUsers(usersData);
       setContacts(contactsData);
+      setNewsletters(newslettersData);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -37,13 +40,17 @@ const AdminDashboard = () => {
   }, [token]);
 
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for auth to finish loading
+    }
+
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/');
       return;
     }
 
     fetchDashboardData();
-  }, [isAuthenticated, user, navigate, fetchDashboardData]);
+  }, [authLoading, isAuthenticated, user, navigate, fetchDashboardData]);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
@@ -53,6 +60,51 @@ const AdminDashboard = () => {
       ));
     } catch (error) {
       console.error('Error updating order status:', error);
+    }
+  };
+
+  const fetchNewsletters = async () => {
+    try {
+      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000/api/newsletter/subscribers'
+        : 'https://handicraft-website.onrender.com/api/newsletter/subscribers';
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.subscribers;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching newsletters:', error);
+      return [];
+    }
+  };
+
+  const handleUnsubscribe = async (email) => {
+    try {
+      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000/api/newsletter/unsubscribe'
+        : 'https://handicraft-website.onrender.com/api/newsletter/unsubscribe';
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Refresh the newsletters list
+        const updatedNewsletters = await fetchNewsletters();
+        setNewsletters(updatedNewsletters);
+      }
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
     }
   };
 
@@ -160,6 +212,12 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('contacts')}
           >
             Contacts
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'newsletters' ? 'active' : ''}`}
+            onClick={() => setActiveTab('newsletters')}
+          >
+            Newsletters
           </button>
         </div>
 
@@ -286,6 +344,61 @@ const AdminDashboard = () => {
                               day: 'numeric',
                               year: 'numeric'
                             })}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'newsletters' && (
+            <div className="content-card">
+              <h3 className="content-title">Newsletter Subscribers</h3>
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th width="40%">Email</th>
+                      <th width="25%">Subscribed Date</th>
+                      <th width="20%">Status</th>
+                      <th width="15%">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {newsletters.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="no-data">
+                          No newsletter subscribers yet
+                        </td>
+                      </tr>
+                    ) : (
+                      newsletters.map((subscriber) => (
+                        <tr key={subscriber._id}>
+                          <td className="subscriber-email" data-label="Email">{subscriber.email}</td>
+                          <td className="subscriber-date" data-label="Subscribed Date">
+                            {new Date(subscriber.subscribedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </td>
+                          <td className="subscriber-status" data-label="Status">
+                            <span className={`status-badge status-${subscriber.status === 'active' ? 'delivered' : 'cancelled'}`}>
+                              {subscriber.status}
+                            </span>
+                          </td>
+                          <td className="subscriber-actions" data-label="Actions">
+                            {subscriber.status === 'active' && (
+                              <button 
+                                className="btn btn-sm btn-outline"
+                                onClick={() => handleUnsubscribe(subscriber.email)}
+                              >
+                                Unsubscribe
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))

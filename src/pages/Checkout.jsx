@@ -68,6 +68,10 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      const subtotal = getCartTotal();
+      const shipping = subtotal >= 999 ? 0 : 99;
+      const total = subtotal + shipping;
+
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
@@ -78,7 +82,7 @@ const Checkout = () => {
         })),
         shippingAddress,
         paymentMethod,
-        totalAmount: getCartTotal()
+        totalAmount: total
       };
 
       await createOrder(orderData, token);
@@ -96,6 +100,10 @@ const Checkout = () => {
     setError('');
 
     try {
+      const subtotal = getCartTotal();
+      const shipping = subtotal >= 999 ? 0 : 99;
+      const total = subtotal + shipping;
+
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
@@ -106,7 +114,7 @@ const Checkout = () => {
         })),
         shippingAddress,
         paymentMethod: 'Razorpay',
-        totalAmount: getCartTotal(),
+        totalAmount: total,
         paymentId: paymentResponse.razorpay_payment_id
       };
 

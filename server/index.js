@@ -16,6 +16,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const newsletterRoutes = require('./routes/newsletterRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -72,6 +73,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Test route
 app.get('/', (req, res) => {

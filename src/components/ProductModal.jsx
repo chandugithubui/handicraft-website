@@ -1,10 +1,34 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { FaHeart, FaShoppingBag, FaTimes } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import './ProductModal.css';
 
 const ProductModal = ({ show, onHide, product }) => {
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+
   if (!product) return null;
+
+  const handleAddToCart = () => {
+    const productWithId = {
+      ...product,
+      _id: product.id.toString(),
+      price: parseInt(product.price.replace(/[^0-9]/g, ''))
+    };
+    addToCart(productWithId);
+    onHide();
+  };
+
+  const handleWishlist = () => {
+    const productWithId = {
+      ...product,
+      _id: product.id.toString(),
+      price: parseInt(product.price.replace(/[^0-9]/g, ''))
+    };
+    addToWishlist(productWithId);
+  };
 
   return (
     <Modal 
@@ -39,13 +63,17 @@ const ProductModal = ({ show, onHide, product }) => {
               Handcrafted with love by skilled artisans, this piece represents the rich cultural heritage of Indian craftsmanship. Each item is unique and tells a story of tradition and artistry.
             </p>
             <div className="modal-actions">
-              <Button variant="primary" className="add-to-cart-btn">
+              <Button variant="primary" className="add-to-cart-btn" onClick={handleAddToCart}>
                 <FaShoppingBag className="btn-icon" />
                 Add to Cart
               </Button>
-              <Button variant="outline" className="wishlist-btn">
+              <Button 
+                variant="outline" 
+                className={`wishlist-btn ${isInWishlist(product.id.toString()) ? 'active' : ''}`} 
+                onClick={handleWishlist}
+              >
                 <FaHeart className="btn-icon" />
-                Add to Wishlist
+                {isInWishlist(product.id.toString()) ? 'In Wishlist' : 'Add to Wishlist'}
               </Button>
             </div>
           </div>
