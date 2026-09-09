@@ -208,10 +208,10 @@ const Orders = () => {
                             <div className="detail-item-info">
                               <span className="detail-item-name">{item.name}</span>
                               <span className="detail-item-qty">Quantity: {item.quantity}</span>
-                              <span className="detail-item-price">₹{item.price.toLocaleString()} each</span>
+                              <span className="detail-item-price">₹{item.price ? item.price.toLocaleString() : '0'} each</span>
                             </div>
                             <div className="detail-item-total">
-                              ₹{(item.price * item.quantity).toLocaleString()}
+                              ₹{item.price && item.quantity ? (item.price * item.quantity).toLocaleString() : '0'}
                             </div>
                           </div>
                         ))}
@@ -229,10 +229,10 @@ const Orders = () => {
                   <div className="order-card-footer">
                     <div className="order-total">
                       <span className="total-label">Total:</span>
-                      <span className="total-amount">₹{order.totalAmount.toLocaleString()}</span>
+                      <span className="total-amount">₹{order.totalAmount ? order.totalAmount.toLocaleString() : '0'}</span>
                     </div>
                     <div className="order-payment">
-                      <span className="payment-label">{order.paymentMethod}</span>
+                      <span className="payment-label">{order.paymentMethod || 'N/A'}</span>
                     </div>
                     <button
                       className="btn btn-outline view-order-btn"
