@@ -15,40 +15,52 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
 
+    router.post('/', auth, async (req, res) => {
+  try {
+    const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      console.error('Order creation error: Items array is empty or invalid');
+      return res.status(400).json({ message: 'Order must contain at least one item' });
+    }
+
     const Product = require('../models/product');
     const stockUpdates = [];
+    const validatedItems = [];
 
-    // Validate each product and check stock
     for (const item of items) {
-      // Validate product ID is valid MongoDB ObjectId
       if (!mongoose.Types.ObjectId.isValid(item.product)) {
         console.error('Order creation error: Invalid product ID:', item.product);
         return res.status(400).json({ message: `Invalid product ID: ${item.product}` });
       }
 
-      // Verify product exists
       const product = await Product.findById(item.product);
       if (!product) {
         console.error('Order creation error: Product not found:', item.product);
         return res.status(404).json({ message: `Product not found: ${item.product}` });
       }
 
-      // Verify stock is sufficient
       if (product.stock < item.quantity) {
-        console.error('Order creation error: Insufficient stock for product:', item.product, 'requested:', item.quantity, 'available:', product.stock);
+        console.error('Order creation error: Insufficient stock for product:', item.product);
         return res.status(400).json({ 
           message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}` 
         });
       }
 
-      // Queue stock update for later
       stockUpdates.push({
         productId: item.product,
         quantity: item.quantity
       });
+
+      validatedItems.push({
+        product: product._id,
+        name: product.name,
+        price: product.price,
+        quantity: item.quantity,
+        image: product.imageUrl
+      });
     }
 
-    // All validations passed - now reduce stock
     for (const update of stockUpdates) {
       await Product.findByIdAndUpdate(
         update.productId,
@@ -56,15 +68,40 @@ router.post('/', auth, async (req, res) => {
       );
     }
 
+    const calculatedTotal = validatedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity, 
+      0
+    );
+
     const order = new Order({
       user: req.user.userId,
-      items,
+      items: validatedItems,
       shippingAddress,
       paymentMethod: paymentMethod || 'COD',
-      totalAmount
+      totalAmount: calculatedTotal
     });
 
     await order.save();
+
+    console.log('Order created successfully:', order._id);
+    res.status(201).json({
+      message: 'Order placed successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Order creation error:', error.message, error.name);
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Validation error: ' + error.message });
+    }
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid data format' });
+    }
+    
+    res.status(500).json({ message: 'Server error during order creation' });
+  }
+});
 
     console.log('Order created successfully:', order._id);
     res.status(201).json({
@@ -93,21 +130,23 @@ router.get('/my-orders', auth, async (req, res) => {
     const orders = await Order.find({ user: req.user.userId })
       .sort({ createdAt: -1 });
 
-    // Fix image paths for deployment
+    // Fix image paths and ensure price/quantity are set for deployment
     const ordersWithFixedImages = orders.map(order => {
       const fixedItems = order.items.map(item => {
-        if (item.image) {
-          let imageUrl = item.image;
-          // Remove double extensions
-          if (imageUrl.endsWith('.jpg.jpg')) {
-            imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
-          }
-          if (imageUrl.endsWith('.jpeg.jpeg')) {
-            imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
-          }
-          return { ...item, image: imageUrl };
+        let imageUrl = item.image;
+        // Remove double extensions
+        if (imageUrl && imageUrl.endsWith('.jpg.jpg')) {
+          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
         }
-        return item;
+        if (imageUrl && imageUrl.endsWith('.jpeg.jpeg')) {
+          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+        }
+        return {
+          ...item,
+          image: imageUrl,
+          price: item.price || 0,
+          quantity: item.quantity || 1
+        };
       });
       return { ...order.toObject(), items: fixedItems };
     });
@@ -133,20 +172,22 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Fix image paths for deployment
+    // Fix image paths and ensure price/quantity are set for deployment
     const fixedItems = order.items.map(item => {
-      if (item.image) {
-        let imageUrl = item.image;
-        // Remove double extensions
-        if (imageUrl.endsWith('.jpg.jpg')) {
-          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
-        }
-        if (imageUrl.endsWith('.jpeg.jpeg')) {
-          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
-        }
-        return { ...item, image: imageUrl };
+      let imageUrl = item.image;
+      // Remove double extensions
+      if (imageUrl && imageUrl.endsWith('.jpg.jpg')) {
+        imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
       }
-      return item;
+      if (imageUrl && imageUrl.endsWith('.jpeg.jpeg')) {
+        imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+      }
+      return {
+        ...item,
+        image: imageUrl,
+        price: item.price || 0,
+        quantity: item.quantity || 1
+      };
     });
 
     res.json({ ...order.toObject(), items: fixedItems });

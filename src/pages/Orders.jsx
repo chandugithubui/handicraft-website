@@ -178,7 +178,7 @@ const Orders = () => {
                         </div>
                         <div className="item-details">
                           <span className="item-name">{item.name}</span>
-                          <span className="item-qty">Qty: {item.quantity}</span>
+                          <span className="item-qty">Qty: {item.quantity || 1}</span>
                         </div>
                       </div>
                     ))}
@@ -207,11 +207,11 @@ const Orders = () => {
                             </div>
                             <div className="detail-item-info">
                               <span className="detail-item-name">{item.name}</span>
-                              <span className="detail-item-qty">Quantity: {item.quantity}</span>
+                              <span className="detail-item-qty">Quantity: {item.quantity || 1}</span>
                               <span className="detail-item-price">₹{item.price ? item.price.toLocaleString() : '0'} each</span>
                             </div>
                             <div className="detail-item-total">
-                              ₹{item.price && item.quantity ? (item.price * item.quantity).toLocaleString() : '0'}
+                              ₹{item.price && item.quantity ? (item.price * item.quantity).toLocaleString() : (item.price ? item.price.toLocaleString() : '0')}
                             </div>
                           </div>
                         ))}

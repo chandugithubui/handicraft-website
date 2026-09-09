@@ -43,21 +43,23 @@ router.get('/orders', adminAuth, async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('user', 'name email');
 
-    // Fix image paths for deployment
+    // Fix image paths and ensure price/quantity are set for deployment
     const ordersWithFixedImages = orders.map(order => {
       const fixedItems = order.items.map(item => {
-        if (item.image) {
-          let imageUrl = item.image;
-          // Remove double extensions
-          if (imageUrl.endsWith('.jpg.jpg')) {
-            imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
-          }
-          if (imageUrl.endsWith('.jpeg.jpeg')) {
-            imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
-          }
-          return { ...item, image: imageUrl };
+        let imageUrl = item.image;
+        // Remove double extensions
+        if (imageUrl && imageUrl.endsWith('.jpg.jpg')) {
+          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
         }
-        return item;
+        if (imageUrl && imageUrl.endsWith('.jpeg.jpeg')) {
+          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
+        }
+        return {
+          ...item,
+          image: imageUrl,
+          price: item.price || 0,
+          quantity: item.quantity || 1
+        };
       });
       return { ...order.toObject(), items: fixedItems };
     });
