@@ -48,11 +48,12 @@ const ProductCard = ({ product }) => {
       <div className="product-card">
         {/* Image Section */}
         <div className="product-image-wrapper">
-          <img 
-            src={getImageSrc()} 
-            alt={product.name} 
+          <img
+            src={getImageSrc()}
+            alt={product.name}
             className="product-image"
             onError={handleImageError}
+            loading="lazy"
           />
           
           {/* Badge */}

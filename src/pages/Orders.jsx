@@ -48,16 +48,24 @@ const Orders = () => {
   }, [isAuthenticated, token]);
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/placeholder.jpg';
+    if (!imagePath) return '/images/HandcraftedWoodenBowl.webp';
     if (imagePath.startsWith('http')) return imagePath;
-    if (imagePath.startsWith('/images/')) {
-      return imagePath;
-    }
-    // Handle double .jpg extension issue
+
+    // Handle double extensions first (before checking /images/)
+    let fixedPath = imagePath;
     if (imagePath.endsWith('.jpg.jpg')) {
-      return imagePath.replace('.jpg.jpg', '.jpg');
+      fixedPath = imagePath.replace('.jpg.jpg', '.jpg');
+    } else if (imagePath.endsWith('.jpeg.jpeg')) {
+      fixedPath = imagePath.replace('.jpeg.jpeg', '.jpeg');
     }
-    return `/images/${imagePath}`;
+
+    // If path already starts with /images/, return the fixed path
+    if (fixedPath.startsWith('/images/')) {
+      return fixedPath;
+    }
+
+    // Otherwise, prepend /images/
+    return `/images/${fixedPath}`;
   };
 
   const getStatusInfo = (status) => {
@@ -163,8 +171,9 @@ const Orders = () => {
                             src={getImageUrl(item.image)}
                             alt={item.name}
                             onError={(e) => {
-                              e.target.src = '/images/placeholder.jpg';
+                              e.target.src = '/images/HandcraftedWoodenBowl.webp';
                             }}
+                            loading="lazy"
                           />
                         </div>
                         <div className="item-details">
@@ -191,8 +200,9 @@ const Orders = () => {
                                 src={getImageUrl(item.image)}
                                 alt={item.name}
                                 onError={(e) => {
-                                  e.target.src = '/images/placeholder.jpg';
+                                  e.target.src = '/images/HandcraftedWoodenBowl.webp';
                                 }}
+                                loading="lazy"
                               />
                             </div>
                             <div className="detail-item-info">
