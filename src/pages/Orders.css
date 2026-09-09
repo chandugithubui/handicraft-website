@@ -394,6 +394,7 @@
   padding-top: var(--spacing-4);
   border-top: 1px solid rgba(41, 37, 34, 0.08);
   animation: slideDown 0.3s ease-out;
+  display: block !important;
 }
 
 @keyframes slideDown {
