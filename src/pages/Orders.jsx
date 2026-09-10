@@ -164,24 +164,28 @@ const Orders = () => {
                   </div>
 
                   <div className="order-items">
-                    {order.items.slice(0, 3).map((item, index) => (
-                      <div key={index} className="order-item-preview">
-                        <div className="item-image">
-                          <img
-                            src={getImageUrl(item.image)}
-                            alt={item.name}
-                            onError={(e) => {
-                              e.target.src = '/images/HandcraftedWoodenBowl.webp';
-                            }}
-                            loading="lazy"
-                          />
+                    {order.items.slice(0, 3).map((item, index) => {
+                      console.log('Order item:', item);
+                      return (
+                        <div key={index} className="order-item-preview">
+                          <div className="item-image">
+                            <img
+                              src={getImageUrl(item.image)}
+                              alt={item.name}
+                              onError={(e) => {
+                                e.target.src = '/images/HandcraftedWoodenBowl.webp';
+                              }}
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="item-details">
+                            <span className="item-name">{item.name}</span>
+                            <span className="item-qty">Qty: {item.quantity || 1}</span>
+                            <span className="item-price">₹{(item.price || 0).toLocaleString()}</span>
+                          </div>
                         </div>
-                        <div className="item-details">
-                          <span className="item-name">{item.name}</span>
-                          <span className="item-qty">Qty: {item.quantity || 1}</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {order.items.length > 3 && (
                       <div className="more-items">
                         +{order.items.length - 3} more items
@@ -208,10 +212,10 @@ const Orders = () => {
                             <div className="detail-item-info">
                               <span className="detail-item-name">{item.name}</span>
                               <span className="detail-item-qty">Quantity: {item.quantity || 1}</span>
-                              <span className="detail-item-price">₹{item.price ? item.price.toLocaleString() : '0'} each</span>
+                              <span className="detail-item-price">₹{(item.price || 0).toLocaleString()} each</span>
                             </div>
                             <div className="detail-item-total">
-                              ₹{item.price && item.quantity ? (item.price * item.quantity).toLocaleString() : (item.price ? item.price.toLocaleString() : '0')}
+                              ₹{((item.price || 0) * (item.quantity || 1)).toLocaleString()}
                             </div>
                           </div>
                         ))}

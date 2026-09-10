@@ -329,6 +329,13 @@
   color: var(--color-charcoal-light);
 }
 
+.item-price {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
 .more-items {
   display: flex;
   align-items: center;
