@@ -10,7 +10,8 @@ const productSchema = new mongoose.Schema({
   material: { type: String },
   stock: { type: Number, default: 0 },
   rating: { type: Number, default: 0 },
-  numReviews: { type: Number, default: 0 }
+  numReviews: { type: Number, default: 0 },
+  featured: { type: Boolean, default: false }
 });
 
 // Create the model from the schema
