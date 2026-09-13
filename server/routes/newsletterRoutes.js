@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Newsletter = require('../models/newsletter');
+const { adminAuth } = require('../middleware/auth');
 
 // Subscribe to newsletter
 router.post('/subscribe', async (req, res) => {
@@ -56,7 +57,7 @@ router.post('/subscribe', async (req, res) => {
 });
 
 // Get all subscribers (admin only)
-router.get('/subscribers', async (req, res) => {
+router.get('/subscribers', adminAuth, async (req, res) => {
   try {
     const subscribers = await Newsletter.find({ status: 'active' })
       .sort({ subscribedAt: -1 });

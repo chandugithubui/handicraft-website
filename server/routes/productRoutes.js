@@ -1,25 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/product');
-
-/*
-====================================
-DEBUG: GET ALL PRODUCTS (no filters)
-====================================
-*/
-router.get('/debug', async (req, res) => {
-  try {
-    const allProducts = await Product.find({});
-    console.log('All products in database:', allProducts.length);
-    allProducts.forEach(p => {
-      console.log(`- ${p.name}: category="${p.category}", material="${p.material}"`);
-    });
-    res.json(allProducts);
-  } catch (error) {
-    console.error('Debug error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+const { adminAuth } = require('../middleware/auth');
 
 /*
 ====================================
@@ -93,7 +75,7 @@ router.get('/', async (req, res) => {
 ADD NEW PRODUCT
 ====================================
 */
-router.post('/', async (req, res) => {
+router.post('/', adminAuth, async (req, res) => {
 
   try {
 
@@ -136,7 +118,7 @@ router.post('/', async (req, res) => {
 UPDATE PRODUCT STOCK
 ====================================
 */
-router.patch('/:id/stock', async (req, res) => {
+router.patch('/:id/stock', adminAuth, async (req, res) => {
   try {
     const { stock } = req.body;
     
