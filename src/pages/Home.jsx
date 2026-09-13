@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSection from '../components/HeroSection';
 import BenefitsStrip from '../components/BenefitsStrip';
 import CategorySection from '../components/CategorySection';
@@ -9,6 +9,7 @@ import { FaShoppingBag, FaHeart, FaStar, FaAward, FaLeaf, FaShieldAlt, FaTruck, 
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { getProducts } from '../services/productService';
 import './Home.css';
 
 const Home = () => {
@@ -17,8 +18,45 @@ const Home = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
+
+  const [bestSellers, setBestSellers] = useState([]);
+  const [bestSellersLoading, setBestSellersLoading] = useState(true);
+  const [bestSellersError, setBestSellersError] = useState('');
+
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
+   
+   // Fetch Best Sellers from database
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        setBestSellersLoading(true);
+        setBestSellersError('');
+
+        const products = await getProducts();
+        
+        console.log('Products from API:', products);
+
+        const featuredProducts = products.filter(
+          (product) => product.featured === true
+        );
+
+        const productsToShow =
+          featuredProducts.length > 0
+            ? featuredProducts.slice(0, 8)
+            : products.slice(0, 8);
+
+        setBestSellers(productsToShow);
+      } catch (error) {
+        console.error('Error fetching best sellers:', error);
+        setBestSellersError('Unable to load best sellers.');
+      } finally {
+        setBestSellersLoading(false);
+      }
+    };
+
+    fetchBestSellers();
+  }, []);
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
@@ -31,22 +69,24 @@ const Home = () => {
   };
 
   const handleAddToCart = (product) => {
-    const productWithId = {
-      ...product,
-      _id: product.id.toString(),
-      price: parseInt(product.price.replace(/[^0-9]/g, ''))
-    };
-    addToCart(productWithId);
+  const productWithId = {
+    ...product,
+    _id: product._id,
+    price: Number(product.price)
   };
 
+  addToCart(productWithId);
+};
+
   const handleWishlist = (product) => {
-    const productWithId = {
-      ...product,
-      _id: product.id.toString(),
-      price: parseInt(product.price.replace(/[^0-9]/g, ''))
-    };
-    addToWishlist(productWithId);
+  const productWithId = {
+    ...product,
+    _id: product._id,
+    price: Number(product.price)
   };
+
+  addToWishlist(productWithId);
+};
 
   const handleNewsletterSubscribe = async (e) => {
     e.preventDefault();
@@ -109,18 +149,22 @@ const Home = () => {
             <h2 className="section-title">Best Sellers</h2>
             <p className="section-subtitle">Handpicked treasures from our artisans</p>
           </div>
-          <Row>
-            {[
-              { id: 1, name: 'Pattachitra Wall Art', price: '₹3,500', image: '/images/pattachitra1.jpg.jpg', rating: 4.9, slug: 'pattachitra-lord-jagannath' },
-              { id: 2, name: 'Palm Leaf Engraving', price: '₹2,800', image: '/images/pattachitra2.jpg.jpg', rating: 4.8, slug: 'palm-leaf-radha-krishna' },
-              { id: 3, name: 'Wooden Bowl', price: '₹1,200', image: '/images/HandcraftedWoodenBowl.webp', rating: 4.9, slug: 'wooden-bowl' },
-              { id: 4, name: 'Decorative Plate', price: '₹950', image: '/images/decorativeplate.webp', rating: 4.7, slug: 'decorative-plate' },
-              { id: 5, name: 'Handcrafted Vase', price: '₹1,800', image: '/images/handmadevase.webp', rating: 4.8, slug: 'handcrafted-vase' },
-              { id: 6, name: 'Wooden Tray', price: '₹1,400', image: '/images/woodentray.jpg', rating: 4.6, slug: 'wooden-tray' },
-              { id: 7, name: 'Glass Bottle', price: '₹2,200', image: '/images/glassbottle.webp', rating: 4.9, slug: 'glass-bottle' },
-              { id: 8, name: 'Teapot', price: '₹1,600', image: '/images/teapot.webp', rating: 4.7, slug: 'teapot' },
-            ].map((product, index) => (
-              <Col xs={6} sm={6} md={6} lg={3} key={index} className="mb-4">
+          
+            <Row>
+                {bestSellersLoading && (
+                   <Col xs={12} className="text-center">
+                        <p>Loading best sellers...</p>
+                   </Col>
+                 )}
+
+                 {bestSellersError && (
+                    <Col xs={12} className="text-center">
+                        <p>{bestSellersError}</p>
+                    </Col>
+                  )}
+
+                 {!bestSellersLoading && !bestSellersError && bestSellers.map((product) => (
+              <Col xs={6} sm={6} md={6} lg={3} key={product._id} className="mb-4">
                 <Card className="product-card h-100">
                   <div className="product-image-wrapper">
                     <Card.Img variant="top" src={product.image} alt={product.name} />
@@ -130,7 +174,7 @@ const Home = () => {
                         className="action-btn"
                         onClick={() => handleWishlist(product)}
                       >
-                        <FaHeart className={isInWishlist(product.id.toString()) ? 'text-danger' : ''} />
+                        <FaHeart className={isInWishlist(product._id) ? 'text-danger' : ''} />
                       </Button>
                       <Button 
                         variant="light" 
@@ -143,11 +187,10 @@ const Home = () => {
                   </div>
                   <Card.Body>
                     <Card.Title className="product-title">{product.name}</Card.Title>
-                    <div className="product-rating">
-                      <FaStar className="star-icon" />
-                      <span>{product.rating}</span>
-                    </div>
-                    <Card.Text className="product-price">{product.price}</Card.Text>
+                    
+                    <Card.Text className="product-price">
+                         ₹{Number(product.price).toLocaleString('en-IN')}
+                    </Card.Text>
                     <Button onClick={() => handleViewDetails(product)} className="btn btn-primary w-100 view-details-btn">View Details</Button>
                   </Card.Body>
                 </Card>

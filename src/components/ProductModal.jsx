@@ -12,23 +12,25 @@ const ProductModal = ({ show, onHide, product }) => {
   if (!product) return null;
 
   const handleAddToCart = () => {
-    const productWithId = {
-      ...product,
-      _id: product.id.toString(),
-      price: parseInt(product.price.replace(/[^0-9]/g, ''))
-    };
-    addToCart(productWithId);
-    onHide();
+  const productWithId = {
+    ...product,
+    _id: product._id,
+    price: Number(product.price)
   };
 
+  addToCart(productWithId);
+  onHide();
+};
+
   const handleWishlist = () => {
-    const productWithId = {
-      ...product,
-      _id: product.id.toString(),
-      price: parseInt(product.price.replace(/[^0-9]/g, ''))
-    };
-    addToWishlist(productWithId);
+  const productWithId = {
+    ...product,
+    _id: product._id,
+    price: Number(product.price)
   };
+
+  addToWishlist(productWithId);
+};
 
   return (
     <Modal 
@@ -58,7 +60,9 @@ const ProductModal = ({ show, onHide, product }) => {
               <FaHeart className="rating-icon" />
               <span>{product.rating}</span>
             </div>
-            <p className="modal-product-price">{product.price}</p>
+            <p className="modal-product-price">
+              ₹{Number(product.price).toLocaleString('en-IN')}
+           </p>
             <p className="modal-product-description">
               Handcrafted with love by skilled artisans, this piece represents the rich cultural heritage of Indian craftsmanship. Each item is unique and tells a story of tradition and artistry.
             </p>
@@ -68,12 +72,12 @@ const ProductModal = ({ show, onHide, product }) => {
                 Add to Cart
               </Button>
               <Button 
-                variant="outline" 
-                className={`wishlist-btn ${isInWishlist(product.id.toString()) ? 'active' : ''}`} 
-                onClick={handleWishlist}
-              >
-                <FaHeart className="btn-icon" />
-                {isInWishlist(product.id.toString()) ? 'In Wishlist' : 'Add to Wishlist'}
+                    variant="outline" 
+                    className={`wishlist-btn ${isInWishlist(product._id) ? 'active' : ''}`} 
+                    onClick={handleWishlist}
+                  >
+                    <FaHeart className="btn-icon" />
+                    {isInWishlist(product._id) ? 'In Wishlist' : 'Add to Wishlist'}
               </Button>
             </div>
           </div>

@@ -20,13 +20,41 @@ const getApiUrl = () => {
 const API_URL = getApiUrl();
 
 // Normalize backend product to frontend format (imageUrl -> image)
-const normalizeProduct = (product) => {
-  return {
-    ...product,
-    image: product.imageUrl || product.image,
-    stock: product.stock !== undefined ? product.stock : 10
-  };
+const resolveProductImage = (imageUrl) => {
+  if (!imageUrl) return '';
+
+  // Already a full external URL
+  if (
+    imageUrl.startsWith('http://') ||
+    imageUrl.startsWith('https://')
+  ) {
+    return imageUrl;
+  }
+
+  // Existing frontend public images
+  if (imageUrl.startsWith('/images/')) {
+    return imageUrl;
+  }
+
+  // Images uploaded through backend
+  if (imageUrl.startsWith('/uploads/')) {
+    const backendOrigin =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000'
+        : 'https://handicraft-website.onrender.com';
+
+    return `${backendOrigin}${imageUrl}`;
+  }
+
+  return imageUrl;
 };
+
+const normalizeProduct = (product) => ({
+  ...product,
+  image: resolveProductImage(product.imageUrl || product.image),
+  stock: product.stock !== undefined ? product.stock : 10
+});
 
 // Get all products
 export const getProducts = async (queryParams = '') => {
