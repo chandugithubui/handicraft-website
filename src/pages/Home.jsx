@@ -1,3 +1,4 @@
+import { getTestimonials } from '../services/testimonialService';
 import React, { useState, useEffect } from 'react';
 import HeroSection from '../components/HeroSection';
 import BenefitsStrip from '../components/BenefitsStrip';
@@ -22,41 +23,67 @@ const Home = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [bestSellersLoading, setBestSellersLoading] = useState(true);
   const [bestSellersError, setBestSellersError] = useState('');
+  
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [testimonialsError, setTestimonialsError] = useState('');
 
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
    
    // Fetch Best Sellers from database
-  useEffect(() => {
-    const fetchBestSellers = async () => {
-      try {
-        setBestSellersLoading(true);
-        setBestSellersError('');
+  // 1. Fetch Best Sellers
+useEffect(() => {
+  const fetchBestSellers = async () => {
+    try {
+      setBestSellersLoading(true);
+      setBestSellersError('');
 
-        const products = await getProducts();
-        
-        console.log('Products from API:', products);
+      const products = await getProducts();
 
-        const featuredProducts = products.filter(
-          (product) => product.featured === true
-        );
+      const featuredProducts = products.filter(
+        (product) => product.featured === true
+      );
 
-        const productsToShow =
-          featuredProducts.length > 0
-            ? featuredProducts.slice(0, 8)
-            : products.slice(0, 8);
+      const productsToShow =
+        featuredProducts.length > 0
+          ? featuredProducts.slice(0, 8)
+          : products.slice(0, 8);
 
-        setBestSellers(productsToShow);
-      } catch (error) {
-        console.error('Error fetching best sellers:', error);
-        setBestSellersError('Unable to load best sellers.');
-      } finally {
-        setBestSellersLoading(false);
-      }
-    };
+      setBestSellers(productsToShow);
+    } catch (error) {
+      console.error('Error fetching best sellers:', error);
+      setBestSellersError('Unable to load best sellers.');
+    } finally {
+      setBestSellersLoading(false);
+    }
+  };
 
-    fetchBestSellers();
-  }, []);
+  fetchBestSellers();
+}, []);
+
+
+// 2. Fetch Testimonials
+useEffect(() => {
+  const fetchTestimonials = async () => {
+    try {
+      setTestimonialsLoading(true);
+      setTestimonialsError('');
+
+      const data = await getTestimonials();
+
+      setTestimonials(data);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      setTestimonialsError('Unable to load testimonials.');
+    } finally {
+      setTestimonialsLoading(false);
+    }
+  };
+
+  fetchTestimonials();
+}, []);
+
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
@@ -248,12 +275,22 @@ const Home = () => {
             <p className="section-subtitle">Real reviews from our happy customers</p>
           </div>
           <Row>
-            {[
-              { name: 'Priya Sharma', location: 'Mumbai', rating: 5, text: 'Amazing quality! The Pattachitra painting I ordered exceeded my expectations. Will definitely order again.', avatar: 'https://randomuser.me/api/portraits/women/1.jpg' },
-              { name: 'Rahul Verma', location: 'Delhi', rating: 5, text: 'Beautiful craftsmanship and fast delivery. The wooden bowl is a centerpiece in my home now.', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
-              { name: 'Anita Desai', location: 'Bangalore', rating: 4, text: 'Love supporting local artisans through this platform. Great collection and reasonable prices.', avatar: 'https://randomuser.me/api/portraits/women/2.jpg' },
-            ].map((testimonial, index) => (
-              <Col md={4} key={index} className="mb-4">
+              {testimonialsLoading && (
+                <Col xs={12} className="text-center">
+                   <p>Loading testimonials...</p>
+                </Col>
+               )}
+
+               {testimonialsError && (
+                 <Col xs={12} className="text-center">
+                   <p>{testimonialsError}</p>
+                 </Col>
+                )}
+
+               {!testimonialsLoading &&
+                   !testimonialsError &&
+                    testimonials.map((testimonial) => (
+               <Col md={4} key={testimonial._id} className="mb-4">
                 <Card className="testimonial-card h-100">
                   <Card.Body>
                     <div className="testimonial-rating">

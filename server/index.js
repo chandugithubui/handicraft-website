@@ -26,6 +26,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const testimonialRoutes = require('./routes/testimonialRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -62,6 +63,7 @@ app.use(
   express.static(path.join(__dirname, 'uploads'))
 );
 
+app.use('/api/testimonials', testimonialRoutes);
 
 /* ===========================
    DATABASE CONNECTION
