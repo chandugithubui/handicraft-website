@@ -59,7 +59,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
    DATABASE CONNECTION
 =========================== */
 
-console.log("Mongo URI:", process.env.MONGODB_URI);
+
 
 mongoose.connection.on('connected', () => {
   console.log('MongoDB connected successfully');
