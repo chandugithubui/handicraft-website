@@ -27,5 +27,10 @@ const reviewSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+  
+  reviewSchema.index(
+  { product: 1, user: 1 },
+  { unique: true }
+);
 
 module.exports = mongoose.model('Review', reviewSchema);

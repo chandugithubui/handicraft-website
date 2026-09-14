@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { getProductById } from '../services/productService';
+import { getProductReviews } from '../services/reviewService';
 import ReviewSection from '../components/ReviewSection';
 import './ProductDetail.css';
 
@@ -19,6 +20,8 @@ const ProductDetail = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -46,10 +49,24 @@ const ProductDetail = () => {
     }
   }, [id]);
 
+  const fetchReviewSummary = useCallback(async () => {
+    try {
+      const data = await getProductReviews(id);
+
+      setAverageRating(Number(data.averageRating) || 0);
+      setTotalReviews(data.totalReviews || 0);
+    } catch (error) {
+      console.error('Error fetching review summary:', error);
+      setAverageRating(0);
+      setTotalReviews(0);
+    }
+  }, [id]);
+
   // Fetch product whenever product ID changes
   useEffect(() => {
     fetchProduct();
-  }, [fetchProduct]);
+    fetchReviewSummary();
+  }, [fetchProduct, fetchReviewSummary]);
 
   // Add product to cart
   const handleAddToCart = () => {
@@ -119,10 +136,10 @@ const ProductDetail = () => {
   // Calculate discount
   const discount = product.originalPrice
     ? Math.round(
-        ((product.originalPrice - product.price) /
-          product.originalPrice) *
-          100
-      )
+      ((product.originalPrice - product.price) /
+        product.originalPrice) *
+      100
+    )
     : 0;
 
   return (
@@ -184,20 +201,18 @@ const ProductDetail = () => {
                 {images.map((image, index) => (
                   <button
                     key={index}
-                    className={`thumbnail-btn ${
-                      selectedImage === index
+                    className={`thumbnail-btn ${selectedImage === index
                         ? 'active'
                         : ''
-                    }`}
+                      }`}
                     onClick={() =>
                       setSelectedImage(index)
                     }
                   >
                     <img
                       src={image}
-                      alt={`${product.name} ${
-                        index + 1
-                      }`}
+                      alt={`${product.name} ${index + 1
+                        }`}
                     />
                   </button>
                 ))}
@@ -217,31 +232,25 @@ const ProductDetail = () => {
 
               {/* Rating */}
               <div className="product-rating">
-
                 <div className="rating-stars">
                   {[...Array(5)].map((_, i) => (
                     <FiStar
                       key={i}
-                      className={`star ${
-                        i <
-                        Math.floor(
-                          product.rating || 4
-                        )
+                      className={`star ${i < Math.floor(averageRating)
                           ? 'filled'
                           : ''
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
 
                 <span className="rating-value">
-                  {product.rating || 4.5}
+                  {averageRating.toFixed(1)}
                 </span>
 
                 <span className="review-count">
-                  ({product.reviewCount || 12} reviews)
+                  ({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})
                 </span>
-
               </div>
             </div>
 
@@ -346,9 +355,8 @@ const ProductDetail = () => {
               </button>
 
               <button
-                className={`btn btn-outline btn-lg wishlist-btn ${
-                  isWishlisted ? 'active' : ''
-                }`}
+                className={`btn btn-outline btn-lg wishlist-btn ${isWishlisted ? 'active' : ''
+                  }`}
                 onClick={handleWishlist}
               >
                 <FiHeart />

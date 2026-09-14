@@ -67,11 +67,7 @@ const ReviewSection = ({ productId }) => {
 
       setSuccess('Review submitted successfully!');
 
-      setFormData({
-        rating: 5,
-        comment: ''
-      });
-
+      setFormData({ rating: 5, comment: '' });
       setShowForm(false);
 
       // Refresh reviews after successful submission
@@ -173,7 +169,7 @@ const ReviewSection = ({ productId }) => {
                 </div>
 
                 <p className="text-muted">
-                  {totalReviews} reviews
+                  {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
                 </p>
 
               </div>
@@ -258,6 +254,7 @@ const ReviewSection = ({ productId }) => {
                     {success}
                   </Alert>
                 )}
+                {/* Write Review Button */}
 
                 <Form onSubmit={handleSubmit}>
 

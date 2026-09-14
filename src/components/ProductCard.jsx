@@ -39,8 +39,8 @@ const ProductCard = ({ product }) => {
     return product.image || '/images/HandcraftedWoodenBowl.webp';
   };
 
-  const discount = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
   return (
@@ -55,7 +55,7 @@ const ProductCard = ({ product }) => {
             onError={handleImageError}
             loading="lazy"
           />
-          
+
           {/* Badge */}
           {discount > 0 && (
             <span className="product-badge">
@@ -64,7 +64,7 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Wishlist Button */}
-          <button 
+          <button
             className={`product-wishlist-btn ${isWishlisted ? 'wishlisted' : ''}`}
             onClick={handleWishlist}
             aria-label="Add to wishlist"
@@ -79,21 +79,27 @@ const ProductCard = ({ product }) => {
           <h3 className="product-name">{product.name}</h3>
 
           {/* Rating */}
-          {product.rating && (
-            <div className="product-rating">
-              <div className="rating-stars">
-                {[...Array(5)].map((_, i) => (
-                  <FiStar 
-                    key={i} 
-                    className={`star ${i < Math.floor(product.rating) ? 'filled' : ''}`}
-                  />
-                ))}
-              </div>
-              {product.reviewCount && (
-                <span className="review-count">({product.reviewCount})</span>
-              )}
+          <div className="product-rating">
+            <div className="rating-stars">
+              {[...Array(5)].map((_, i) => (
+                <FiStar
+                  key={i}
+                  className={`star ${i < Math.floor(Number(product.rating) || 0)
+                      ? 'filled'
+                      : ''
+                    }`}
+                />
+              ))}
             </div>
-          )}
+
+            <span className="rating-value">
+              {(Number(product.rating) || 0).toFixed(1)}
+            </span>
+
+            <span className="review-count">
+              ({product.numReviews || 0})
+            </span>
+          </div>
 
           {/* Price */}
           <div className="product-price">
@@ -104,7 +110,7 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Add to Cart Button */}
-          <button 
+          <button
             className="product-add-btn"
             onClick={handleAddToCart}
           >
