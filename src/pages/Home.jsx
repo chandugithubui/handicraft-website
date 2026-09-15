@@ -39,7 +39,7 @@ useEffect(() => {
       setBestSellersLoading(true);
       setBestSellersError('');
 
-      const products = await getProducts();
+      const products = await getProducts('?limit=100');
 
       const featuredProducts = products.filter(
         (product) => product.featured === true

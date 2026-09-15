@@ -70,10 +70,11 @@ export const getAllContacts = async (token) => {
 // ── Products ──────────────────────────────────────────────────────────────────
 
 export const getAdminProducts = async (token) => {
-  const response = await axios.get(`${API_URL}/products`, {
+  const response = await axios.get(`${API_URL}/products?limit=100`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  return response.data;
+
+  return response.data.products;
 };
 
 export const createAdminProduct = async (productData, token) => {

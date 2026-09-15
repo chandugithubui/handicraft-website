@@ -59,15 +59,43 @@ const normalizeProduct = (product) => ({
 // Get all products
 export const getProducts = async (queryParams = '') => {
   try {
-    const url = queryParams ? `${API_URL}/products${queryParams}` : `${API_URL}/products`;
+    const url = queryParams
+      ? `${API_URL}/products${queryParams}`
+      : `${API_URL}/products`;
+
     const response = await axios.get(url);
-    
-    // Normalize backend products (imageUrl -> image)
-    const normalizedProducts = response.data.map(normalizeProduct);
-    
+
+    const products = Array.isArray(response.data)
+      ? response.data
+      : response.data.products;
+
+    const normalizedProducts = products.map(normalizeProduct);
+
     return normalizedProducts;
   } catch (error) {
     console.error("Error fetching products:", error);
+    throw error;
+  }
+};
+
+// Get products with pagination metadata
+export const getPaginatedProducts = async (queryParams = '') => {
+  try {
+    const url = queryParams
+      ? `${API_URL}/products${queryParams}`
+      : `${API_URL}/products`;
+
+    const response = await axios.get(url);
+
+    const normalizedProducts =
+      response.data.products.map(normalizeProduct);
+
+    return {
+      products: normalizedProducts,
+      pagination: response.data.pagination
+    };
+  } catch (error) {
+    console.error("Error fetching paginated products:", error);
     throw error;
   }
 };

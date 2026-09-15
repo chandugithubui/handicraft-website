@@ -19,8 +19,37 @@ router.get('/', async (req, res) => {
       category,
       minPrice,
       maxPrice,
-      material
+      material,
+      page = 1,
+      limit = 12,
+      sort = 'newest'
     } = req.query;
+
+    const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+    const limitNumber = Math.max(1, parseInt(limit, 10) || 12);
+
+    const skip = (pageNumber - 1) * limitNumber;
+
+    let sortOption = { _id: -1 };
+
+    switch (sort) {
+      case 'price-low-high':
+        sortOption = { price: 1 };
+        break;
+
+      case 'price-high-low':
+        sortOption = { price: -1 };
+        break;
+
+      case 'name-a-z':
+        sortOption = { name: 1 };
+        break;
+
+      case 'newest':
+      default:
+        sortOption = { _id: -1 };
+        break;
+    }
 
     console.log('Query params received:', {
       search,
@@ -77,7 +106,12 @@ router.get('/', async (req, res) => {
     FETCH PRODUCTS
     ====================================
     */
-    const products = await Product.find(query);
+    const totalProducts = await Product.countDocuments(query);
+
+    const products = await Product.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNumber);
 
     /*
     ====================================
@@ -181,7 +215,7 @@ router.get('/', async (req, res) => {
         */
         const stats =
           reviewStatsMap[
-            product._id.toString()
+          product._id.toString()
           ];
 
         /*
@@ -199,9 +233,19 @@ router.get('/', async (req, res) => {
         return productData;
       });
 
-    return res
-      .status(200)
-      .json(productsWithFixedImages);
+    const totalPages = Math.ceil(
+      totalProducts / limitNumber
+    );
+
+    return res.status(200).json({
+      products: productsWithFixedImages,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages,
+        totalProducts,
+        limit: limitNumber
+      }
+    });
 
   } catch (error) {
     console.error(

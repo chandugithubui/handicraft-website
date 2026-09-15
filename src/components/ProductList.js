@@ -1,7 +1,7 @@
 // src/components/ProductList.js
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getProducts } from "../services/productService";
+import { getPaginatedProducts } from "../services/productService";
 import ProductFilters from "./ProductFilters";
 import ProductGrid from "./ProductGrid";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -10,6 +10,15 @@ import "./productList.css";
 const ProductList = () => {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sort, setSort] = useState('newest');
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalProducts: 0,
+    limit: 12
+  });
+
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({
@@ -23,7 +32,7 @@ const ProductList = () => {
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
     const searchFromUrl = searchParams.get('search');
-    
+
     if (categoryFromUrl) {
       setFilters(prev => ({ ...prev, category: categoryFromUrl }));
     }
@@ -36,6 +45,9 @@ const ProductList = () => {
     const fetchProducts = async () => {
       try {
         const queryParams = new URLSearchParams();
+        queryParams.append('page', currentPage);
+        queryParams.append('limit', 12);
+        queryParams.append('sort', sort);
         if (search) queryParams.append('search', search);
         if (filters.category) queryParams.append('category', filters.category);
         if (filters.material) queryParams.append('material', filters.material);
@@ -46,8 +58,10 @@ const ProductList = () => {
           ? `?${queryParams.toString()}`
           : '';
 
-        const productData = await getProducts(url);
-        setProducts(productData);
+        const productData = await getPaginatedProducts(url);
+
+        setProducts(productData.products);
+        setPagination(productData.pagination);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -56,10 +70,11 @@ const ProductList = () => {
     };
 
     fetchProducts();
-  }, [search, filters]);
+  }, [search, filters, currentPage, sort]);
 
 
   const handleFilterChange = (filterType, value) => {
+    setCurrentPage(1);
     if (filterType === 'clear') {
       setFilters({
         category: '',
@@ -94,7 +109,7 @@ const ProductList = () => {
           {filters.category && (
             <div className="active-filter">
               <span className="filter-badge">Category: {filters.category}</span>
-              <button 
+              <button
                 className="clear-filter-btn"
                 onClick={() => handleFilterChange('clear')}
               >
@@ -107,7 +122,7 @@ const ProductList = () => {
         <div className="products-layout">
           {/* Filters Sidebar */}
           <div className="products-sidebar">
-            <ProductFilters 
+            <ProductFilters
               onFilterChange={handleFilterChange}
               activeFilters={filters}
             />
@@ -125,12 +140,66 @@ const ProductList = () => {
                 onChange={(e) => handleFilterChange('search', e.target.value)}
               />
               <span className="products-count">
-                {products.length} product{products.length !== 1 ? 's' : ''} found
+                {pagination.totalProducts} product{pagination.totalProducts !== 1 ? 's' : ''} found
               </span>
+              <select
+                className="sort-select"
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="newest">Newest</option>
+                <option value="price-low-high">
+                  Price: Low to High
+                </option>
+                <option value="price-high-low">
+                  Price: High to Low
+                </option>
+                <option value="name-a-z">
+                  Name: A to Z
+                </option>
+              </select>
             </div>
 
             {/* Product Grid */}
             <ProductGrid products={products} loading={loading} />
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="pagination-container">
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </button>
+
+                {[...Array(pagination.totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''
+                        }`}
+                      onClick={() => setCurrentPage(pageNumber)}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === pagination.totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
