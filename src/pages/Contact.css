@@ -10,7 +10,7 @@
 }
 
 /* =========================================================
-   HERO SECTION
+   CONTACT HERO
    ========================================================= */
 
 .contact-hero {
@@ -21,7 +21,7 @@
   margin: 32px auto 0;
   overflow: hidden;
   border-radius: 18px;
-  background-color: #f3e2cc;
+  background: #f3e2cc;
 }
 
 .hero-background {
@@ -44,10 +44,11 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(247, 235, 218, 0.96) 0%,
-    rgba(247, 235, 218, 0.82) 34%,
-    rgba(247, 235, 218, 0.28) 65%,
-    rgba(247, 235, 218, 0.05) 100%
+    rgba(247, 235, 218, 0.98) 0%,
+    rgba(247, 235, 218, 0.94) 24%,
+    rgba(247, 235, 218, 0.62) 38%,
+    rgba(247, 235, 218, 0.12) 50%,
+    transparent 58%
   );
 }
 
@@ -56,30 +57,152 @@
   z-index: 2;
   width: 100%;
   height: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 48px 56px;
+
+  padding: 0 70px;
+
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .hero-title {
-  max-width: 560px;
-  margin: 0 0 12px;
+  width: 360px;
+  max-width: 360px;
+  margin: 0 0 16px;
+
   font-family: var(--font-serif);
-  font-size: clamp(2.3rem, 4vw, 4rem);
-  line-height: 1.08;
+  font-size: 48px;
+  line-height: 1.05;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
 }
 
 .hero-subtitle {
-  max-width: 540px;
+  width: 390px;
+  max-width: 390px;
   margin: 0;
+
   font-family: var(--font-sans);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.6;
   color: var(--color-charcoal);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .contact-hero {
+    width: calc(100% - 40px);
+    height: 280px;
+    margin-top: 24px;
+  }
+
+  .hero-content {
+    padding: 38px 40px;
+  }
+
+  .hero-title {
+    font-size: 2.7rem;
+  }
+
+  .hero-subtitle {
+    max-width: 420px;
+    font-size: 0.95rem;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .contact-hero {
+    width: calc(100% - 24px);
+    height: 230px;
+    margin: 16px auto 0;
+    border-radius: 12px;
+  }
+
+  .hero-bg-image {
+    object-position: 62% center;
+  }
+
+  .hero-overlay {
+    display: block;
+
+    background: linear-gradient(90deg,
+        rgba(247, 235, 218, 0.96) 0%,
+        rgba(247, 235, 218, 0.88) 25%,
+        rgba(247, 235, 218, 0.45) 40%,
+        rgba(247, 235, 218, 0.08) 52%,
+        transparent 58%);
+  }
+
+  .hero-content {
+    height: 100%;
+    padding: 20px 18px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .hero-title {
+    width: auto;
+    max-width: 54%;
+    margin: 0 0 9px;
+    padding: 0;
+
+    font-size: 24px;
+    line-height: 1.05;
+
+    background: transparent;
+  }
+
+  .hero-subtitle {
+    width: auto;
+    max-width: 49%;
+    margin: 0;
+    padding: 0;
+
+    font-size: 10.5px;
+    line-height: 1.45;
+    font-weight: 500;
+
+    background: transparent;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .contact-hero {
+    width: calc(100% - 20px);
+    height: 215px;
+  }
+
+  .hero-content {
+    padding: 18px 15px;
+  }
+
+  .hero-title {
+    max-width: 55%;
+    font-size: 21px;
+  }
+
+  .hero-subtitle {
+    max-width: 50%;
+    font-size: 9.5px;
+  }
 }
 
 /* =========================================================
@@ -505,11 +628,9 @@
 .support-card {
   padding: 30px;
 
-  background: linear-gradient(
-    135deg,
-    #7b1717 0%,
-    #963529 100%
-  );
+  background: linear-gradient(135deg,
+      #7b1717 0%,
+      #963529 100%);
 
   color: var(--color-white);
   text-align: center;
@@ -635,12 +756,10 @@
   }
 
   .hero-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(247, 235, 218, 0.96) 0%,
-      rgba(247, 235, 218, 0.82) 42%,
-      rgba(247, 235, 218, 0.2) 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(247, 235, 218, 0.96) 0%,
+        rgba(247, 235, 218, 0.82) 42%,
+        rgba(247, 235, 218, 0.2) 100%);
   }
 
   .hero-content {
@@ -856,48 +975,46 @@
    FINAL CONTACT PAGE POLISH
    ========================================================= */
 
-/* Hero text refinement */
-.hero-content {
-  padding-left: 56px;
-  padding-right: 56px;
+/* ---------- DESKTOP ---------- */
+
+.contact-hero {
+  margin-top: 28px;
 }
 
-.hero-content > * {
-  max-width: 520px;
+.contact-hero .hero-content {
+  padding: 48px 56px;
+  align-items: center;
 }
 
-.hero-title {
+.contact-hero .hero-title {
+  max-width: 500px;
+  margin: 0 0 14px;
   color: #7b1717;
-  margin-bottom: 18px;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.hero-subtitle {
-  color: #5a211b;
+.contact-hero .hero-subtitle {
   max-width: 440px;
+  margin: 0;
+  color: #5a211b;
   font-weight: 500;
   line-height: 1.7;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.45);
 }
 
-/* Give more breathing room between hero and contact cards */
 .contact-layout {
-  padding-top: 72px;
-  gap: 40px;
+  padding-top: 52px;
+  padding-bottom: 72px;
+  gap: 32px;
 }
 
-/* Slightly more breathing room inside the cards */
 .form-card {
-  padding: 42px;
+  padding: 36px;
 }
 
 .info-card {
-  padding: 34px;
+  padding: 30px;
 }
-
-/* =========================================================
-   QUICK HELP / FAQ BUTTON
-   ========================================================= */
 
 .support-btn {
   background-color: #f5e5cf;
@@ -916,6 +1033,359 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1023px) {
+
+  .contact-layout {
+    padding-top: 44px;
+    gap: 26px;
+  }
+
+  .form-card {
+    padding: 32px;
+  }
+
+  .info-card {
+    padding: 28px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+  /* Hero */
+
+  .contact-hero {
+    width: calc(100% - 24px);
+    height: 280px;
+    margin-top: 16px;
+    border-radius: 14px;
+  }
+
+  .contact-hero .hero-bg-image {
+    object-position: 65% center;
+  }
+
+  .contact-hero .hero-overlay {
+    background: linear-gradient(180deg,
+        rgba(247, 235, 218, 0.97) 0%,
+        rgba(247, 235, 218, 0.88) 38%,
+        rgba(247, 235, 218, 0.45) 68%,
+        rgba(247, 235, 218, 0.12) 100%);
+  }
+
+  .contact-hero .hero-content {
+    padding: 26px 20px;
+    align-items: flex-start;
+  }
+
+  .contact-hero .hero-title {
+    max-width: 240px;
+    margin-bottom: 10px;
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  .contact-hero .hero-subtitle {
+    max-width: 230px;
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+
+  /* Main layout */
+
+  .contact-layout {
+    width: calc(100% - 24px);
+    padding: 24px 0 40px;
+    gap: 18px;
+  }
+
+
+  /* Form */
+
+  .form-card {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .form-header {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    column-gap: 12px;
+    row-gap: 3px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+
+  .form-icon {
+    grid-row: 1 / 3;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+  }
+
+  .form-title {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .form-subtitle {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .contact-form {
+    gap: 15px;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+  }
+
+  .form-input {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .form-textarea {
+    min-height: 120px;
+  }
+
+  .submit-btn {
+    min-height: 44px;
+    font-size: 0.85rem;
+  }
+
+
+  /* Contact information */
+
+  .contact-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .info-card {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .info-header {
+    margin-bottom: 16px;
+  }
+
+  .info-title {
+    font-size: 1.4rem;
+  }
+
+  .info-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .info-items {
+    gap: 9px;
+  }
+
+  .info-item {
+    padding: 11px;
+    gap: 10px;
+    align-items: flex-start;
+    border-radius: 10px;
+  }
+
+  .info-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .info-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .info-label {
+    font-size: 0.68rem;
+  }
+
+  .info-text {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+
+  /* Social */
+
+  .social-section {
+    padding: 18px 16px;
+    border-radius: 12px;
+  }
+
+  .social-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+
+  .social-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .social-link {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px;
+  }
+
+
+  /* FAQ */
+
+  .support-card {
+    padding: 24px 18px;
+    border-radius: 14px;
+  }
+
+  .support-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 12px;
+  }
+
+  .support-title {
+    font-size: 1.3rem;
+  }
+
+  .support-text {
+    max-width: 280px;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .support-btn {
+    min-height: 40px;
+    padding: 9px 18px;
+    font-size: 0.8rem;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE - 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .contact-hero {
+    height: 260px;
+  }
+
+  .contact-hero .hero-content {
+    padding: 24px 18px;
+  }
+
+  .contact-hero .hero-title {
+    max-width: 210px;
+    font-size: 1.8rem;
+  }
+
+  .contact-hero .hero-subtitle {
+    max-width: 205px;
+    font-size: 0.78rem;
+  }
+
+  .contact-layout {
+    width: calc(100% - 20px);
+    padding-top: 20px;
+  }
+
+  .form-card,
+  .info-card {
+    padding: 18px 14px;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+  }
+
+  .form-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .social-section {
+    padding: 16px 14px;
+  }
+
+  .support-card {
+    padding: 22px 16px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL - 375px
+   ========================================================= */
+
+@media (max-width: 375px) {
+
+  .contact-hero {
+    height: 250px;
+  }
+
+  .contact-hero .hero-title {
+    font-size: 1.65rem;
+  }
+
+  .contact-hero .hero-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .form-card,
+  .info-card {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .info-text {
+    font-size: 0.74rem;
+  }
+}
+
+/* =========================================================
+   QUICK HELP / FAQ BUTTON
+   ========================================================= */
+
+.support-btn {
+  background-color: #f5e5cf;
+  color: #7b1717;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  padding: 11px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.support-btn:hover {
+  background-color: #ffffff;
+  color: #7b1c17;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
 /* =========================================================
    MOBILE POLISH
    ========================================================= */
@@ -926,7 +1396,7 @@
     padding-right: 24px;
   }
 
-  .hero-content > * {
+  .hero-content>* {
     max-width: 340px;
   }
 
@@ -954,7 +1424,7 @@
 }
 
 @media (max-width: 480px) {
-  .hero-content > * {
+  .hero-content>* {
     max-width: 300px;
   }
 
@@ -968,5 +1438,192 @@
 
   .contact-layout {
     padding-top: 34px;
+  }
+}
+
+/* =========================================================
+   FINAL CONTACT HERO FIX
+   Keep this at the END of Contact.css
+   ========================================================= */
+
+/* DESKTOP */
+.contact-page .contact-hero {
+  width: calc(100% - 80px);
+  max-width: 1440px;
+  height: 300px;
+  margin: 28px auto 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.contact-page .contact-hero .hero-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 58%;
+}
+
+.contact-page .contact-hero .hero-overlay {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    rgba(247, 235, 218, 0.98) 0%,
+    rgba(247, 235, 218, 0.94) 24%,
+    rgba(247, 235, 218, 0.70) 34%,
+    rgba(247, 235, 218, 0.25) 44%,
+    rgba(247, 235, 218, 0.05) 52%,
+    transparent 60%
+  );
+}
+
+.contact-page .contact-hero .hero-content {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 0 70px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  text-align: left;
+}
+
+.contact-page .contact-hero .hero-title {
+  width: 380px;
+  max-width: 380px;
+
+  margin: 0 0 14px;
+  padding: 0;
+
+  font-size: 48px;
+  line-height: 1.05;
+
+  color: #7b1717;
+  background: transparent;
+  text-align: left;
+}
+
+.contact-page .contact-hero .hero-subtitle {
+  width: 400px;
+  max-width: 400px;
+
+  margin: 0;
+  padding: 0;
+
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 500;
+
+  color: #5a211b;
+  background: transparent;
+  text-align: left;
+}
+
+
+/* TABLET */
+@media (max-width: 1023px) {
+  .contact-page .contact-hero {
+    width: calc(100% - 40px);
+    height: 270px;
+  }
+
+  .contact-page .contact-hero .hero-content {
+    padding: 0 40px;
+  }
+
+  .contact-page .contact-hero .hero-title {
+    width: 330px;
+    max-width: 330px;
+    font-size: 40px;
+  }
+
+  .contact-page .contact-hero .hero-subtitle {
+    width: 350px;
+    max-width: 350px;
+    font-size: 14px;
+  }
+}
+
+
+/* MOBILE */
+@media (max-width: 767px) {
+  .contact-page .contact-hero {
+    width: calc(100% - 24px);
+    height: 230px;
+    margin: 16px auto 0;
+    border-radius: 12px;
+  }
+
+  .contact-page .contact-hero .hero-bg-image {
+    object-position: 62% center;
+  }
+
+  .contact-page .contact-hero .hero-overlay {
+    display: block;
+
+    background: linear-gradient(
+      90deg,
+      rgba(247, 235, 218, 0.96) 0%,
+      rgba(247, 235, 218, 0.88) 25%,
+      rgba(247, 235, 218, 0.48) 40%,
+      rgba(247, 235, 218, 0.10) 52%,
+      transparent 60%
+    );
+  }
+
+  .contact-page .contact-hero .hero-content {
+    padding: 20px 18px;
+
+    justify-content: center;
+    align-items: flex-start;
+
+    text-align: left;
+  }
+
+  .contact-page .contact-hero .hero-title {
+    width: auto;
+    max-width: 54%;
+
+    margin: 0 0 9px;
+
+    font-size: 24px;
+    line-height: 1.05;
+  }
+
+  .contact-page .contact-hero .hero-subtitle {
+    width: auto;
+    max-width: 49%;
+
+    font-size: 10.5px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+}
+
+
+/* VERY SMALL MOBILE */
+@media (max-width: 360px) {
+  .contact-page .contact-hero {
+    width: calc(100% - 20px);
+    height: 215px;
+  }
+
+  .contact-page .contact-hero .hero-content {
+    padding: 18px 15px;
+  }
+
+  .contact-page .contact-hero .hero-title {
+    max-width: 55%;
+    font-size: 21px;
+  }
+
+  .contact-page .contact-hero .hero-subtitle {
+    max-width: 50%;
+    font-size: 9.5px;
   }
 }

@@ -102,26 +102,26 @@
 
 @media (max-width: 767px) {
   .benefits-strip {
-    padding: var(--spacing-6) 0;
+    padding: var(--spacing-5) 0;
   }
 
   .benefits-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-3);
   }
 
   .benefit-item {
-    gap: var(--spacing-3);
-    padding: var(--spacing-3);
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
   }
 
   .benefit-icon-wrapper {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .benefit-icon {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .benefit-title {
@@ -130,5 +130,38 @@
 
   .benefit-description {
     font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .benefits-strip {
+    padding: var(--spacing-4) 0;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+
+  .benefit-item {
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+  }
+
+  .benefit-icon-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .benefit-icon {
+    font-size: 14px;
+  }
+
+  .benefit-title {
+    font-size: var(--font-size-xs);
+  }
+
+  .benefit-description {
+    font-size: 10px;
   }
 }

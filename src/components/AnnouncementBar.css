@@ -49,5 +49,14 @@
   .announcement-text {
     font-size: var(--font-size-xs);
     letter-spacing: var(--letter-spacing-normal);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 375px) {
+  .announcement-text {
+    font-size: 10px;
   }
 }

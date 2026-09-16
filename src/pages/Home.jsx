@@ -191,7 +191,7 @@ useEffect(() => {
                   )}
 
                  {!bestSellersLoading && !bestSellersError && bestSellers.map((product) => (
-              <Col xs={6} sm={6} md={6} lg={3} key={product._id} className="mb-4">
+              <Col xs={6} sm={6} md={4} lg={3} key={product._id} className="mb-4">
                 <Card className="product-card h-100">
                   <div className="product-image-wrapper">
                     <Card.Img variant="top" src={product.image} alt={product.name} />

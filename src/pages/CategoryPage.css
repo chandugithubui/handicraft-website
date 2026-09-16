@@ -116,6 +116,83 @@
   margin-bottom: var(--spacing-6);
 }
 
+/* =========================================
+   EXPLORE OUR CRAFTS
+========================================= */
+
+.explore-crafts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-5);
+}
+
+.explore-craft-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-light);
+  border: 1px solid rgba(41, 37, 34, 0.08);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-normal);
+}
+
+.explore-craft-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-terracotta);
+}
+
+.explore-craft-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-sand);
+}
+
+.explore-craft-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.explore-craft-card:hover .explore-craft-image img {
+  transform: scale(1.05);
+}
+
+.explore-craft-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--spacing-4);
+}
+
+.explore-craft-content h3 {
+  margin: 0 0 var(--spacing-2);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-charcoal);
+}
+
+.explore-craft-content p {
+  margin: 0 0 var(--spacing-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-charcoal-light);
+}
+
+.explore-craft-link {
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
 .craft-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -377,5 +454,195 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-2);
+  }
+}
+
+/* Explore Crafts Responsive */
+@media (max-width: 1024px) {
+  .explore-crafts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .explore-crafts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* =========================================
+     MASTER ARTISANS - MOBILE
+  ========================================= */
+
+  .artisan-showcase {
+    overflow: hidden;
+  }
+
+  .artisan-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .artisan-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .artisan-card {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+    border-radius: 12px;
+  }
+
+  .artisan-card-image {
+    aspect-ratio: 4 / 3;
+  }
+
+  .artisan-card-info {
+    padding: 14px;
+  }
+
+  .artisan-card-name {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .artisan-card-specialty {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .artisan-card-years {
+    font-size: 11px;
+  }
+
+  .artisan-showcase .section-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .artisan-showcase .section-title {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .artisan-showcase .section-link {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+
+  /* =========================================
+     EXPLORE OUR CRAFTS - MOBILE
+  ========================================= */
+
+  .craft-info-panel {
+    padding: 16px;
+  }
+
+  .explore-crafts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .explore-craft-card {
+    border-radius: 9px;
+  }
+
+  .explore-craft-image {
+    aspect-ratio: 1 / 0.82;
+  }
+
+  .explore-craft-content {
+    padding: 10px;
+  }
+
+  .explore-craft-content h3 {
+    font-size: 14px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .explore-craft-content p {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .explore-craft-link {
+    font-size: 11px;
+    margin-top: auto;
+  }
+
+
+  /* =========================================
+     CATEGORY PRODUCTS - MOBILE
+  ========================================= */
+
+  .category-products .section-title {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .category-products .product-card {
+    min-width: 0;
+    border-radius: 10px;
+  }
+
+  .category-products .product-card-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .category-products .product-card-name {
+    font-size: 13px;
+    line-height: 1.3;
+    margin: 10px 10px 5px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .category-products .product-card-description {
+    font-size: 10px;
+    line-height: 1.4;
+    margin: 0 10px 8px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .category-products .product-card-price {
+    font-size: 15px;
+    margin: 0;
+    padding: 0 10px 12px;
   }
 }

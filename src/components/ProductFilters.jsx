@@ -14,13 +14,14 @@ const localCategories = [
 ];
 
 const ProductFilters = ({ onFilterChange, activeFilters }) => {
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     material: false,
     price: false
   });
-  
+
   const materials = ['Wood', 'Metal', 'Clay', 'Fabric', 'Stone', 'Bamboo'];
 
   useEffect(() => {
@@ -50,22 +51,40 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
   return (
     <div className="product-filters">
       <div className="filters-header">
-        <h3 className="filters-title">
-          <FiFilter className="filters-icon" />
-          Filters
-        </h3>
+        <button
+          type="button"
+          className="filters-mobile-toggle"
+          onClick={() => setMobileFiltersOpen(prev => !prev)}
+        >
+          <span className="filters-title">
+            <FiFilter className="filters-icon" />
+            Filters
+          </span>
+
+          <span className="filters-mobile-icon">
+            {mobileFiltersOpen ? <FiChevronUp /> : <FiChevronDown />}
+          </span>
+        </button>
+
         {hasActiveFilters && (
-          <button className="clear-filters-btn" onClick={clearFilters}>
+          <button
+            className="clear-filters-btn"
+            onClick={clearFilters}
+            type="button"
+          >
             <FiX className="clear-icon" />
             Clear All
           </button>
         )}
       </div>
 
-      <div className="filters-content">
+      <div
+        className={`filters-content ${mobileFiltersOpen ? 'mobile-open' : ''
+          }`}
+      >
         {/* Category Filter */}
         <div className="filter-section">
-          <button 
+          <button
             className="filter-section-header"
             onClick={() => toggleSection('category')}
           >
@@ -100,7 +119,7 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
 
         {/* Material Filter */}
         <div className="filter-section">
-          <button 
+          <button
             className="filter-section-header"
             onClick={() => toggleSection('material')}
           >
@@ -135,7 +154,7 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
 
         {/* Price Range Filter */}
         <div className="filter-section">
-          <button 
+          <button
             className="filter-section-header"
             onClick={() => toggleSection('price')}
           >

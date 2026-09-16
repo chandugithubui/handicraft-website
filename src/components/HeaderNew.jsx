@@ -15,7 +15,7 @@ const HeaderNew = () => {
   const { logout, isAuthenticated } = useAuth();
   const { getWishlistCount } = useWishlist();
   const { getCartItemCount } = useCart();
-  
+
   const cartItemCount = getCartItemCount();
   const wishlistCount = getWishlistCount();
 
@@ -39,9 +39,12 @@ const HeaderNew = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
+
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setIsSearchOpen(false);
+      setIsMobileMenuOpen(false);
+      document.body.style.overflow = 'auto';
       setSearchQuery('');
     }
   };
@@ -61,11 +64,11 @@ const HeaderNew = () => {
           <img src="/images/heropic.png" alt="Handicraft background" className="header-bg-image" />
           <div className="header-overlay"></div>
         </div>
-        
+
         <div className="container">
           <div className="header-content">
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="mobile-menu-btn hide-desktop"
               onClick={toggleMobileMenu}
               aria-label="Toggle menu"
@@ -85,8 +88,8 @@ const HeaderNew = () => {
               <ul className="nav-list">
                 {navLinks.map((link) => (
                   <li key={link.path} className="nav-item">
-                    <Link 
-                      to={link.path} 
+                    <Link
+                      to={link.path}
                       className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
                     >
                       {link.label}
@@ -98,9 +101,9 @@ const HeaderNew = () => {
 
             {/* Right Actions */}
             <div className="header-actions">
-              {/* Search */}
-              <button 
-                className="action-btn premium-action-btn"
+              {/* Search - Desktop only */}
+              <button
+                className="action-btn premium-action-btn hide-mobile"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 aria-label="Search"
               >
@@ -115,9 +118,9 @@ const HeaderNew = () => {
                 )}
               </Link>
 
-              {/* Account */}
-              <button 
-                className="action-btn premium-action-btn" 
+              {/* Account - Desktop only */}
+              <button
+                className="action-btn premium-action-btn hide-mobile"
                 aria-label="Account"
                 onClick={handleUserClick}
               >
@@ -141,15 +144,15 @@ const HeaderNew = () => {
             <div className="container">
               <form onSubmit={handleSearch} className="search-input-wrapper">
                 <FiSearch className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search for handicrafts, artisans, categories..." 
+                <input
+                  type="text"
+                  placeholder="Search for handicrafts, artisans, categories..."
                   className="search-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
                 />
-                <button 
+                <button
                   type="button"
                   className="search-close"
                   onClick={() => setIsSearchOpen(false)}
@@ -169,7 +172,8 @@ const HeaderNew = () => {
             <div className="logo">
               <span className="logo-text">Handicraft Hub</span>
             </div>
-            <button 
+
+            <button
               className="mobile-close-btn"
               onClick={closeMobileMenu}
               aria-label="Close menu"
@@ -178,12 +182,26 @@ const HeaderNew = () => {
             </button>
           </div>
 
+          <div className="mobile-drawer-search">
+            <form onSubmit={handleSearch} className="mobile-search-form">
+              <FiSearch className="mobile-search-icon" />
+
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mobile-search-input"
+              />
+            </form>
+          </div>
+
           <nav className="mobile-nav">
             <ul className="mobile-nav-list">
               {navLinks.map((link) => (
                 <li key={link.path} className="mobile-nav-item">
-                  <Link 
-                    to={link.path} 
+                  <Link
+                    to={link.path}
                     className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
                     onClick={closeMobileMenu}
                   >
@@ -195,6 +213,22 @@ const HeaderNew = () => {
                 <Link to="/track-order" className="mobile-nav-link" onClick={closeMobileMenu}>
                   Track Order
                 </Link>
+              </li>
+              <li className="mobile-nav-item">
+                <Link to="/wishlist" className="mobile-nav-link" onClick={closeMobileMenu}>
+                  Wishlist
+                </Link>
+              </li>
+              <li className="mobile-nav-item">
+                {isAuthenticated ? (
+                  <Link to="/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    My Account
+                  </Link>
+                ) : (
+                  <Link to="/login" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    My Account
+                  </Link>
+                )}
               </li>
               <li className="mobile-nav-item">
                 {isAuthenticated ? (

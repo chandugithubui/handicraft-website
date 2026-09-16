@@ -32,10 +32,7 @@ const ProductCard = ({ product }) => {
     if (imageError) {
       return '/images/HandcraftedWoodenBowl.webp';
     }
-    // If image path doesn't start with /, add it
-    if (product.image && !product.image.startsWith('/')) {
-      return `/${product.image}`;
-    }
+
     return product.image || '/images/HandcraftedWoodenBowl.webp';
   };
 
@@ -85,8 +82,8 @@ const ProductCard = ({ product }) => {
                 <FiStar
                   key={i}
                   className={`star ${i < Math.floor(Number(product.rating) || 0)
-                      ? 'filled'
-                      : ''
+                    ? 'filled'
+                    : ''
                     }`}
                 />
               ))}

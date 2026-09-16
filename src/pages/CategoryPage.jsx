@@ -173,8 +173,52 @@ const categoryData = {
     artisans: []
   }
 };
-
+const exploreCategories = [
+  {
+    id: 'pattachitra',
+    name: 'Pattachitra',
+    description: 'Traditional hand-painted stories from Odisha.',
+    image: '/images/pattachitra1.jpg.jpg'
+  },
+  {
+    id: 'palm-leaf',
+    name: 'Palm Leaf Art',
+    description: 'Intricate engraving inspired by ancient Odia traditions.',
+    image: '/images/woodentray.jpg'
+  },
+  {
+    id: 'wooden',
+    name: 'Wooden Crafts',
+    description: 'Hand-carved decorative pieces crafted by skilled artisans.',
+    image: '/images/handcraftwooden.jpg'
+  },
+  {
+    id: 'sarees',
+    name: 'Handwoven Sarees',
+    description: 'Traditional Indian handloom weaving and timeless patterns.',
+    image: '/images/relatedProduct.webp'
+  },
+  {
+    id: 'sculptures',
+    name: 'Sculptures',
+    description: 'Traditional handcrafted sculptures in metal, clay and stone.',
+    image: '/images/sculpture.webp'
+  },
+  {
+    id: 'decor',
+    name: 'Home Decor',
+    description: 'Artisan-made pieces that bring Indian craft into your home.',
+    image: '/images/decorativeplate.webp'
+  },
+  {
+    id: 'gifts',
+    name: 'Handcrafted Gifts',
+    description: 'Unique artisan-made gifts for memorable occasions.',
+    image: '/images/GiftsItems.webp'
+  }
+];
 const CategoryPage = () => {
+
   const { categoryId } = useParams();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
@@ -185,44 +229,68 @@ const CategoryPage = () => {
 
   useEffect(() => {
     const fetchCategoryAndProducts = async () => {
-      // Use local category data immediately
-      if (categoryInfo) {
-        setCategory(categoryInfo);
-        setLoading(false);
-        return;
-      }
+      setLoading(true);
 
-      // Only try backend if no local data
-      try {
-        const getApiUrl = () => {
-          if (window.location.hostname === 'localhost' || 
-              window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:5000/api';
-          }
-          if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-              window.location.hostname.includes('vercel.app')) {
-            return 'https://handicraft-website.onrender.com/api';
-          }
-          return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-        };
-        const API_URL = getApiUrl();
-        
-        try {
-          const categoryResponse = await axios.get(`${API_URL}/categories/${categoryId}`);
-          setCategory(categoryResponse.data);
-        } catch (err) {
-          // Could not fetch category from backend
+      const getApiUrl = () => {
+        if (
+          window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1'
+        ) {
+          return 'http://localhost:5000/api';
         }
 
+        if (
+          window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
+          window.location.hostname.includes('vercel.app')
+        ) {
+          return 'https://handicraft-website.onrender.com/api';
+        }
+
+        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      };
+
+      const API_URL = getApiUrl();
+
+      try {
+        // Use our local category information for known categories
+        if (categoryInfo) {
+          setCategory(categoryInfo);
+        } else {
+          try {
+            const categoryResponse = await axios.get(
+              `${API_URL}/categories/${categoryId}`
+            );
+
+            setCategory(categoryResponse.data);
+          } catch (error) {
+            console.error('Error fetching category:', error);
+            setCategory(null);
+          }
+        }
+
+        // Fetch real products from backend
         try {
-          const productsResponse = await axios.get(`${API_URL}/products?category=${categoryId}`);
-          setProducts(productsResponse.data);
-        } catch (err) {
-          // Could not fetch products from backend, using empty array
+          let productsUrl;
+
+          if (categoryId === 'all') {
+            productsUrl = `${API_URL}/products?limit=100`;
+          } else {
+            productsUrl = `${API_URL}/products?category=${categoryId}&limit=100`;
+          }
+
+          const productsResponse = await axios.get(productsUrl);
+
+          const fetchedProducts = Array.isArray(productsResponse.data)
+            ? productsResponse.data
+            : productsResponse.data.products || [];
+
+          setProducts(fetchedProducts);
+        } catch (error) {
+          console.error('Error fetching category products:', error);
           setProducts([]);
         }
       } catch (error) {
-        console.error('Error fetching category or products:', error);
+        console.error('Error loading category page:', error);
       } finally {
         setLoading(false);
       }
@@ -230,7 +298,6 @@ const CategoryPage = () => {
 
     fetchCategoryAndProducts();
   }, [categoryId, categoryInfo]);
-
   if (loading) return <div className="loading">Loading...</div>;
   if (!categoryInfo && !category) return <div className="not-found">Category not found</div>;
 
@@ -265,42 +332,95 @@ const CategoryPage = () => {
       </div>
 
       <div className="container">
-        {/* Craft Information Panel */}
-        <div className="craft-info-panel">
-          <h2 className="panel-title">About This Craft</h2>
-          <div className="craft-info-grid">
-            <div className="info-card">
-              <h3 className="info-card-title">
-                <FiMapPin className="info-icon" />
-                Origin
-              </h3>
-              <p className="info-card-content">{displayCategory.origin}</p>
-            </div>
-            <div className="info-card">
-              <h3 className="info-card-title">
-                <FiAward className="info-icon" />
-                History
-              </h3>
-              <p className="info-card-content">{displayCategory.history}</p>
-            </div>
-            <div className="info-card">
-              <h3 className="info-card-title">Techniques</h3>
-              <p className="info-card-content">{displayCategory.techniques}</p>
-            </div>
-            <div className="info-card">
-              <h3 className="info-card-title">Materials</h3>
-              <p className="info-card-content">{displayCategory.materials}</p>
-            </div>
-            <div className="info-card">
-              <h3 className="info-card-title">Regions</h3>
-              <p className="info-card-content">{displayCategory.regions}</p>
-            </div>
-            <div className="info-card">
-              <h3 className="info-card-title">Cultural Significance</h3>
-              <p className="info-card-content">{displayCategory.culturalSignificance}</p>
+        {/* Category Information Section */}
+        {categoryId === 'all' ? (
+          <div className="craft-info-panel">
+            <h2 className="panel-title">Explore Our Crafts</h2>
+
+            <div className="explore-crafts-grid">
+              {exploreCategories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.id}`}
+                  className="explore-craft-card"
+                >
+                  <div className="explore-craft-image">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="explore-craft-content">
+                    <h3>{category.name}</h3>
+                    <p>{category.description}</p>
+
+                    <span className="explore-craft-link">
+                      Explore Craft →
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="craft-info-panel">
+            <h2 className="panel-title">About This Craft</h2>
+
+            <div className="craft-info-grid">
+              <div className="info-card">
+                <h3 className="info-card-title">
+                  <FiMapPin className="info-icon" />
+                  Origin
+                </h3>
+                <p className="info-card-content">
+                  {displayCategory.origin}
+                </p>
+              </div>
+
+              <div className="info-card">
+                <h3 className="info-card-title">
+                  <FiAward className="info-icon" />
+                  History
+                </h3>
+                <p className="info-card-content">
+                  {displayCategory.history}
+                </p>
+              </div>
+
+              <div className="info-card">
+                <h3 className="info-card-title">Techniques</h3>
+                <p className="info-card-content">
+                  {displayCategory.techniques}
+                </p>
+              </div>
+
+              <div className="info-card">
+                <h3 className="info-card-title">Materials</h3>
+                <p className="info-card-content">
+                  {displayCategory.materials}
+                </p>
+              </div>
+
+              <div className="info-card">
+                <h3 className="info-card-title">Regions</h3>
+                <p className="info-card-content">
+                  {displayCategory.regions}
+                </p>
+              </div>
+
+              <div className="info-card">
+                <h3 className="info-card-title">
+                  Cultural Significance
+                </h3>
+                <p className="info-card-content">
+                  {displayCategory.culturalSignificance}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Artisan Showcase */}
         {displayCategory.artisans && displayCategory.artisans.length > 0 && (
@@ -329,38 +449,50 @@ const CategoryPage = () => {
         )}
 
         {/* Products Section */}
-        <div className="category-products">
-          <div className="section-header">
-            <h2 className="section-title">Products in {displayCategory.name}</h2>
-          </div>
-          {displayCategory.localProducts && displayCategory.localProducts.length > 0 ? (
-            <div className="products-grid">
-              {displayCategory.localProducts.map((product) => (
-                <div key={product._id} className="product-card">
-                  <img src={product.image} alt={product.name} className="product-card-image" />
-                  <h3 className="product-card-name">{product.name}</h3>
-                  <p className="product-card-description">{product.description}</p>
-                  <p className="product-card-price">₹{product.price}</p>
-                </div>
-              ))}
-            </div>
-          ) : products.length > 0 ? (
-            <div className="products-grid">
-              {products.map((product) => (
-                <div key={product._id} className="product-card">
-                  <img src={product.image} alt={product.name} className="product-card-image" />
-                  <h3 className="product-card-name">{product.name}</h3>
-                  <p className="product-card-description">{product.description}</p>
-                  <p className="product-card-price">₹{product.price}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-products">No products available in this category yet.</p>
-          )}
-        </div>
-      </div>
+<div className="category-products">
+  <div className="section-header">
+    <h2 className="section-title">
+      Products in {displayCategory.name}
+    </h2>
+  </div>
+
+  {products.length > 0 ? (
+    <div className="products-grid">
+      {products.map((product) => (
+        <Link
+          key={product._id}
+          to={`/product/${product._id}`}
+          className="product-card"
+        >
+          <img
+            src={product.imageUrl || product.image}
+            alt={product.name}
+            className="product-card-image"
+            loading="lazy"
+          />
+
+          <h3 className="product-card-name">
+            {product.name}
+          </h3>
+
+          <p className="product-card-description">
+            {product.description}
+          </p>
+
+          <p className="product-card-price">
+            ₹{Number(product.price).toLocaleString('en-IN')}
+          </p>
+        </Link>
+      ))}
     </div>
+  ) : (
+    <p className="no-products">
+      No products available in this category yet.
+    </p>
+  )}
+   </div>
+  </div>
+</div>
   );
 };
 

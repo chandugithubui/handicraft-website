@@ -1,5 +1,5 @@
 .artisan-story-section {
-  padding: var(--spacing-10) 0;
+  padding: var(--spacing-8) 0;
   background-color: var(--color-white);
 }
 
@@ -220,24 +220,28 @@
 
 @media (max-width: 767px) {
   .artisan-story-section {
-    padding: var(--spacing-12) 0;
+    padding: var(--spacing-6) 0;
+  }
+
+  .section-header {
+    margin-bottom: var(--spacing-6);
   }
 
   .section-title {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
   }
 
   .section-subtitle {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
   }
 
   .artisans-grid {
     grid-template-columns: 1fr;
-    gap: var(--spacing-6);
+    gap: var(--spacing-4);
   }
 
   .artisan-image {
-    height: 300px;
+    height: 280px;
   }
 
   .artisan-content {
@@ -245,14 +249,95 @@
   }
 
   .artisan-name {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
+  }
+
+  .artisan-location {
+    font-size: var(--font-size-xs);
+  }
+
+  .artisan-stats {
+    gap: var(--spacing-3);
+  }
+
+  .stat {
+    font-size: var(--font-size-xs);
+  }
+
+  .artisan-story {
+    font-size: var(--font-size-xs);
   }
 
   .artisan-cta {
-    padding: var(--spacing-8) var(--spacing-4);
+    padding: var(--spacing-6) var(--spacing-4);
   }
 
   .cta-title {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  .cta-description {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .artisan-story-section {
+    padding: var(--spacing-5) 0;
+  }
+
+  .section-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .section-subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .artisan-image {
+    height: 250px;
+  }
+
+  .artisan-content {
+    padding: var(--spacing-3);
+  }
+
+  .artisan-name {
+    font-size: var(--font-size-base);
+  }
+
+  .artisan-cta {
+    padding: var(--spacing-5) var(--spacing-3);
+  }
+
+  .cta-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .cta-description {
+    font-size: var(--font-size-sm);
+  }
+
+  .cta-btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-3) var(--spacing-5);
+  }
+}
+
+@media (max-width: 375px) {
+  .artisan-image {
+    height: 220px;
+  }
+
+  .artisan-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .artisan-story {
+    font-size: 11px;
+  }
+
+  .cta-title {
+    font-size: var(--font-size-lg);
   }
 }

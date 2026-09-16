@@ -223,3 +223,247 @@
     width: 100%;
   }
 }
+
+/* ========================================
+   Products Toolbar - Search / Count / Sort
+======================================== */
+
+.sort-select {
+  min-width: 180px;
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-charcoal);
+  background-color: var(--color-white);
+  border: 1px solid #E0D5C5;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.sort-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(110, 23, 23, 0.1);
+}
+
+
+/* Mobile Products Toolbar */
+@media (max-width: 767px) {
+
+  .products-main {
+    gap: var(--spacing-4);
+  }
+
+  .products-search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .search-input {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 14px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .products-count {
+    grid-column: 1;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .sort-select {
+    grid-column: 2;
+    min-width: 145px;
+    width: auto;
+    min-height: 40px;
+    padding: 8px 32px 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}
+
+
+/* Extra Small Mobile */
+@media (max-width: 390px) {
+
+  .products-search {
+    gap: 10px;
+  }
+
+  .products-count {
+    font-size: 11px;
+  }
+
+  .sort-select {
+    min-width: 135px;
+    font-size: 12px;
+  }
+}
+
+/* ========================================
+   Product Pagination
+======================================== */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--color-white);
+  color: var(--color-charcoal);
+
+  border: 1px solid #E0D5C5;
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: #FFF8F2;
+}
+
+.pagination-btn.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+/* Mobile Pagination */
+@media (max-width: 767px) {
+
+  .pagination-container {
+    width: 100%;
+    gap: 6px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+
+  .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 9px;
+    font-size: 12px;
+    border-radius: 7px;
+  }
+}
+
+
+/* Very Small Mobile */
+@media (max-width: 390px) {
+
+  .pagination-container {
+    gap: 5px;
+  }
+
+  .pagination-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 7px;
+    font-size: 11px;
+  }
+}
+/* =========================================
+   PRODUCT PAGINATION
+========================================= */
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 0;
+}
+
+.pagination-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-white);
+  color: var(--color-charcoal);
+
+  border: 1px solid #e0d5c5;
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pagination-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+/* Mobile Pagination */
+@media (max-width: 480px) {
+
+  .pagination-container {
+    gap: 5px;
+    margin-top: 6px;
+    padding: 8px 0;
+  }
+
+  .pagination-btn {
+    min-width: 32px;
+    height: 34px;
+    padding: 0 8px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+}
