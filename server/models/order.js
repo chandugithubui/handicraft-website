@@ -42,7 +42,37 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
   },
-  totalAmount: Number,
+  subtotal: {
+  type: Number,
+  required: true,
+  min: 0
+},
+
+shippingAmount: {
+  type: Number,
+  default: 0,
+  min: 0
+},
+
+couponCode: {
+  type: String,
+  uppercase: true,
+  trim: true,
+  default: null
+},
+
+discountAmount: {
+  type: Number,
+  default: 0,
+  min: 0
+},
+
+totalAmount: {
+  type: Number,
+  required: true,
+  min: 0
+},
+
   createdAt: {
     type: Date,
     default: Date.now

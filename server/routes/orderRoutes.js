@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const Order = require('../models/order');
 const Product = require('../models/product');
+const Coupon = require('../models/coupon');
 const { auth } = require('../middleware/auth');
 
 /* =========================================================
@@ -16,7 +17,8 @@ router.post('/', auth, async (req, res) => {
     const {
       items,
       shippingAddress,
-      paymentMethod
+      paymentMethod,
+      couponCode
     } = req.body;
 
     /* -------------------------------------------------------
@@ -24,7 +26,9 @@ router.post('/', auth, async (req, res) => {
     ------------------------------------------------------- */
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-      console.error('Order creation error: Items array is empty or invalid');
+      console.error(
+        'Order creation error: Items array is empty or invalid'
+      );
 
       return res.status(400).json({
         message: 'Order must contain at least one item'
@@ -86,7 +90,10 @@ router.post('/', auth, async (req, res) => {
         );
 
         return res.status(400).json({
-          message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`
+          message:
+            `Insufficient stock for ${product.name}. ` +
+            `Available: ${product.stock}, ` +
+            `Requested: ${item.quantity}`
         });
       }
 
@@ -106,10 +113,10 @@ router.post('/', auth, async (req, res) => {
     }
 
     /* -------------------------------------------------------
-       3. Calculate total from database prices
+       3. Calculate subtotal from trusted database prices
     ------------------------------------------------------- */
 
-    const calculatedTotal = validatedItems.reduce(
+    const subtotal = validatedItems.reduce(
       (sum, item) => {
         return sum + item.price * item.quantity;
       },
@@ -117,50 +124,187 @@ router.post('/', auth, async (req, res) => {
     );
 
     /* -------------------------------------------------------
-       4. Reduce product stock
+       4. Calculate shipping on backend
+    ------------------------------------------------------- */
+
+    const shippingAmount = subtotal >= 999 ? 0 : 99;
+
+    /* -------------------------------------------------------
+       5. Validate and calculate coupon discount
+    ------------------------------------------------------- */
+
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode && couponCode.trim()) {
+      const normalizedCouponCode =
+        couponCode.trim().toUpperCase();
+
+      const coupon = await Coupon.findOne({
+        code: normalizedCouponCode
+      });
+
+      // Coupon does not exist
+      if (!coupon) {
+        return res.status(400).json({
+          message: 'Invalid coupon code'
+        });
+      }
+
+      // Coupon disabled by admin
+      if (!coupon.isActive) {
+        return res.status(400).json({
+          message: 'This coupon is inactive'
+        });
+      }
+
+      // Coupon expired
+      if (new Date() > coupon.expiryDate) {
+        return res.status(400).json({
+          message: 'This coupon has expired'
+        });
+      }
+
+      // Usage limit reached
+      if (
+        coupon.usageLimit !== null &&
+        coupon.usedCount >= coupon.usageLimit
+      ) {
+        return res.status(400).json({
+          message: 'Coupon usage limit has been reached'
+        });
+      }
+
+      // Minimum order requirement
+      if (subtotal < coupon.minimumOrderAmount) {
+        return res.status(400).json({
+          message:
+            `Minimum order amount is ₹${coupon.minimumOrderAmount}`
+        });
+      }
+
+      /* -----------------------------------------------------
+         Calculate discount
+      ----------------------------------------------------- */
+
+      if (coupon.discountType === 'percentage') {
+        discountAmount =
+          (subtotal * coupon.discountValue) / 100;
+
+        // Apply maximum discount cap
+        if (
+          coupon.maxDiscountAmount !== null &&
+          discountAmount > coupon.maxDiscountAmount
+        ) {
+          discountAmount = coupon.maxDiscountAmount;
+        }
+      } else {
+        // Fixed discount
+        discountAmount = coupon.discountValue;
+      }
+
+      // Discount must never exceed subtotal
+      discountAmount = Math.min(
+        discountAmount,
+        subtotal
+      );
+
+      discountAmount = Number(
+        discountAmount.toFixed(2)
+      );
+
+      appliedCoupon = coupon;
+    }
+
+    /* -------------------------------------------------------
+       6. Calculate final payable amount
+    ------------------------------------------------------- */
+
+    const totalAmount = Number(
+      (
+        subtotal +
+        shippingAmount -
+        discountAmount
+      ).toFixed(2)
+    );
+
+    /* -------------------------------------------------------
+       7. Reduce product stock
     ------------------------------------------------------- */
 
     for (const item of validatedItems) {
-      const updatedProduct = await Product.findOneAndUpdate(
-        {
-          _id: item.product,
-          stock: { $gte: item.quantity }
-        },
-        {
-          $inc: {
-            stock: -item.quantity
+      const updatedProduct =
+        await Product.findOneAndUpdate(
+          {
+            _id: item.product,
+            stock: { $gte: item.quantity }
+          },
+          {
+            $inc: {
+              stock: -item.quantity
+            }
+          },
+          {
+            new: true
           }
-        },
-        {
-          new: true
-        }
-      );
+        );
 
       // Stock may have changed between validation and update
       if (!updatedProduct) {
         return res.status(400).json({
-          message: `Unable to reserve stock for ${item.name}. Please try again.`
+          message:
+            `Unable to reserve stock for ${item.name}. ` +
+            'Please try again.'
         });
       }
     }
 
     /* -------------------------------------------------------
-       5. Create order
+       8. Create order
     ------------------------------------------------------- */
 
     const order = new Order({
       user: req.user.userId,
+
       items: validatedItems,
+
       shippingAddress,
+
       paymentMethod: paymentMethod || 'COD',
-      totalAmount: calculatedTotal
+
+      subtotal,
+
+      shippingAmount,
+
+      couponCode: appliedCoupon
+        ? appliedCoupon.code
+        : null,
+
+      discountAmount,
+
+      totalAmount
     });
 
     /* -------------------------------------------------------
-       6. Save order
+       9. Save order
     ------------------------------------------------------- */
 
     await order.save();
+
+    /* -------------------------------------------------------
+       10. Increment coupon usage only after successful order
+    ------------------------------------------------------- */
+
+    if (appliedCoupon) {
+      await Coupon.findByIdAndUpdate(
+        appliedCoupon._id,
+        {
+          $inc: {
+            usedCount: 1
+          }
+        }
+      );
+    }
 
     console.log(
       'Order created successfully:',
@@ -168,7 +312,7 @@ router.post('/', auth, async (req, res) => {
     );
 
     /* -------------------------------------------------------
-       7. Send response
+       11. Send response
     ------------------------------------------------------- */
 
     return res.status(201).json({
@@ -177,28 +321,36 @@ router.post('/', auth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('========== ORDER CREATION ERROR ==========');
+    console.error(
+      '========== ORDER CREATION ERROR =========='
+    );
     console.error('Message:', error.message);
     console.error('Name:', error.name);
     console.error('Stack:', error.stack);
     console.error('Request body:', req.body);
     console.error('User:', req.user);
-    console.error('==========================================');
+    console.error(
+      '=========================================='
+    );
 
     if (error.name === 'ValidationError') {
       return res.status(400).json({
-        message: 'Validation error: ' + error.message
+        message:
+          'Validation error: ' + error.message
       });
     }
 
     if (error.name === 'CastError') {
       return res.status(400).json({
-        message: 'Invalid data format: ' + error.message
+        message:
+          'Invalid data format: ' + error.message
       });
     }
 
     return res.status(500).json({
-      message: error.message || 'Server error during order creation'
+      message:
+        error.message ||
+        'Server error during order creation'
     });
   }
 });
@@ -221,37 +373,56 @@ router.get('/my-orders', auth, async (req, res) => {
        Fix image paths and ensure item values are available
     ------------------------------------------------------- */
 
-    const ordersWithFixedImages = orders.map((order) => {
-      const fixedItems = order.items.map((item) => {
-        let imageUrl = item.image;
+    const ordersWithFixedImages = orders.map(
+      (order) => {
+        const fixedItems = order.items.map(
+          (item) => {
+            let imageUrl = item.image;
 
-        // Remove accidental double extensions
-        if (imageUrl && imageUrl.endsWith('.jpg.jpg')) {
-          imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
-        }
+            // Remove accidental double extensions
+            if (
+              imageUrl &&
+              imageUrl.endsWith('.jpg.jpg')
+            ) {
+              imageUrl = imageUrl.replace(
+                '.jpg.jpg',
+                '.jpg'
+              );
+            }
 
-        if (imageUrl && imageUrl.endsWith('.jpeg.jpeg')) {
-          imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
-        }
+            if (
+              imageUrl &&
+              imageUrl.endsWith('.jpeg.jpeg')
+            ) {
+              imageUrl = imageUrl.replace(
+                '.jpeg.jpeg',
+                '.jpeg'
+              );
+            }
+
+            return {
+              ...item,
+              image: imageUrl,
+              price: item.price ?? 0,
+              quantity: item.quantity ?? 1
+            };
+          }
+        );
 
         return {
-          ...item,
-          image: imageUrl,
-          price: item.price ?? 0,
-          quantity: item.quantity ?? 1
+          ...order,
+          items: fixedItems
         };
-      });
-
-      return {
-        ...order,
-        items: fixedItems
-      };
-    });
+      }
+    );
 
     return res.json(ordersWithFixedImages);
 
   } catch (error) {
-    console.error('Get orders error:', error);
+    console.error(
+      'Get orders error:',
+      error
+    );
 
     return res.status(500).json({
       message: 'Server error'
@@ -268,13 +439,19 @@ router.get('/my-orders', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     // Validate order ID
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(
+        req.params.id
+      )
+    ) {
       return res.status(400).json({
         message: 'Invalid order ID'
       });
     }
 
-    const order = await Order.findById(req.params.id).lean();
+    const order = await Order.findById(
+      req.params.id
+    ).lean();
 
     if (!order) {
       return res.status(404).json({
@@ -289,7 +466,8 @@ router.get('/:id', auth, async (req, res) => {
     if (
       !order.user ||
       (
-        order.user.toString() !== req.user.userId &&
+        order.user.toString() !==
+          req.user.userId &&
         req.user.role !== 'admin'
       )
     ) {
@@ -302,24 +480,38 @@ router.get('/:id', auth, async (req, res) => {
        Fix item image paths and values
     ------------------------------------------------------- */
 
-    const fixedItems = order.items.map((item) => {
-      let imageUrl = item.image;
+    const fixedItems = order.items.map(
+      (item) => {
+        let imageUrl = item.image;
 
-      if (imageUrl && imageUrl.endsWith('.jpg.jpg')) {
-        imageUrl = imageUrl.replace('.jpg.jpg', '.jpg');
+        if (
+          imageUrl &&
+          imageUrl.endsWith('.jpg.jpg')
+        ) {
+          imageUrl = imageUrl.replace(
+            '.jpg.jpg',
+            '.jpg'
+          );
+        }
+
+        if (
+          imageUrl &&
+          imageUrl.endsWith('.jpeg.jpeg')
+        ) {
+          imageUrl = imageUrl.replace(
+            '.jpeg.jpeg',
+            '.jpeg'
+          );
+        }
+
+        return {
+          ...item,
+          image: imageUrl,
+          price: item.price ?? 0,
+          quantity: item.quantity ?? 1
+        };
       }
-
-      if (imageUrl && imageUrl.endsWith('.jpeg.jpeg')) {
-        imageUrl = imageUrl.replace('.jpeg.jpeg', '.jpeg');
-      }
-
-      return {
-        ...item,
-        image: imageUrl,
-        price: item.price ?? 0,
-        quantity: item.quantity ?? 1
-      };
-    });
+    );
 
     return res.json({
       ...order,
@@ -327,7 +519,10 @@ router.get('/:id', auth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get order error:', error);
+    console.error(
+      'Get order error:',
+      error
+    );
 
     if (error.name === 'CastError') {
       return res.status(400).json({
@@ -349,91 +544,112 @@ router.get('/:id', auth, async (req, res) => {
    Admin only
 ========================================================= */
 
-router.patch('/:id/status', auth, async (req, res) => {
-  try {
-    const { orderStatus } = req.body;
+router.patch(
+  '/:id/status',
+  auth,
+  async (req, res) => {
+    try {
+      const { orderStatus } = req.body;
 
-    /* -------------------------------------------------------
-       Admin check
-    ------------------------------------------------------- */
+      /* -------------------------------------------------------
+         Admin check
+      ------------------------------------------------------- */
 
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        message: 'Access denied. Admin only.'
-      });
-    }
-
-    /* -------------------------------------------------------
-       Validate order ID
-    ------------------------------------------------------- */
-
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        message: 'Invalid order ID'
-      });
-    }
-
-    /* -------------------------------------------------------
-       Validate order status
-    ------------------------------------------------------- */
-
-    const allowedStatuses = [
-      'pending',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled'
-    ];
-
-    if (!allowedStatuses.includes(orderStatus)) {
-      return res.status(400).json({
-        message: 'Invalid order status'
-      });
-    }
-
-    /* -------------------------------------------------------
-       Update order
-    ------------------------------------------------------- */
-
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      {
-        orderStatus
-      },
-      {
-        new: true,
-        runValidators: true
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({
+          message:
+            'Access denied. Admin only.'
+        });
       }
-    );
 
-    if (!order) {
-      return res.status(404).json({
-        message: 'Order not found'
+      /* -------------------------------------------------------
+         Validate order ID
+      ------------------------------------------------------- */
+
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          req.params.id
+        )
+      ) {
+        return res.status(400).json({
+          message: 'Invalid order ID'
+        });
+      }
+
+      /* -------------------------------------------------------
+         Validate order status
+      ------------------------------------------------------- */
+
+      const allowedStatuses = [
+        'pending',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled'
+      ];
+
+      if (
+        !allowedStatuses.includes(
+          orderStatus
+        )
+      ) {
+        return res.status(400).json({
+          message: 'Invalid order status'
+        });
+      }
+
+      /* -------------------------------------------------------
+         Update order
+      ------------------------------------------------------- */
+
+      const order =
+        await Order.findByIdAndUpdate(
+          req.params.id,
+          {
+            orderStatus
+          },
+          {
+            new: true,
+            runValidators: true
+          }
+        );
+
+      if (!order) {
+        return res.status(404).json({
+          message: 'Order not found'
+        });
+      }
+
+      return res.json(order);
+
+    } catch (error) {
+      console.error(
+        'Update order status error:',
+        error
+      );
+
+      if (
+        error.name === 'ValidationError'
+      ) {
+        return res.status(400).json({
+          message:
+            'Validation error: ' +
+            error.message
+        });
+      }
+
+      if (error.name === 'CastError') {
+        return res.status(400).json({
+          message: 'Invalid order ID'
+        });
+      }
+
+      return res.status(500).json({
+        message: 'Server error'
       });
     }
-
-    return res.json(order);
-
-  } catch (error) {
-    console.error('Update order status error:', error);
-
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        message: 'Validation error: ' + error.message
-      });
-    }
-
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        message: 'Invalid order ID'
-      });
-    }
-
-    return res.status(500).json({
-      message: 'Server error'
-    });
   }
-});
+);
 
 
 /* =========================================================

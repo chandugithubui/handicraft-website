@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiUsers, FiShoppingCart, FiBox, FiDollarSign, FiLogOut, FiRefreshCw } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { getAdminStats, getAllOrders, getAllUsers, getAllContacts, updateOrderStatus,
+import {
+  getAdminStats, getAllOrders, getAllUsers, getAllContacts, updateOrderStatus,
   getAdminProducts, createAdminProduct, updateAdminProduct, deleteAdminProduct, uploadProductImage
 } from '../services/adminService';
 import './AdminDashboard.css';
-
+import { getAdminCoupons, createCoupon, updateCoupon, deleteCoupon } from '../services/couponService';
 const AdminDashboard = () => {
   const { user, isAuthenticated, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +33,29 @@ const AdminDashboard = () => {
   const [uploadStatus, setUploadStatus] = useState(''); // '' | 'uploading' | 'success' | 'error'
   const [imagePreview, setImagePreview] = useState('');
   const [deletingId, setDeletingId] = useState(null);
+  // ── Coupons tab state ──────────────────────────────────────
+  const [coupons, setCoupons] = useState([]);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [showCouponForm, setShowCouponForm] = useState(false);
+  const [couponSaving, setCouponSaving] = useState(false);
+  const [deletingCouponId, setDeletingCouponId] = useState(null);
+  const [couponFormError, setCouponFormError] = useState('');
+  const [editingCoupon, setEditingCoupon] = useState(null);
 
+  const EMPTY_COUPON_FORM = {
+    code: '',
+    discountType: 'percentage',
+    discountValue: '',
+    minimumOrderAmount: '0',
+    maxDiscountAmount: '',
+    expiryDate: '',
+    usageLimit: '',
+    isActive: true
+  };
+
+  const [couponForm, setCouponForm] = useState(
+    EMPTY_COUPON_FORM
+  );
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -73,7 +96,7 @@ const AdminDashboard = () => {
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
       await updateOrderStatus(orderId, newStatus, token);
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order._id === orderId ? { ...order, orderStatus: newStatus } : order
       ));
     } catch (error) {
@@ -86,10 +109,10 @@ const AdminDashboard = () => {
       const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000/api/newsletter/subscribers'
         : 'https://handicraft-website.onrender.com/api/newsletter/subscribers';
-      
+
       const response = await fetch(apiUrl);
       const data = await response.json();
-      
+
       if (data.success) {
         return data.subscribers;
       }
@@ -105,7 +128,7 @@ const AdminDashboard = () => {
       const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000/api/newsletter/unsubscribe'
         : 'https://handicraft-website.onrender.com/api/newsletter/unsubscribe';
-      
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -113,9 +136,9 @@ const AdminDashboard = () => {
         },
         body: JSON.stringify({ email }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         // Refresh the newsletters list
         const updatedNewsletters = await fetchNewsletters();
@@ -290,6 +313,159 @@ const AdminDashboard = () => {
 
   const { logout } = useAuth();
 
+  // ── Coupons: refresh list ──────────────────────────────────
+  const refreshCoupons = useCallback(async () => {
+    setCouponLoading(true);
+
+    try {
+      const data = await getAdminCoupons(token);
+      setCoupons(data);
+    } catch (err) {
+      console.error('Error fetching coupons:', err);
+    } finally {
+      setCouponLoading(false);
+    }
+  }, [token]);
+
+  // ── Open coupon form ───────────────────────────────────────
+  const openCouponForm = () => {
+    setEditingCoupon(null);
+    setCouponForm(EMPTY_COUPON_FORM);
+    setCouponFormError('');
+    setShowCouponForm(true);
+  };
+  const openEditCouponForm = (coupon) => {
+    setEditingCoupon(coupon);
+
+    setCouponForm({
+      code: coupon.code || '',
+      discountType: coupon.discountType || 'percentage',
+      discountValue: coupon.discountValue ?? '',
+      minimumOrderAmount: coupon.minimumOrderAmount ?? 0,
+      maxDiscountAmount: coupon.maxDiscountAmount ?? '',
+      expiryDate: coupon.expiryDate
+        ? new Date(coupon.expiryDate).toISOString().split('T')[0]
+        : '',
+      usageLimit: coupon.usageLimit ?? '',
+      isActive: coupon.isActive
+    });
+
+    setCouponFormError('');
+    setShowCouponForm(true);
+  };
+  // ── Close coupon form ──────────────────────────────────────
+  const closeCouponForm = () => {
+    setShowCouponForm(false);
+    setEditingCoupon(null);
+    setCouponForm(EMPTY_COUPON_FORM);
+    setCouponFormError('');
+    setCouponSaving(false);
+  };
+
+  // ── Coupon form field change ───────────────────────────────
+  const handleCouponFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setCouponForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  // ── Create coupon ──────────────────────────────────────────
+  const handleCouponSubmit = async (e) => {
+    e.preventDefault();
+    setCouponFormError('');
+
+    if (!couponForm.code.trim()) {
+      return setCouponFormError('Coupon code is required.');
+    }
+
+    if (
+      !couponForm.discountValue ||
+      Number(couponForm.discountValue) <= 0
+    ) {
+      return setCouponFormError(
+        'Discount value must be greater than 0.'
+      );
+    }
+
+    if (!couponForm.expiryDate) {
+      return setCouponFormError('Expiry date is required.');
+    }
+
+    const payload = {
+      code: couponForm.code.trim().toUpperCase(),
+      discountType: couponForm.discountType,
+      discountValue: Number(couponForm.discountValue),
+
+      minimumOrderAmount:
+        Number(couponForm.minimumOrderAmount) || 0,
+
+      maxDiscountAmount:
+        couponForm.maxDiscountAmount
+          ? Number(couponForm.maxDiscountAmount)
+          : null,
+
+      expiryDate: couponForm.expiryDate,
+
+      usageLimit:
+        couponForm.usageLimit
+          ? Number(couponForm.usageLimit)
+          : null,
+
+      isActive: couponForm.isActive
+    };
+
+    setCouponSaving(true);
+
+    try {
+      if (editingCoupon) {
+        await updateCoupon(
+          editingCoupon._id,
+          payload,
+          token
+        );
+      } else {
+        await createCoupon(payload, token);
+      }
+
+      closeCouponForm();
+      await refreshCoupons();
+
+    } catch (err) {
+      console.error('Create coupon error:', err);
+
+      setCouponFormError(
+        err?.response?.data?.message ||
+        'Failed to create coupon.'
+      );
+    } finally {
+      setCouponSaving(false);
+    }
+  };
+
+  // ── Delete coupon ──────────────────────────────────────────
+  const handleDeleteCoupon = async (coupon) => {
+    const confirmed = window.confirm(
+      `Delete coupon "${coupon.code}"?`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingCouponId(coupon._id);
+
+    try {
+      await deleteCoupon(coupon._id, token);
+      await refreshCoupons();
+    } catch (err) {
+      console.error('Delete coupon error:', err);
+      alert('Failed to delete coupon.');
+    } finally {
+      setDeletingCouponId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -364,35 +540,44 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <div className="dashboard-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
             onClick={() => setActiveTab('orders')}
           >
             Orders
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
             onClick={() => setActiveTab('products')}
           >
             Products
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
           >
             Users
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'contacts' ? 'active' : ''}`}
             onClick={() => setActiveTab('contacts')}
           >
             Contacts
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'newsletters' ? 'active' : ''}`}
             onClick={() => setActiveTab('newsletters')}
           >
             Newsletters
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'coupons' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('coupons');
+              refreshCoupons();
+            }}
+          >
+            Coupons
           </button>
         </div>
 
@@ -653,7 +838,7 @@ const AdminDashboard = () => {
                           </td>
                           <td className="subscriber-actions" data-label="Actions">
                             {subscriber.status === 'active' && (
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline"
                                 onClick={() => handleUnsubscribe(subscriber.email)}
                               >
@@ -667,6 +852,120 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+          {activeTab === 'coupons' && (
+            <div className="content-card">
+              <div className="products-header">
+                <h3
+                  className="content-title"
+                  style={{ margin: 0 }}
+                >
+                  Coupons
+                </h3>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={openCouponForm}
+                >
+                  + Add Coupon
+                </button>
+              </div>
+
+              {couponLoading ? (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: 'var(--spacing-8)',
+                    color: 'var(--color-charcoal-light)'
+                  }}
+                >
+                  Loading coupons…
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Minimum Order</th>
+                        <th>Expiry</th>
+                        <th>Usage</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {coupons.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" className="no-data">
+                            No coupons found.
+                          </td>
+                        </tr>
+                      ) : (
+                        coupons.map((coupon) => (
+                          <tr key={coupon._id}>
+
+                            <td>{coupon.code}</td>
+
+                            <td>
+                              {coupon.discountType === 'percentage'
+                                ? `${coupon.discountValue}%`
+                                : `₹${coupon.discountValue}`}
+                            </td>
+
+                            <td>₹{coupon.minimumOrderAmount}</td>
+
+                            <td>
+                              {new Date(coupon.expiryDate).toLocaleDateString()}
+                            </td>
+
+                            <td>
+                              {coupon.usedCount} / {coupon.usageLimit ?? '∞'}
+                            </td>
+
+                            <td>
+                              <span
+                                className={`status-badge ${coupon.isActive
+                                  ? 'status-delivered'
+                                  : 'status-cancelled'
+                                  }`}
+                              >
+                                {coupon.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+
+                            {/* ACTIONS MUST BE LAST */}
+                            <td>
+                              <div className="row-actions">
+                                <button
+                                  type="button"
+                                  className="btn-edit"
+                                  onClick={() => openEditCouponForm(coupon)}
+                                >
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="btn-delete"
+                                  onClick={() => handleDeleteCoupon(coupon)}
+                                  disabled={deletingCouponId === coupon._id}
+                                >
+                                  {deletingCouponId === coupon._id ? 'Deleting…' : 'Delete'}
+                                </button>
+                              </div>
+                            </td>
+
+                          </tr>
+                        ))
+                        )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -791,6 +1090,215 @@ const AdminDashboard = () => {
                   disabled={formSaving || uploadStatus === 'uploading'}
                 >
                   {formSaving ? 'Saving…' : (editingProduct ? 'Save Changes' : 'Add Product')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ── Add Coupon Modal ───────────────── */}
+      {showCouponForm && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeCouponForm();
+            }
+          }}
+        >
+          <div className="product-form-modal">
+            <div className="modal-header">
+              <h2 className="modal-title">
+                Add Coupon
+              </h2>
+
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={closeCouponForm}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              className="product-form"
+              onSubmit={handleCouponSubmit}
+              noValidate
+            >
+              {/* Coupon Code */}
+              <div className="form-group">
+                <label htmlFor="coupon-code">
+                  Coupon Code *
+                </label>
+
+                <input
+                  id="coupon-code"
+                  type="text"
+                  name="code"
+                  value={couponForm.code}
+                  onChange={handleCouponFormChange}
+                  placeholder="e.g. FESTIVE25"
+                  required
+                />
+              </div>
+
+              {/* Discount Type + Value */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="coupon-type">
+                    Discount Type *
+                  </label>
+
+                  <select
+                    id="coupon-type"
+                    name="discountType"
+                    value={couponForm.discountType}
+                    onChange={handleCouponFormChange}
+                  >
+                    <option value="percentage">
+                      Percentage
+                    </option>
+
+                    <option value="fixed">
+                      Fixed Amount
+                    </option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="coupon-value">
+                    Discount Value *
+                  </label>
+
+                  <input
+                    id="coupon-value"
+                    type="number"
+                    name="discountValue"
+                    min="0"
+                    value={couponForm.discountValue}
+                    onChange={handleCouponFormChange}
+                    placeholder={
+                      couponForm.discountType === 'percentage'
+                        ? 'e.g. 20'
+                        : 'e.g. 500'
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Minimum + Maximum */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="coupon-minimum">
+                    Minimum Order (₹)
+                  </label>
+
+                  <input
+                    id="coupon-minimum"
+                    type="number"
+                    name="minimumOrderAmount"
+                    min="0"
+                    value={couponForm.minimumOrderAmount}
+                    onChange={handleCouponFormChange}
+                    placeholder="e.g. 500"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="coupon-maximum">
+                    Max Discount (₹)
+                  </label>
+
+                  <input
+                    id="coupon-maximum"
+                    type="number"
+                    name="maxDiscountAmount"
+                    min="0"
+                    value={couponForm.maxDiscountAmount}
+                    onChange={handleCouponFormChange}
+                    placeholder="Optional"
+                  />
+                </div>
+              </div>
+
+              {/* Expiry + Usage */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="coupon-expiry">
+                    Expiry Date *
+                  </label>
+
+                  <input
+                    id="coupon-expiry"
+                    type="date"
+                    name="expiryDate"
+                    value={couponForm.expiryDate}
+                    onChange={handleCouponFormChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="coupon-limit">
+                    Usage Limit
+                  </label>
+
+                  <input
+                    id="coupon-limit"
+                    type="number"
+                    name="usageLimit"
+                    min="1"
+                    value={couponForm.usageLimit}
+                    onChange={handleCouponFormChange}
+                    placeholder="Unlimited"
+                  />
+                </div>
+              </div>
+
+              {/* Active */}
+              <div className="form-group checkbox-group">
+                <input
+                  id="coupon-active"
+                  type="checkbox"
+                  name="isActive"
+                  checked={couponForm.isActive}
+                  onChange={handleCouponFormChange}
+                />
+
+                <label htmlFor="coupon-active">
+                  Coupon is active
+                </label>
+              </div>
+
+              {/* Error */}
+              {couponFormError && (
+                <div className="form-error">
+                  {couponFormError}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={closeCouponForm}
+                  disabled={couponSaving}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={couponSaving}
+                >
+                  {couponSaving
+                    ? 'Creating…'
+                    : 'Create Coupon'}
                 </button>
               </div>
             </form>

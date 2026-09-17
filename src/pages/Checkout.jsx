@@ -4,6 +4,7 @@ import { FiArrowLeft, FiMapPin, FiCreditCard, FiTruck, FiLock } from 'react-icon
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/orderService';
+import { validateCoupon } from '../services/couponService';
 import RazorpayPaymentForm from '../components/RazorpayPaymentForm';
 import './Checkout.css';
 
@@ -25,6 +26,12 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -53,14 +60,52 @@ const Checkout = () => {
       [e.target.name]: e.target.value
     });
   };
+  const handleApplyCoupon = async () => {
+    setCouponMessage('');
+    setCouponError('');
 
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+
+      const subtotal = getCartTotal();
+
+      const result = await validateCoupon(
+        couponCode.trim(),
+        subtotal,
+        token
+      );
+
+      setAppliedCoupon(result.coupon);
+      setDiscountAmount(result.discountAmount);
+      setCouponCode(result.coupon.code);
+
+      setCouponMessage(
+        `${result.coupon.code} applied successfully`
+      );
+    } catch (err) {
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
+
+      setCouponError(
+        err.response?.data?.message ||
+        'Unable to apply coupon'
+      );
+    } finally {
+      setCouponLoading(false);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     // Validate form
     if (!shippingAddress.fullName || !shippingAddress.address || !shippingAddress.city ||
-        !shippingAddress.state || !shippingAddress.postalCode || !shippingAddress.phone) {
+      !shippingAddress.state || !shippingAddress.postalCode || !shippingAddress.phone) {
       setError('Please fill in all shipping fields');
       return;
     }
@@ -68,21 +113,21 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      const subtotal = getCartTotal();
-      const shipping = subtotal >= 999 ? 0 : 99;
-      const total = subtotal + shipping;
+
 
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image
+          quantity: item.quantity
         })),
+
         shippingAddress,
-        paymentMethod,
-        totalAmount: total
+
+        paymentMethod: 'COD',
+
+        couponCode: appliedCoupon
+          ? appliedCoupon.code
+          : null
       };
 
       await createOrder(orderData, token);
@@ -100,29 +145,32 @@ const Checkout = () => {
     setError('');
 
     try {
-      const subtotal = getCartTotal();
-      const shipping = subtotal >= 999 ? 0 : 99;
-      const total = subtotal + shipping;
-
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image
+          quantity: item.quantity
         })),
+
         shippingAddress,
+
         paymentMethod: 'Razorpay',
-        totalAmount: total,
+
+        couponCode: appliedCoupon
+          ? appliedCoupon.code
+          : null,
+
         paymentId: paymentResponse.razorpay_payment_id
       };
 
       await createOrder(orderData, token);
+
       clearCart();
       navigate('/order-success');
     } catch (err) {
-      setError(err.response?.data?.message || 'Payment failed');
+      setError(
+        err.response?.data?.message ||
+        'Payment failed'
+      );
     } finally {
       setLoading(false);
     }
@@ -133,17 +181,30 @@ const Checkout = () => {
       <div className="checkout-page">
         <div className="container">
           <div className="empty-cart">
-            <h2 className="empty-title">Your cart is empty</h2>
-            <Link to="/products" className="btn btn-primary">Browse Products</Link>
+            <h2 className="empty-title">
+              Your cart is empty
+            </h2>
+
+            <Link
+              to="/products"
+              className="btn btn-primary"
+            >
+              Browse Products
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
+  // KEEP THESE HERE
   const subtotal = getCartTotal();
   const shipping = subtotal >= 999 ? 0 : 99;
-  const total = subtotal + shipping;
+
+  const total = Math.max(
+    0,
+    subtotal + shipping - discountAmount
+  );
 
   return (
     <div className="checkout-page">
@@ -167,7 +228,7 @@ const Checkout = () => {
                 <FiMapPin className="section-icon" />
                 <h2 className="section-title">Shipping Information</h2>
               </div>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="form-grid">
                   <div className="form-group">
@@ -182,7 +243,7 @@ const Checkout = () => {
                       placeholder="Enter your full name"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">Phone Number *</label>
                     <input
@@ -223,7 +284,7 @@ const Checkout = () => {
                       placeholder="Enter your city"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">State *</label>
                     <input
@@ -251,7 +312,7 @@ const Checkout = () => {
                       placeholder="Enter postal code"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">Country</label>
                     <input
@@ -271,7 +332,7 @@ const Checkout = () => {
                     <FiCreditCard className="section-icon" />
                     <h2 className="section-title">Payment Method</h2>
                   </div>
-                  
+
                   <div className="payment-options">
                     <label className="payment-option">
                       <input
@@ -286,7 +347,7 @@ const Checkout = () => {
                         <span className="payment-desc">Pay when you receive your order</span>
                       </div>
                     </label>
-                    
+
                     <label className="payment-option">
                       <input
                         type="radio"
@@ -330,7 +391,7 @@ const Checkout = () => {
           <div className="checkout-summary">
             <div className="summary-card">
               <h3 className="summary-title">Order Summary</h3>
-              
+
               <div className="summary-items">
                 {cartItems.map((item) => (
                   <div key={item._id} className="summary-item">
@@ -342,14 +403,14 @@ const Checkout = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="summary-divider"></div>
-              
+
               <div className="summary-row">
                 <span className="summary-label">Subtotal</span>
                 <span className="summary-value">₹{subtotal.toLocaleString()}</span>
               </div>
-              
+
               <div className="summary-row">
                 <span className="summary-label">Shipping</span>
                 <span className="summary-value">
@@ -363,15 +424,73 @@ const Checkout = () => {
                   )}
                 </span>
               </div>
-              
+              <div className="coupon-section">
+                <label className="coupon-label">
+                  Have a coupon?
+                </label>
+
+                <div className="coupon-input-row">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value.toUpperCase());
+
+                      if (appliedCoupon) {
+                        setAppliedCoupon(null);
+                        setDiscountAmount(0);
+                        setCouponMessage('');
+                      }
+
+                      setCouponError('');
+                    }}
+                    placeholder="Enter coupon code"
+                    className="coupon-input"
+                    disabled={couponLoading}
+                  />
+
+                  <button
+                    type="button"
+                    className="coupon-apply-btn"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading}
+                  >
+                    {couponLoading ? 'Applying...' : 'Apply'}
+                  </button>
+                </div>
+
+                {couponMessage && (
+                  <div className="coupon-success">
+                    ✓ {couponMessage}
+                  </div>
+                )}
+
+                {couponError && (
+                  <div className="coupon-error">
+                    {couponError}
+                  </div>
+                )}
+              </div>
+
+              {appliedCoupon && discountAmount > 0 && (
+                <div className="summary-row discount-row">
+                  <span className="summary-label">
+                    Discount ({appliedCoupon.code})
+                  </span>
+
+                  <span className="summary-value discount-value">
+                    -₹{discountAmount.toLocaleString()}
+                  </span>
+                </div>
+              )}
               <div className="summary-divider"></div>
-              
+
               <div className="summary-row summary-total">
                 <span className="summary-label total-label">Total</span>
                 <span className="summary-value total-value">₹{total.toLocaleString()}</span>
               </div>
             </div>
-            
+
             {/* Trust Badges */}
             <div className="trust-badges">
               <div className="trust-badge">
