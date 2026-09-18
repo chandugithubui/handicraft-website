@@ -6,19 +6,27 @@ const HeroSection = () => {
   return (
     <section className="hero-section">
       <div className="hero-background">
-        <img
-          src="/images/homepagedesign.png"
-          alt="Indian handicrafts and Pattachitra art"
-          className="hero-bg-image"
-        />
+        <picture>
+          <source
+            media="(max-width: 480px)"
+            srcSet="/images/homepagedesign-mobile.png"
+          />
+
+          <img
+            src="/images/homepagedesign.png"
+            alt="Indian handicrafts and Pattachitra art"
+            className="hero-bg-image"
+          />
+        </picture>
       </div>
 
       <div className="hero-content">
         <div className="hero-text-wrapper">
 
           <h1 className="hero-title">
-            Handcrafted<br />
-            Stories, Made to Last
+            <span>Handcrafted</span>
+            <span>Stories, Made</span>
+            <span>to Last</span>
           </h1>
 
           <p className="hero-description">

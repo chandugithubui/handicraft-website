@@ -67,7 +67,7 @@
   align-items: flex-start;
 }
 
-.hero-title {
+.contact-page .hero-title { 
   width: 380px;
   max-width: 380px;
   margin: 0 0 14px;
