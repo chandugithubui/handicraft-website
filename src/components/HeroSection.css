@@ -296,7 +296,7 @@
     display: flex;
     align-items: flex-start;
 
-    padding: 48px 0 20px 18px;
+    padding: 48px 0 20px 0px;
     box-sizing: border-box;
   }
 
@@ -308,7 +308,7 @@
     text-align: left;
 
     /* pushes only content farther left */
-    transform: translateX(-32px);
+    transform: translateX(-42px);
   }
 
   .hero-title {
