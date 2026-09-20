@@ -248,68 +248,90 @@
   }
 }
 
+
 /* =========================================
-   MOBILE
+   MOBILE HERO
    <= 480px
 ========================================= */
 
 @media (max-width: 480px) {
+
   .hero-section {
+    position: relative;
     width: calc(100% - 20px);
     height: 350px;
     margin: 10px auto 16px;
+    overflow: hidden;
     border-radius: 10px;
   }
 
-  /*
-    Move the artwork farther right.
-    Left side is reserved for content.
-  */
+  /* Keep artwork on the right */
   .hero-bg-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: 78% center;
   }
 
-  /*
-    Stronger cream protection behind text.
-  */
+  /* Protect text from busy background */
   .hero-section::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
+
     background: linear-gradient(90deg,
         rgba(247, 232, 210, 1) 0%,
-        rgba(247, 232, 210, 0.99) 32%,
-        rgba(247, 232, 210, 0.92) 43%,
-        rgba(247, 232, 210, 0.48) 55%,
-        rgba(247, 232, 210, 0.08) 68%,
-        rgba(247, 232, 210, 0) 76%);
+        rgba(247, 232, 210, 1) 22%,
+        rgba(247, 232, 210, 0.98) 34%,
+        rgba(247, 232, 210, 0.88) 44%,
+        rgba(247, 232, 210, 0.55) 53%,
+        rgba(247, 232, 210, 0.20) 62%,
+        rgba(247, 232, 210, 0) 72%);
   }
 
+  /*
+    MAIN POSITIONING
+
+    10px left padding keeps the whole content
+    naturally close to the left side.
+
+    No translateX required.
+  */
   .hero-content {
     position: relative;
     z-index: 2;
+
     width: 100%;
     height: 100%;
+
     display: flex;
     align-items: flex-start;
+    justify-content: flex-start;
 
-    padding: 48px 0 20px 0px;
+    padding: 95px 0 20px 10px;
+
     box-sizing: border-box;
   }
 
   .hero-text-wrapper {
-    width: 52%;
+    width: 50%;
     max-width: 180px;
     min-width: 0;
+
     margin: 0;
+    padding: 0;
+
     text-align: left;
 
-    /* pushes only content farther left */
-    transform: translateX(-42px);
+    /* IMPORTANT */
+    transform: none;
   }
+
+  /* -------------------------
+     TITLE
+  ------------------------- */
 
   .hero-title {
     width: 100%;
@@ -325,40 +347,76 @@
     text-align: left;
   }
 
+  /*
+    Expected:
+    Handcrafted
+    Stories, Made
+    to Last
+  */
   .hero-title span {
     display: block;
     white-space: nowrap;
   }
 
+  /* -------------------------
+     DESCRIPTION
+  ------------------------- */
+
   .hero-description {
     width: 100%;
     max-width: 165px;
+
     margin: 0 0 14px;
+
+    font-family: Arial, sans-serif;
     font-size: 10px;
     line-height: 1.45;
+    font-weight: 400;
+
     color: #403832;
     text-align: left;
   }
 
+  /* -------------------------
+     BUTTONS
+  ------------------------- */
+
   .hero-buttons {
     display: flex;
     flex-direction: row;
+
     align-items: center;
     justify-content: flex-start;
+
     flex-wrap: nowrap;
+
     gap: 6px;
+
+    margin: 0;
+    padding: 0;
   }
 
   .hero-btn {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
     min-height: 32px;
     height: 32px;
-    padding: 0 11px;
+
+    padding: 0 10px;
+
     font-size: 8.5px;
     font-weight: 600;
+
     border-radius: 4px;
+
     white-space: nowrap;
+    box-sizing: border-box;
   }
 }
+
 
 /* =========================================
    SMALL MOBILE
@@ -366,46 +424,37 @@
 ========================================= */
 
 @media (max-width: 375px) {
+
   .hero-section {
     width: calc(100% - 16px);
     height: 335px;
-    margin: 8px auto 14px;
   }
 
   .hero-content {
-    padding: 45px 0 16px 16px;
+    padding-top: 44px;
+    padding-left: 9px;
   }
 
   .hero-text-wrapper {
-    width: 53%;
-    max-width: 165px;
-    transform: translateX(-8px);
+    width: 50%;
+    max-width: 170px;
+    transform: none;
   }
 
   .hero-title {
-    margin-bottom: 9px;
     font-size: 23px;
-    line-height: 0.98;
   }
 
   .hero-description {
-    max-width: 150px;
-    margin-bottom: 11px;
-    font-size: 8.5px;
-    line-height: 1.4;
-  }
-
-  .hero-buttons {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 5px;
+    max-width: 155px;
+    font-size: 9.5px;
   }
 
   .hero-btn {
-    min-height: 28px;
-    height: 28px;
-    padding: 0 7px;
-    font-size: 7px;
+    min-height: 30px;
+    height: 30px;
+    padding: 0 8px;
+    font-size: 8px;
   }
 }
 
@@ -415,46 +464,40 @@
 ========================================= */
 
 @media (max-width: 320px) {
+
   .hero-section {
     width: calc(100% - 12px);
-    height: 315px;
-    margin: 6px auto 12px;
-  }
-
-  .hero-bg-image {
-    object-position: center;
+    height: 320px;
   }
 
   .hero-content {
-    padding: 29px 0 14px 10px;
+    padding-top: 40px;
+    padding-left: 8px;
   }
 
   .hero-text-wrapper {
-    width: 36%;
-    max-width: 92px;
+    width: 51%;
+    max-width: 150px;
+    transform: none;
   }
 
   .hero-title {
-    margin-bottom: 8px;
-    font-size: 14px;
-    line-height: 1.08;
-  }
-
-  .hero-title span {
-    white-space: normal;
+    font-size: 20px;
   }
 
   .hero-description {
-    max-width: 88px;
-    margin-bottom: 10px;
-    font-size: 6.5px;
-    line-height: 1.35;
+    max-width: 140px;
+    font-size: 9px;
+  }
+
+  .hero-buttons {
+    gap: 4px;
   }
 
   .hero-btn {
-    min-height: 23px;
-    height: 23px;
+    min-height: 28px;
+    height: 28px;
     padding: 0 6px;
-    font-size: 6.2px;
+    font-size: 7.5px;
   }
 }
