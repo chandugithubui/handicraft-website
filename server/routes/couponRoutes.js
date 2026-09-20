@@ -308,4 +308,35 @@ router.delete('/:id', auth, adminAuth, async (req, res) => {
   }
 });
 
+/* =========================================================
+   GET ACTIVE COUPONS - PUBLIC
+========================================================= */
+
+router.get('/active', async (req, res) => {
+  try {
+    const now = new Date();
+
+    const coupons = await Coupon.find({
+      isActive: true,
+      expiryDate: { $gt: now },
+      $or: [
+        { usageLimit: null },
+        { $expr: { $lt: ['$usedCount', '$usageLimit'] } }
+      ]
+    })
+      .select(
+        'code discountType discountValue minimumOrderAmount maxDiscountAmount expiryDate'
+      )
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(coupons);
+  } catch (error) {
+    console.error('Fetch active coupons error:', error);
+
+    return res.status(500).json({
+      message: 'Failed to fetch active coupons'
+    });
+  }
+});
+
 module.exports = router;

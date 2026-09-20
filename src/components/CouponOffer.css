@@ -1,0 +1,266 @@
+.coupon-offer-section {
+  padding: 40px 20px;
+  background: #fffaf3;
+}
+
+.coupon-offer-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 88% 25%,
+      rgba(255, 255, 255, 0.12) 0,
+      rgba(255, 255, 255, 0) 30%
+    ),
+    linear-gradient(135deg, #6f1616 0%, #8d2222 55%, #641010 100%);
+  box-shadow: 0 12px 30px rgba(91, 20, 20, 0.16);
+}
+
+/* Decorative circles */
+.coupon-offer-container::before,
+.coupon-offer-container::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.coupon-offer-container::before {
+  width: 230px;
+  height: 230px;
+  right: -60px;
+  top: -90px;
+}
+
+.coupon-offer-container::after {
+  width: 160px;
+  height: 160px;
+  right: 120px;
+  bottom: -100px;
+}
+
+.coupon-offer-content {
+  position: relative;
+  z-index: 2;
+  padding: 42px 50px;
+  color: #ffffff;
+}
+
+.coupon-offer-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #f6dfb9;
+  color: #6f1616;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.coupon-offer-content h2 {
+  margin: 0 0 10px;
+  color: #ffffff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 38px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.coupon-offer-description {
+  max-width: 600px;
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.coupon-condition {
+  margin: 0 0 22px;
+  color: #f5dfc0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.coupon-code-wrapper {
+  display: flex;
+  align-items: stretch;
+  width: fit-content;
+  margin-bottom: 20px;
+}
+
+.coupon-code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border-radius: 7px 0 0 7px;
+  color: #333333;
+}
+
+.coupon-code span {
+  font-size: 12px;
+  color: #777777;
+}
+
+.coupon-code strong {
+  color: #7b1717;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.copy-coupon-btn {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid #f1d7ad;
+  border-radius: 0 7px 7px 0;
+  background: #f1d7ad;
+  color: #651313;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-coupon-btn:hover {
+  background: #ffffff;
+}
+
+.coupon-shop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.coupon-shop-btn:hover {
+  background: #ffffff;
+  color: #721717;
+  text-decoration: none;
+}
+
+
+/* Tablet */
+@media (max-width: 768px) {
+  .coupon-offer-section {
+    padding: 30px 16px;
+  }
+
+  .coupon-offer-content {
+    padding: 34px 30px;
+  }
+
+  .coupon-offer-content h2 {
+    font-size: 32px;
+  }
+}
+
+
+/* Mobile */
+@media (max-width: 480px) {
+  .coupon-offer-section {
+    padding: 22px 12px;
+  }
+
+  .coupon-offer-container {
+    border-radius: 14px;
+  }
+
+  .coupon-offer-content {
+    padding: 26px 20px;
+  }
+
+  .coupon-offer-label {
+    margin-bottom: 9px;
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .coupon-offer-content h2 {
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+
+  .coupon-offer-description {
+    margin-bottom: 9px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .coupon-condition {
+    margin-bottom: 18px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .coupon-code-wrapper {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .coupon-code {
+    flex: 1;
+    min-width: 0;
+    min-height: 42px;
+    padding: 7px 11px;
+    gap: 7px;
+  }
+
+  .coupon-code span {
+    font-size: 10px;
+  }
+
+  .coupon-code strong {
+    font-size: 13px;
+  }
+
+  .copy-coupon-btn {
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+
+  .coupon-shop-btn {
+    min-height: 38px;
+    padding: 0 18px;
+    font-size: 12px;
+  }
+}
+
+
+/* Very small phones */
+@media (max-width: 340px) {
+  .coupon-offer-content {
+    padding: 23px 16px;
+  }
+
+  .coupon-offer-content h2 {
+    font-size: 25px;
+  }
+
+  .coupon-code {
+    padding: 7px 8px;
+  }
+
+  .coupon-code strong {
+    font-size: 12px;
+  }
+
+  .copy-coupon-btn {
+    padding: 0 9px;
+    font-size: 10px;
+  }
+}

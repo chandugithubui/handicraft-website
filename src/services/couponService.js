@@ -81,3 +81,17 @@ export const deleteCoupon = async (couponId, token) => {
 
   return response.data;
 };
+
+// Get active coupons for customers
+export const getActiveCoupons = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/coupons/active`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching active coupons:', error);
+    throw error;
+  }
+};

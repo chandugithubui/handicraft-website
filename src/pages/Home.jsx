@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import HeroSection from '../components/HeroSection';
 import BenefitsStrip from '../components/BenefitsStrip';
 import CategorySection from '../components/CategorySection';
+import CouponOffer from '../components/CouponOffer';
 import ArtisanStorySection from '../components/ArtisanStorySection';
 import ProductModal from '../components/ProductModal';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
@@ -23,66 +24,66 @@ const Home = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [bestSellersLoading, setBestSellersLoading] = useState(true);
   const [bestSellersError, setBestSellersError] = useState('');
-  
+
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [testimonialsError, setTestimonialsError] = useState('');
 
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
-   
-   // Fetch Best Sellers from database
+
+  // Fetch Best Sellers from database
   // 1. Fetch Best Sellers
-useEffect(() => {
-  const fetchBestSellers = async () => {
-    try {
-      setBestSellersLoading(true);
-      setBestSellersError('');
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        setBestSellersLoading(true);
+        setBestSellersError('');
 
-      const products = await getProducts('?limit=100');
+        const products = await getProducts('?limit=100');
 
-      const featuredProducts = products.filter(
-        (product) => product.featured === true
-      );
+        const featuredProducts = products.filter(
+          (product) => product.featured === true
+        );
 
-      const productsToShow =
-        featuredProducts.length > 0
-          ? featuredProducts.slice(0, 8)
-          : products.slice(0, 8);
+        const productsToShow =
+          featuredProducts.length > 0
+            ? featuredProducts.slice(0, 8)
+            : products.slice(0, 8);
 
-      setBestSellers(productsToShow);
-    } catch (error) {
-      console.error('Error fetching best sellers:', error);
-      setBestSellersError('Unable to load best sellers.');
-    } finally {
-      setBestSellersLoading(false);
-    }
-  };
+        setBestSellers(productsToShow);
+      } catch (error) {
+        console.error('Error fetching best sellers:', error);
+        setBestSellersError('Unable to load best sellers.');
+      } finally {
+        setBestSellersLoading(false);
+      }
+    };
 
-  fetchBestSellers();
-}, []);
+    fetchBestSellers();
+  }, []);
 
 
-// 2. Fetch Testimonials
-useEffect(() => {
-  const fetchTestimonials = async () => {
-    try {
-      setTestimonialsLoading(true);
-      setTestimonialsError('');
+  // 2. Fetch Testimonials
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setTestimonialsLoading(true);
+        setTestimonialsError('');
 
-      const data = await getTestimonials();
+        const data = await getTestimonials();
 
-      setTestimonials(data);
-    } catch (error) {
-      console.error('Error fetching testimonials:', error);
-      setTestimonialsError('Unable to load testimonials.');
-    } finally {
-      setTestimonialsLoading(false);
-    }
-  };
+        setTestimonials(data);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        setTestimonialsError('Unable to load testimonials.');
+      } finally {
+        setTestimonialsLoading(false);
+      }
+    };
 
-  fetchTestimonials();
-}, []);
+    fetchTestimonials();
+  }, []);
 
 
   const handleViewDetails = (product) => {
@@ -96,28 +97,28 @@ useEffect(() => {
   };
 
   const handleAddToCart = (product) => {
-  const productWithId = {
-    ...product,
-    _id: product._id,
-    price: Number(product.price)
-  };
+    const productWithId = {
+      ...product,
+      _id: product._id,
+      price: Number(product.price)
+    };
 
-  addToCart(productWithId);
-};
+    addToCart(productWithId);
+  };
 
   const handleWishlist = (product) => {
-  const productWithId = {
-    ...product,
-    _id: product._id,
-    price: Number(product.price)
-  };
+    const productWithId = {
+      ...product,
+      _id: product._id,
+      price: Number(product.price)
+    };
 
-  addToWishlist(productWithId);
-};
+    addToWishlist(productWithId);
+  };
 
   const handleNewsletterSubscribe = async (e) => {
     e.preventDefault();
-    
+
     // Email validation - more permissive regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!newsletterEmail || !emailRegex.test(newsletterEmail)) {
@@ -166,6 +167,9 @@ useEffect(() => {
       {/* New Category Section */}
       <CategorySection />
 
+      {/* Dynamic Coupon Offer */}
+      <CouponOffer />
+
       {/* Artisan Story Section */}
       <ArtisanStorySection />
 
@@ -176,35 +180,35 @@ useEffect(() => {
             <h2 className="section-title">Best Sellers</h2>
             <p className="section-subtitle">Handpicked treasures from our artisans</p>
           </div>
-          
-            <Row>
-                {bestSellersLoading && (
-                   <Col xs={12} className="text-center">
-                        <p>Loading best sellers...</p>
-                   </Col>
-                 )}
 
-                 {bestSellersError && (
-                    <Col xs={12} className="text-center">
-                        <p>{bestSellersError}</p>
-                    </Col>
-                  )}
+          <Row>
+            {bestSellersLoading && (
+              <Col xs={12} className="text-center">
+                <p>Loading best sellers...</p>
+              </Col>
+            )}
 
-                 {!bestSellersLoading && !bestSellersError && bestSellers.map((product) => (
+            {bestSellersError && (
+              <Col xs={12} className="text-center">
+                <p>{bestSellersError}</p>
+              </Col>
+            )}
+
+            {!bestSellersLoading && !bestSellersError && bestSellers.map((product) => (
               <Col xs={6} sm={6} md={4} lg={3} key={product._id} className="mb-4">
                 <Card className="product-card h-100">
                   <div className="product-image-wrapper">
                     <Card.Img variant="top" src={product.image} alt={product.name} />
                     <div className="product-actions">
-                      <Button 
-                        variant="light" 
+                      <Button
+                        variant="light"
                         className="action-btn"
                         onClick={() => handleWishlist(product)}
                       >
                         <FaHeart className={isInWishlist(product._id) ? 'text-danger' : ''} />
                       </Button>
-                      <Button 
-                        variant="light" 
+                      <Button
+                        variant="light"
                         className="action-btn"
                         onClick={() => handleAddToCart(product)}
                       >
@@ -214,9 +218,9 @@ useEffect(() => {
                   </div>
                   <Card.Body>
                     <Card.Title className="product-title">{product.name}</Card.Title>
-                    
+
                     <Card.Text className="product-price">
-                         ₹{Number(product.price).toLocaleString('en-IN')}
+                      ₹{Number(product.price).toLocaleString('en-IN')}
                     </Card.Text>
                     <Button onClick={() => handleViewDetails(product)} className="btn btn-primary w-100 view-details-btn">View Details</Button>
                   </Card.Body>
@@ -228,17 +232,6 @@ useEffect(() => {
             <Link to="/products" className="btn btn-outline-primary btn-lg">View All Products</Link>
           </div>
         </Container>
-      </section>
-
-      {/* Promotional Banner Section */}
-      <section className="promo-banner-section">
-        <div className="promo-banner">
-          <div className="promo-content">
-            <h2 className="promo-title">Special Offer: 20% Off on All Pattachitra Art</h2>
-            <p className="promo-subtitle">Use code: CRAFT20 at checkout</p>
-            <Link to="/products?category=Pattachitra" className="btn btn-primary btn-lg promo-btn">Shop Now</Link>
-          </div>
-        </div>
       </section>
 
       {/* Why Choose Us Section */}
@@ -275,41 +268,41 @@ useEffect(() => {
             <p className="section-subtitle">Real reviews from our happy customers</p>
           </div>
           <Row>
-              {testimonialsLoading && (
-                <Col xs={12} className="text-center">
-                   <p>Loading testimonials...</p>
-                </Col>
-               )}
-
-               {testimonialsError && (
-                 <Col xs={12} className="text-center">
-                   <p>{testimonialsError}</p>
-                 </Col>
-                )}
-
-               {!testimonialsLoading &&
-                   !testimonialsError &&
-                    testimonials.map((testimonial) => (
-               <Col md={4} key={testimonial._id} className="mb-4">
-                <Card className="testimonial-card h-100">
-                  <Card.Body>
-                    <div className="testimonial-rating">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <FaStar key={i} className="star-icon" />
-                      ))}
-                    </div>
-                    <p className="testimonial-text">"{testimonial.text}"</p>
-                    <div className="testimonial-author">
-                      <img src={testimonial.avatar} alt={testimonial.name} className="author-avatar" />
-                      <div>
-                        <h5 className="author-name">{testimonial.name}</h5>
-                        <p className="author-location">{testimonial.location}</p>
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
+            {testimonialsLoading && (
+              <Col xs={12} className="text-center">
+                <p>Loading testimonials...</p>
               </Col>
-            ))}
+            )}
+
+            {testimonialsError && (
+              <Col xs={12} className="text-center">
+                <p>{testimonialsError}</p>
+              </Col>
+            )}
+
+            {!testimonialsLoading &&
+              !testimonialsError &&
+              testimonials.map((testimonial) => (
+                <Col md={4} key={testimonial._id} className="mb-4">
+                  <Card className="testimonial-card h-100">
+                    <Card.Body>
+                      <div className="testimonial-rating">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <FaStar key={i} className="star-icon" />
+                        ))}
+                      </div>
+                      <p className="testimonial-text">"{testimonial.text}"</p>
+                      <div className="testimonial-author">
+                        <img src={testimonial.avatar} alt={testimonial.name} className="author-avatar" />
+                        <div>
+                          <h5 className="author-name">{testimonial.name}</h5>
+                          <p className="author-location">{testimonial.location}</p>
+                        </div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
           </Row>
         </Container>
       </section>
@@ -322,15 +315,15 @@ useEffect(() => {
               <h2 className="newsletter-title">Subscribe to Our Newsletter</h2>
               <p className="newsletter-subtitle">Get updates on new arrivals, exclusive offers, and artisan stories</p>
               <div className="newsletter-form">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email address" 
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
                   className="form-control newsletter-input"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                 />
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   className="newsletter-btn"
                   onClick={handleNewsletterSubscribe}
                 >
@@ -348,10 +341,10 @@ useEffect(() => {
       </section>
 
       {/* Product Modal */}
-      <ProductModal 
-        show={showModal} 
-        onHide={handleCloseModal} 
-        product={selectedProduct} 
+      <ProductModal
+        show={showModal}
+        onHide={handleCloseModal}
+        product={selectedProduct}
       />
     </div>
   );
