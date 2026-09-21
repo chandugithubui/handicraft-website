@@ -32,6 +32,10 @@ const testimonialRoutes = require('./routes/testimonialRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+
+// Trust the first reverse proxy (Render)
+app.set('trust proxy', 1);
+
 /* ===========================
    MIDDLEWARE
 =========================== */

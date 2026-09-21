@@ -1,27 +1,50 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Initialize Resend using the API key from environment variables
+const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * Send email using Resend API
+ *
+ * @param {Object} options
+ * @param {string} options.to - Recipient email
+ * @param {string} options.subject - Email subject
+ * @param {string} options.html - HTML email content
+ */
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Handicraft Hub" <${process.env.EMAIL_USER}>`,
+    // Basic validation
+    if (!to) {
+      throw new Error('Recipient email is required');
+    }
+
+    if (!subject) {
+      throw new Error('Email subject is required');
+    }
+
+    if (!html) {
+      throw new Error('Email content is required');
+    }
+
+    // Send email through Resend HTTP API
+    const { data, error } = await resend.emails.send({
+      from: 'Handicraft Hub <onboarding@resend.dev>',
       to,
       subject,
       html
     });
 
-    console.log('Email sent:', info.messageId);
+    // Resend can return an error without throwing automatically
+    if (error) {
+      throw new Error(error.message);
+    }
 
-    return info;
+    console.log('Email sent successfully:', data?.id);
+
+    return data;
+
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error('Email sending failed:', error.message);
     throw error;
   }
 };
