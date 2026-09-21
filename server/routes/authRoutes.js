@@ -4,6 +4,8 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // Rate limiter: max 10 requests per 15 minutes per IP on auth routes
 const authLimiter = rateLimit({
@@ -70,8 +72,14 @@ router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        message: 'Email and password are required'
+      });
+    }
+
     // Lowercase email for consistency
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Check if user exists
     const user = await User.findOne({ email: normalizedEmail });
@@ -108,11 +116,240 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 });
 
+// Forgot Password
+router.post('/forgot-password', authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: 'Email is required'
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({
+      email: normalizedEmail
+    });
+
+    /*
+      Return the same response even if the account does not exist.
+      This prevents exposing which email addresses are registered.
+    */
+    if (!user) {
+      return res.json({
+        message:
+          'If an account exists with this email, a password reset link has been sent.'
+      });
+    }
+
+    // Generate secure random reset token
+    const resetToken = crypto
+      .randomBytes(32)
+      .toString('hex');
+
+    // Hash token before storing it in MongoDB
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    user.resetPasswordToken = hashedToken;
+
+    // Token valid for 15 minutes
+    user.resetPasswordExpires =
+      Date.now() + 15 * 60 * 1000;
+
+    await user.save();
+
+    // Frontend reset-password URL
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      'http://localhost:5173';
+
+    const resetUrl =
+      `${frontendUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Reset Your Password - Handicraft Hub',
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #333333; max-width: 650px; margin: auto;">
+
+            <h2 style="color: #7b1717;">
+              Reset Your Password
+            </h2>
+
+            <p>Hi ${user.name},</p>
+
+            <p>
+              We received a request to reset your
+              Handicraft Hub password.
+            </p>
+
+            <p>
+              Click the button below to create a new password.
+            </p>
+
+            <p style="margin: 30px 0;">
+              <a
+                href="${resetUrl}"
+                style="
+                  background: #7b1717;
+                  color: #ffffff;
+                  padding: 12px 20px;
+                  text-decoration: none;
+                  border-radius: 5px;
+                  display: inline-block;
+                "
+              >
+                Reset Password
+              </a>
+            </p>
+
+            <p>
+              This password reset link will expire in
+              <strong>15 minutes</strong>.
+            </p>
+
+            <p>
+              If you did not request a password reset,
+              you can safely ignore this email.
+            </p>
+
+            <p>
+              <strong>Handicraft Hub</strong>
+            </p>
+
+          </div>
+        `
+      });
+
+      console.log(
+        'Password reset email sent successfully'
+      );
+
+    } catch (emailError) {
+      /*
+        If email fails, remove the token because
+        the user never received it.
+      */
+      user.resetPasswordToken = null;
+      user.resetPasswordExpires = null;
+
+      await user.save();
+
+      console.error(
+        'Password reset email failed:',
+        emailError.message
+      );
+
+      return res.status(500).json({
+        message:
+          'Unable to send password reset email. Please try again.'
+      });
+    }
+
+    return res.json({
+      message:
+        'If an account exists with this email, a password reset link has been sent.'
+    });
+
+  } catch (error) {
+    console.error(
+      'Forgot password error:',
+      error
+    );
+
+    return res.status(500).json({
+      message: 'Server error'
+    });
+  }
+});
+
+// Reset Password
+router.post('/reset-password/:token', authLimiter, async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Validate password
+    if (!password) {
+      return res.status(400).json({
+        message: 'New password is required'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    // Hash the token received from the URL
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with matching token that has not expired
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message:
+          'Password reset link is invalid or has expired'
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(
+      password,
+      salt
+    );
+
+    // Update password
+    user.password = hashedPassword;
+
+    // Reset token can only be used once
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    console.log(
+      'Password reset successfully for user:',
+      user._id.toString()
+    );
+
+    return res.json({
+      message:
+        'Password reset successfully. You can now log in with your new password.'
+    });
+
+  } catch (error) {
+    console.error(
+      'Reset password error:',
+      error
+    );
+
+    return res.status(500).json({
+      message: 'Server error while resetting password'
+    });
+  }
+});
 // Get user profile (protected route)
 router.get('/profile', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({ message: 'No authentication token' });
     }

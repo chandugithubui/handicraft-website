@@ -74,6 +74,16 @@
   font-size: var(--font-size-sm);
 }
 
+.auth-success {
+  background-color: rgba(22, 163, 74, 0.1);
+  color: #166534;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-6);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+}
+
 /* Auth Form */
 .auth-form {
   display: flex;

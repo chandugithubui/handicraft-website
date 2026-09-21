@@ -7,13 +7,15 @@ import AnnouncementBar from './components/AnnouncementBar';
 import HeaderNew from './components/HeaderNew';
 import FooterNew from './components/FooterNew';
 import About from './pages/About';
-import Home from './pages/Home'; 
+import Home from './pages/Home';
 import Contact from './pages/Contact';
 import Product from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import CategoryPage from './pages/CategoryPage';
+import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
@@ -81,8 +83,17 @@ const App = () => {
                 <Route path="/artisan/:slug" element={<ArtisanProfile />} />
 
                 {/* Auth Routes */}
+                {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route
+                  path="/forgot-password"
+                  element={<ForgotPassword />}
+                />
+                <Route
+                  path="/reset-password/:token"
+                  element={<ResetPassword />}
+                />
               </Routes>
             </main>
             <FooterNew />
