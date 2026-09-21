@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const Order = require('../models/order');
 const Product = require('../models/product');
 const Coupon = require('../models/coupon');
+const User = require('../models/user');
 const { auth } = require('../middleware/auth');
+const sendEmail = require('../utils/sendEmail');
 
 /* =========================================================
    CREATE NEW ORDER
@@ -310,9 +312,258 @@ router.post('/', auth, async (req, res) => {
       'Order created successfully:',
       order._id.toString()
     );
+    const customer = await User.findById(
+      req.user.userId
+    ).select('name email');
 
     /* -------------------------------------------------------
-       11. Send response
+   11. Send customer order confirmation email
+------------------------------------------------------- */
+
+    try {
+
+      if (customer && customer.email) {
+        const itemsHtml = validatedItems
+          .map(
+            (item) => `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">
+              ${item.name}
+            </td>
+            <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">
+              ${item.quantity}
+            </td>
+            <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">
+              ₹${item.price}
+            </td>
+          </tr>
+        `
+          )
+          .join('');
+
+        await sendEmail({
+          to: customer.email,
+          subject: `Order Confirmation - Handicraft Hub`,
+          html: `
+        <div style="font-family: Arial, sans-serif; color: #333333;">
+          <h2 style="color: #7b1717;">
+            Thank you for your order!
+          </h2>
+
+          <p>Hi ${customer.name},</p>
+
+          <p>
+            Your order has been placed successfully.
+          </p>
+
+          <p>
+            <strong>Order ID:</strong> ${order._id}
+          </p>
+
+          <table
+            style="width: 100%; border-collapse: collapse; margin: 20px 0;"
+          >
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 8px;">
+                  Product
+                </th>
+                <th style="text-align: left; padding: 8px;">
+                  Quantity
+                </th>
+                <th style="text-align: left; padding: 8px;">
+                  Price
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <p>
+            Subtotal:
+            <strong>₹${subtotal}</strong>
+          </p>
+
+          <p>
+            Shipping:
+            <strong>
+              ${shippingAmount === 0 ? 'Free' : `₹${shippingAmount}`}
+            </strong>
+          </p>
+
+          ${discountAmount > 0
+              ? `
+                <p>
+                  Discount${appliedCoupon
+                ? ` (${appliedCoupon.code})`
+                : ''
+              }:
+                  <strong>-₹${discountAmount}</strong>
+                </p>
+              `
+              : ''
+            }
+
+          <h3 style="color: #7b1717;">
+            Total Paid: ₹${totalAmount}
+          </h3>
+
+          <p>
+            Payment Method:
+            <strong>${paymentMethod || 'COD'}</strong>
+          </p>
+
+          <p>
+            We'll notify you when your order status changes.
+          </p>
+
+          <p>
+            Thank you for supporting Indian artisans.
+          </p>
+
+          <p>
+            <strong>Handicraft Hub</strong>
+          </p>
+        </div>
+      `
+        })
+          .then(() => {
+            console.log(
+              'Order confirmation email sent to customer'
+            );
+          })
+          .catch((emailError) => {
+            console.error(
+              'Order confirmation email failed:',
+              emailError.message
+            );
+          });
+      }
+    } catch (emailError) {
+      console.error(
+        'Order confirmation setup failed:',
+        emailError.message
+      );
+    }
+    /* -------------------------------------------------------
+   12. Send new order notification to admin
+   ------------------------------------------------------- */
+
+    // Send new order notification to admin
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL;
+
+      if (adminEmail) {
+        const itemsHtml = order.items
+          .map(
+            (item) => `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+              ${item.name}
+            </td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+              ${item.quantity}
+            </td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+              ₹${item.price}
+            </td>
+          </tr>
+        `
+          )
+          .join('');
+
+        sendEmail({
+          to: adminEmail,
+          subject: `New Order Received - ${order._id}`,
+          html: `
+        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto;">
+          <h2 style="color: #7b1717;">New Order Received</h2>
+
+          <p>A new order has been placed on Handicraft Hub.</p>
+
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Customer:</strong> ${customer?.name || 'N/A'}</p>
+          <p><strong>Email:</strong> ${customer?.email || 'N/A'}</p>
+          <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+
+          <h3>Order Items</h3>
+
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 8px;">Product</th>
+                <th style="text-align: left; padding: 8px;">Quantity</th>
+                <th style="text-align: left; padding: 8px;">Price</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <p><strong>Subtotal:</strong> ₹${order.subtotal}</p>
+
+            <p>
+              <strong>Shipping:</strong>
+              ${order.shippingAmount === 0
+              ? 'Free'
+              : `₹${order.shippingAmount}`
+            }
+            </p>
+
+            ${order.discountAmount > 0
+              ? `<p><strong>Discount:</strong> -₹${order.discountAmount}</p>`
+              : ''
+            }
+
+            <h3 style="color: #7b1717;">
+              Order Total: ₹${order.totalAmount}
+            </h3>
+          </div>
+
+          <h3>Shipping Address</h3>
+
+          <p>
+            ${order.shippingAddress.fullName}<br>
+            ${order.shippingAddress.address}<br>
+            ${order.shippingAddress.city},
+            ${order.shippingAddress.state} -
+            ${order.shippingAddress.pincode}<br>
+            Phone: ${order.shippingAddress.phone}
+          </p>
+        </div>
+      `
+        })
+          .then(() => {
+            console.log(
+              'Admin order notification sent successfully'
+            );
+          })
+          .catch((emailError) => {
+            console.error(
+              'Admin order notification failed:',
+              emailError.message
+            );
+          });
+
+      }
+
+
+    } catch (emailError) {
+      console.error(
+        'Admin email setup failed:',
+        emailError.message
+      );
+    }
+
+
+    /* -------------------------------------------------------
+       13. Send response
     ------------------------------------------------------- */
 
     return res.status(201).json({
@@ -467,7 +718,7 @@ router.get('/:id', auth, async (req, res) => {
       !order.user ||
       (
         order.user.toString() !==
-          req.user.userId &&
+        req.user.userId &&
         req.user.role !== 'admin'
       )
     ) {
@@ -620,6 +871,90 @@ router.patch(
         });
       }
 
+      /* -------------------------------------------------------
+   Send order status update email to customer
+------------------------------------------------------- */
+
+      try {
+        const customer = await User.findById(
+          order.user
+        ).select('name email');
+
+        if (customer && customer.email) {
+
+          const statusMessages = {
+            pending: 'Your order has been received and is pending confirmation.',
+            processing: 'Your order is now being processed.',
+            shipped: 'Great news! Your order has been shipped.',
+            delivered: 'Your order has been delivered successfully.',
+            cancelled: 'Your order has been cancelled.'
+          };
+
+          sendEmail({
+            to: customer.email,
+            subject: `Order ${orderStatus} - Handicraft Hub`,
+            html: `
+        <div style="font-family: Arial, sans-serif; color: #333333; max-width: 650px; margin: auto;">
+
+          <h2 style="color: #7b1717;">
+            Order Status Updated
+          </h2>
+
+          <p>Hi ${customer.name},</p>
+
+          <p>
+            ${statusMessages[orderStatus]}
+          </p>
+
+          <p>
+            <strong>Order ID:</strong> ${order._id}
+          </p>
+
+          <p>
+            <strong>Current Status:</strong>
+            ${orderStatus.toUpperCase()}
+          </p>
+
+          <p>
+            <strong>Order Total:</strong>
+            ₹${order.totalAmount}
+          </p>
+
+          <p>
+            You can check your order details from the
+            My Orders section of Handicraft Hub.
+          </p>
+
+          <p>
+            Thank you for supporting Indian artisans.
+          </p>
+
+          <p>
+            <strong>Handicraft Hub</strong>
+          </p>
+
+        </div>
+      `
+          })
+            .then(() => {
+              console.log(
+                `Order status email sent to customer: ${orderStatus}`
+              );
+            })
+            .catch((emailError) => {
+              console.error(
+                'Order status email failed:',
+                emailError.message
+              );
+            });
+        }
+
+      } catch (emailError) {
+        console.error(
+          'Order status email setup failed:',
+          emailError.message
+        );
+      }
       return res.json(order);
 
     } catch (error) {
