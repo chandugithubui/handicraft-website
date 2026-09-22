@@ -51,19 +51,19 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div key={item._id} className="cart-item">
                 <div className="cart-item-image">
-                  <img 
-                    src={getImageUrl(item.image)} 
+                  <img
+                    src={getImageUrl(item.imageUrl || item.image)}
                     alt={item.name}
                     onError={(e) => {
                       e.target.src = '/images/placeholder.jpg';
                     }}
                   />
                 </div>
-                
+
                 <div className="cart-item-details">
                   <div className="cart-item-header">
                     <h3 className="cart-item-name">{item.name}</h3>
-                    <button 
+                    <button
                       className="cart-item-remove"
                       onClick={() => removeFromCart(item._id)}
                       aria-label="Remove item"
@@ -71,13 +71,13 @@ const Cart = () => {
                       <FiTrash2 />
                     </button>
                   </div>
-                  
+
                   <p className="cart-item-category">{item.category || 'Handicraft'}</p>
-                  
+
                   <div className="cart-item-price">₹{item.price.toLocaleString()}</div>
-                  
+
                   <div className="cart-item-quantity">
-                    <button 
+                    <button
                       className="quantity-btn"
                       onClick={() => updateQuantity(item._id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
@@ -85,7 +85,7 @@ const Cart = () => {
                       <FiMinus />
                     </button>
                     <span className="quantity-value">{item.quantity}</span>
-                    <button 
+                    <button
                       className="quantity-btn"
                       onClick={() => updateQuantity(item._id, item.quantity + 1)}
                       disabled={item.stock && item.quantity >= item.stock}
@@ -93,7 +93,7 @@ const Cart = () => {
                       <FiPlus />
                     </button>
                   </div>
-                  
+
                   <div className="cart-item-total">
                     Total: ₹{(item.price * item.quantity).toLocaleString()}
                   </div>
@@ -106,12 +106,12 @@ const Cart = () => {
           <div className="cart-summary">
             <div className="summary-card">
               <h3 className="summary-title">Order Summary</h3>
-              
+
               <div className="summary-row">
                 <span className="summary-label">Subtotal</span>
                 <span className="summary-value">₹{subtotal.toLocaleString()}</span>
               </div>
-              
+
               <div className="summary-row">
                 <span className="summary-label">Shipping</span>
                 <span className="summary-value">
@@ -125,31 +125,31 @@ const Cart = () => {
                   )}
                 </span>
               </div>
-              
+
               {shipping > 0 && (
                 <div className="shipping-note">
                   Add ₹{(999 - subtotal).toLocaleString()} more for free shipping!
                 </div>
               )}
-              
+
               <div className="summary-divider"></div>
-              
+
               <div className="summary-row summary-total">
                 <span className="summary-label total-label">Total</span>
                 <span className="summary-value total-value">₹{total.toLocaleString()}</span>
               </div>
-              
+
               <Link to="/checkout" className="btn btn-primary btn-lg checkout-btn">
                 Proceed to Checkout
               </Link>
-              
-              <button 
+
+              <button
                 className="btn btn-outline btn-lg clear-cart-btn"
                 onClick={clearCart}
               >
                 Clear Cart
               </button>
-              
+
               <div className="continue-shopping">
                 <Link to="/products">
                   <FiArrowLeft className="continue-icon" />
@@ -157,7 +157,7 @@ const Cart = () => {
                 </Link>
               </div>
             </div>
-            
+
             {/* Trust Badges */}
             <div className="trust-badges">
               <div className="trust-badge">

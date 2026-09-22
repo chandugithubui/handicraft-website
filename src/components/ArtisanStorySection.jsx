@@ -1,112 +1,145 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHeart, FiMapPin, FiAward, FiArrowRight } from 'react-icons/fi';
+import { FiMapPin, FiArrowRight } from 'react-icons/fi';
+import { getArtisans } from '../services/artisanService';
 import './ArtisanStorySection.css';
 
 const ArtisanStorySection = () => {
-  const artisans = [
-    {
-      id: 1,
-      name: 'Rakesh Prusty',
-      slug: 'rakesh-prusty',
-      craft: 'Pattachitra Painting',
-      location: 'Chandanpur, Puri, Odisha',
-      years: 25,
-      story: 'Rakesh learned the ancient art of Pattachitra from his father, who learned it from his father. For 5 years, he has been keeping this 200-year-old tradition alive, creating intricate mythological paintings on cloth and palm leaves.',
-      image: '/images/rakesh.jpeg',
-      specialty: 'Lord Jagannath Paintings'
-    },
-    {
-      id: 2,
-      name: 'Jagannath Das',
-      slug: 'jagannath-das',
-      craft: 'Palm Leaf Engraving',
-      location: 'Raghurajpur, Odisha',
-      years: 26,
-      story: 'Jagannath is a master of palm leaf engraving, a delicate art form that requires immense patience and precision. Her work tells stories from Indian epics through intricate cut-work on dried palm leaves.',
-      image: '/images/jaga.jpeg',
-      specialty: 'Epic Narratives'
-    },
-    {
-      id: 3,
-      name: 'Chandan Sahoo ',
-      slug: 'chandan-sahoo',
-      craft: 'Wood Carving',
-      location: 'Saharanpur, Uttar Pradesh',
-      years: 26,
-      story: 'Jagannath comes from a family of wood carvers who have been crafting beautiful wooden artifacts for generations. His work ranges from decorative bowls to intricate furniture pieces.',
-      image: '/images/chandan.jpeg',
-      specialty: 'Decorative Artifacts'
-    }
-  ];
+  const [artisans, setArtisans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchArtisans = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const data = await getArtisans();
+        setArtisans(data);
+      } catch (error) {
+        console.error('Failed to load artisans:', error);
+        setError('Unable to load artisans.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtisans();
+  }, []);
 
   return (
-    <div className="artisan-story-section">
+    <section className="artisan-story-section">
       <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">Meet Our Artisans</h2>
-          <p className="section-subtitle">
-            The skilled hands behind every masterpiece. Each artisan brings generations of tradition and expertise to create unique handcrafted treasures.
+
+        {/* Section Header */}
+        <div className="artisan-section-header">
+          <h2 className="artisan-section-title">
+            Meet Our Artisans
+          </h2>
+
+          <p className="artisan-section-tagline">
+            Real people. Real stories. Real craftsmanship.
+          </p>
+
+          <p className="artisan-section-description">
+            Discover the skilled hands preserving Odisha&apos;s traditional
+            crafts and creating meaningful handcrafted pieces.
           </p>
         </div>
 
-        <div className="artisans-grid">
-          {artisans.map((artisan) => (
-            <div key={artisan.id} className="artisan-card">
-              <div className={`artisan-image ${artisan.id === 1 ? 'face-high' :
-                                                   artisan.id === 2 ? 'face-right' :
-                                                   ''}`}>
-                <img src={artisan.image} alt={artisan.name} />
-                <div className="artisan-overlay">
-                  <div className="craft-badge">{artisan.craft}</div>
-                </div>
-              </div>
-              
-              <div className="artisan-content">
-                <div className="artisan-header">
-                  <h3 className="artisan-name">{artisan.name}</h3>
-                  <div className="artisan-location">
-                    <FiMapPin className="location-icon" />
+        {/* Loading */}
+        {loading && (
+          <div className="artisan-status">
+            <p>Loading artisans...</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="artisan-status">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Artisan Cards */}
+        {!loading && !error && (
+          <div className="artisans-grid">
+            {artisans.map((artisan) => (
+              <article key={artisan._id} className="artisan-card">
+
+                {/* Image */}
+                <div className="artisan-image">
+                  <img
+                    src={artisan.image}
+                    alt={artisan.name}
+                  />
+
+                  <div className="artisan-location-badge">
+                    <FiMapPin />
                     <span>{artisan.location}</span>
                   </div>
                 </div>
 
-                <div className="artisan-stats">
-                  <div className="stat">
-                    <FiAward className="stat-icon" />
-                    <span>{artisan.years} Years</span>
+                {/* Content */}
+                <div className="artisan-content">
+
+                  <div className="artisan-info-row">
+                    <div className="artisan-main-info">
+                      <h3 className="artisan-name">
+                        {artisan.name}
+                      </h3>
+
+                      <p className="artisan-craft">
+                        {artisan.craft}
+                      </p>
+                    </div>
+
+                    <div className="artisan-experience">
+                      {artisan.years}+ Years
+                    </div>
                   </div>
-                  <div className="stat">
-                    <FiHeart className="stat-icon" />
-                    <span>{artisan.specialty}</span>
-                  </div>
+
+                  <p className="artisan-story">
+                    {artisan.story}
+                  </p>
+
+                  <Link
+                    to={`/artisan/${artisan.slug}`}
+                    className="artisan-profile-btn"
+                  >
+                    <span>View Profile</span>
+                    <FiArrowRight />
+                  </Link>
+
                 </div>
-
-                <p className="artisan-story">{artisan.story}</p>
-
-                <Link to={`/artisan/${artisan.slug}`} className="btn btn-outline artisan-btn">
-                  View Their Work
-                  <FiArrowRight className="btn-icon" />
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="artisan-cta">
-          <div className="cta-content">
-            <h3 className="cta-title">Support Traditional Craftsmanship</h3>
-            <p className="cta-description">
-              Every purchase directly supports our artisans and their families, helping preserve centuries-old traditions for future generations.
-            </p>
-            <a href="/products" className="btn btn-primary cta-btn">
-              Shop Artisan Products
-              <FiArrowRight className="btn-icon" />
-            </a>
+              </article>
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* Bottom CTA */}
+        {!loading && !error && artisans.length > 0 && (
+          <div className="artisan-bottom-area">
+
+            <Link
+              to="/products"
+              className="artisan-products-btn"
+            >
+              Explore Artisan Products
+              <FiArrowRight />
+            </Link>
+
+            <p className="artisan-support-text">
+              “Supporting artisans means preserving traditional
+              craftsmanship for future generations.”
+            </p>
+
+          </div>
+        )}
+
       </div>
-    </div>
+    </section>
   );
 };
 

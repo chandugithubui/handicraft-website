@@ -11,7 +11,14 @@ const productSchema = new mongoose.Schema({
   stock: { type: Number, default: 0 },
   rating: { type: Number, default: 0 },
   numReviews: { type: Number, default: 0 },
-  featured: { type: Boolean, default: false }
+  featured: { type: Boolean, default: false },
+
+  artisan: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Artisan',
+  default: null
+}
+
 });
 
 // Create the model from the schema
