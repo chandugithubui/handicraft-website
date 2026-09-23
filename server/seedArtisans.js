@@ -16,7 +16,7 @@ const artisans = [
     slug: 'rakesh-prusty',
     craft: 'Wood Carving',
     location: 'Puri, Odisha',
-    years: 25,
+    years: 5,
     specialty: 'Traditional Decorative Woodwork',
     featured: true,
 
@@ -31,28 +31,28 @@ const artisans = [
         title: 'Wood Selection',
         description:
           'Suitable wood is selected according to the design and requirements of the handcrafted piece.',
-        image: '/images/rakesh.png'
+        image: '/images/wood-selection.png'
       },
       {
         step: 2,
         title: 'Shaping the Wood',
         description:
           'The selected wood is cut and shaped to prepare the basic form of the design.',
-        image: '/images/rakesh.png'
+        image: '/images/wood-shaping.png'
       },
       {
         step: 3,
         title: 'Hand Carving',
         description:
           'Carving tools are used to create detailed patterns and decorative elements by hand.',
-        image: '/images/rakesh.png'
+        image: '/images/wood-hand-carving.png'
       },
       {
         step: 4,
         title: 'Sanding & Finishing',
         description:
           'The completed carving is carefully sanded and finished to enhance its final appearance.',
-        image: '/images/rakesh.png'
+        image: '/images/wood-finishing.png'
       }
     ]
   },
@@ -65,7 +65,7 @@ const artisans = [
     slug: 'monalisa-sahoo',
     craft: 'Pattachitra Painting',
     location: 'Khurda, Odisha',
-    years: 26,
+    years: 7,
     specialty: 'Traditional Pattachitra Art',
     featured: true,
 
@@ -114,7 +114,7 @@ const artisans = [
     slug: 'jagannath-das',
     craft: 'Palm Leaf Engraving',
     location: 'Puri, Odisha',
-    years: 26,
+    years: 4,
     specialty: 'Traditional Palm Leaf Engraving',
     featured: true,
 
@@ -129,28 +129,28 @@ const artisans = [
         title: 'Preparing Palm Leaves',
         description:
           'Palm leaves are selected, dried, and prepared before the engraving process begins.',
-        image: '/images/jaga.png'
+        image: '/images/palm-leaf-preparation.png'
       },
       {
         step: 2,
         title: 'Planning the Design',
         description:
           'The composition is carefully planned across the prepared palm leaf surface.',
-        image: '/images/jaga.png'
+        image: '/images/palm-leaf-design.png'
       },
       {
         step: 3,
         title: 'Hand Engraving',
         description:
           'Traditional tools are used to engrave fine lines, patterns, and figures onto the palm leaf.',
-        image: '/images/jaga.png'
+        image: '/images/palm-leaf-engraving.png'
       },
       {
         step: 4,
         title: 'Finishing the Artwork',
         description:
           'The engraved sections are cleaned, arranged, and finished to reveal the complete artwork.',
-        image: '/images/jaga.png'
+        image: '/images/palm-leaf-finishing.png'
       }
     ]
   }

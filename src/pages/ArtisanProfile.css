@@ -392,3 +392,89 @@
     gap: var(--spacing-4);
   }
 }
+
+/* =========================================
+   Craft Process Responsive Improvements
+   ========================================= */
+
+/* Tablet: 2 cards per row */
+@media (max-width: 1024px) {
+  .craft-process-timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-6);
+  }
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 768px) {
+  .craft-process-section {
+    padding: var(--spacing-6);
+  }
+
+  .craft-process-timeline {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+
+  .process-step {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .step-number {
+    width: 44px;
+    height: 44px;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .step-content {
+    width: 100%;
+    padding: var(--spacing-4);
+  }
+
+  .step-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+  }
+
+  .step-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .step-description {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  /* Disable desktop hover movement on touch screens */
+  .process-step:hover .step-content {
+    transform: none;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .craft-process-section {
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+  }
+
+  .craft-process-timeline {
+    gap: 24px;
+  }
+
+  .step-content {
+    padding: 12px;
+  }
+
+  .step-image {
+    aspect-ratio: 4 / 3;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+}
