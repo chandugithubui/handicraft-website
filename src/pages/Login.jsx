@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { login as loginApi } from '../services/authService';
+import {
+  login as loginApi,
+  googleLogin
+} from '../services/authService';
+import { GoogleLogin } from '@react-oauth/google';
 import './Auth.css';
 
 const Login = () => {
@@ -12,7 +16,7 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -37,6 +41,32 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await googleLogin(
+        credentialResponse.credential
+      );
+
+      login(response.token, response.user);
+
+      navigate('/');
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        'Google Sign-In failed. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed. Please try again.');
   };
 
   return (
@@ -102,6 +132,21 @@ const Login = () => {
             </button>
           </form>
 
+          <div className="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <div className="google-login-wrapper">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="continue_with"
+              shape="rectangular"
+              size="large"
+              width="350"
+            />
+          </div>
+          
           <div className="auth-footer">
             <p className="auth-footer-text">
               Don't have an account?{' '}

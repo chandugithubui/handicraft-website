@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+
   email: {
     type: String,
     required: true,
@@ -13,11 +14,38 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+
+  // Required only for normal email/password accounts
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: function () {
+      return !this.googleId;
+    },
+    minlength: 6,
+    default: null
   },
+
+  // Google account identifier
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    default: null
+  },
+
+  // How the account was originally created
+  authProvider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
+  },
+
+  // Google profile image
+  avatar: {
+    type: String,
+    default: null
+  },
+
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -33,6 +61,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+
   createdAt: {
     type: Date,
     default: Date.now

@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { register as registerApi } from '../services/authService';
+import {
+  register as registerApi,
+  googleLogin
+} from '../services/authService';
+import { GoogleLogin } from '@react-oauth/google';
 import './Auth.css';
 
 const Register = () => {
@@ -14,7 +18,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -50,6 +54,33 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await googleLogin(
+        credentialResponse.credential
+      );
+
+      login(response.token, response.user);
+
+      navigate('/');
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        'Google Sign-Up failed. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-Up failed. Please try again.');
   };
 
   return (
@@ -140,6 +171,21 @@ const Register = () => {
               <FiArrowRight className="btn-icon" />
             </button>
           </form>
+
+          <div className="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <div className="google-login-wrapper">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signup_with"
+              shape="rectangular"
+              size="large"
+              width="350"
+            />
+          </div>
 
           <div className="auth-footer">
             <p className="auth-footer-text">

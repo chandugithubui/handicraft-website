@@ -35,6 +35,14 @@ export const login = async (email, password) => {
   return response.data;
 };
 
+export const googleLogin = async (credential) => {
+  const response = await axios.post(`${API_URL}/auth/google`, {
+    credential
+  });
+
+  return response.data;
+};
+
 export const getProfile = async (token) => {
   const response = await axios.get(`${API_URL}/auth/profile`, {
     headers: {

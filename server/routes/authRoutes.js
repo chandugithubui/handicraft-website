@@ -6,7 +6,11 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const { OAuth2Client } = require('google-auth-library');
 
+const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID
+);
 // Rate limiter: max 10 requests per 15 minutes per IP on auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -87,6 +91,13 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+
+    if (!user.password) {
+      return res.status(400).json({
+        message: 'This account uses Google Sign-In. Please continue with Google.'
+      });
+    }
+    
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -113,6 +124,116 @@ router.post('/login', authLimiter, async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Google Login / Register
+router.post('/google', authLimiter, async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        message: 'Google credential is required'
+      });
+    }
+
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      sub: googleId,
+      email,
+      name,
+      picture,
+      email_verified: emailVerified
+    } = payload;
+
+    if (!email || !emailVerified) {
+      return res.status(400).json({
+        message: 'Google email could not be verified'
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // First try Google ID
+    let user = await User.findOne({ googleId });
+
+    // Otherwise check whether the email already exists
+    if (!user) {
+      user = await User.findOne({
+        email: normalizedEmail
+      });
+    }
+
+    if (user) {
+      // Existing local account using the same verified email:
+      // safely connect Google identity to it.
+      if (!user.googleId) {
+        user.googleId = googleId;
+
+        if (!user.avatar && picture) {
+          user.avatar = picture;
+        }
+
+        await user.save();
+      }
+    } else {
+      // Completely new Google user
+      user = new User({
+        name,
+        email: normalizedEmail,
+        googleId,
+        authProvider: 'google',
+        avatar: picture || null,
+        role: 'user'
+      });
+
+      await user.save();
+    }
+
+    // Generate our own Handicraft Hub JWT
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '7d'
+      }
+    );
+
+    return res.json({
+      message: 'Google authentication successful',
+
+      token,
+
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      'Google authentication error:',
+      error.message
+    );
+
+    return res.status(401).json({
+      message: 'Google authentication failed'
+    });
   }
 });
 
