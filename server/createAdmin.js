@@ -28,11 +28,20 @@ const createAdmin = async () => {
   try {
     // Check if admin already exists
     const existingAdmin = await User.findOne({ email: 'admin@handicraft.com' });
-    
+
     if (existingAdmin) {
-      console.log('Admin user already exists');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('admin123', salt);
+
+      existingAdmin.password = hashedPassword;
+      existingAdmin.role = 'admin';
+
+      await existingAdmin.save();
+
+      console.log('Admin password reset successfully');
       console.log('Email: admin@handicraft.com');
-      console.log('Password: admin123');
+
+      await mongoose.connection.close();
       process.exit(0);
     }
 
@@ -55,7 +64,7 @@ const createAdmin = async () => {
     console.log('Password: admin123');
     console.log('\nPlease login at: http://localhost:3000/login');
     console.log('Then access admin dashboard at: http://localhost:3000/admin');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('Error creating admin:', error);

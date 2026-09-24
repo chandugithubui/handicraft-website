@@ -129,14 +129,28 @@ router.post('/login', authLimiter, async (req, res) => {
 
 // Google Login / Register
 router.post('/google', authLimiter, async (req, res) => {
+  console.log('\n========== GOOGLE AUTH REQUEST ==========');
+  console.log('Timestamp      :', new Date().toISOString());
+  console.log('Body keys      :', Object.keys(req.body));
+  console.log('credential     :', req.body.credential
+    ? `present (${req.body.credential.length} chars)`
+    : 'MISSING');
+  console.log('GOOGLE_CLIENT_ID env:', process.env.GOOGLE_CLIENT_ID
+    ? `set (${process.env.GOOGLE_CLIENT_ID.slice(0, 20)}...)`
+    : 'NOT SET ⚠️');
+  console.log('=========================================\n');
+
   try {
     const { credential } = req.body;
 
     if (!credential) {
+      console.log('[Google Auth] ❌ No credential in request body');
       return res.status(400).json({
         message: 'Google credential is required'
       });
     }
+
+    console.log('[Google Auth] Verifying ID token with Google...');
 
     // Verify Google ID token
     const ticket = await googleClient.verifyIdToken({
@@ -145,6 +159,11 @@ router.post('/google', authLimiter, async (req, res) => {
     });
 
     const payload = ticket.getPayload();
+    console.log('[Google Auth] ✅ Token verified');
+    console.log('[Google Auth] Payload email     :', payload.email);
+    console.log('[Google Auth] Payload name      :', payload.name);
+    console.log('[Google Auth] email_verified    :', payload.email_verified);
+    console.log('[Google Auth] sub (googleId)    :', payload.sub?.slice(0, 8) + '...');
 
     const {
       sub: googleId,
@@ -155,6 +174,7 @@ router.post('/google', authLimiter, async (req, res) => {
     } = payload;
 
     if (!email || !emailVerified) {
+      console.log('[Google Auth] ❌ Email missing or not verified');
       return res.status(400).json({
         message: 'Google email could not be verified'
       });
@@ -164,28 +184,30 @@ router.post('/google', authLimiter, async (req, res) => {
 
     // First try Google ID
     let user = await User.findOne({ googleId });
+    console.log('[Google Auth] Lookup by googleId :', user ? `found (${user._id})` : 'not found');
 
     // Otherwise check whether the email already exists
     if (!user) {
-      user = await User.findOne({
-        email: normalizedEmail
-      });
+      user = await User.findOne({ email: normalizedEmail });
+      console.log('[Google Auth] Lookup by email   :', user ? `found (${user._id})` : 'not found');
     }
 
     if (user) {
       // Existing local account using the same verified email:
       // safely connect Google identity to it.
       if (!user.googleId) {
+        console.log('[Google Auth] Linking Google ID to existing local account');
         user.googleId = googleId;
-
         if (!user.avatar && picture) {
           user.avatar = picture;
         }
-
         await user.save();
+      } else {
+        console.log('[Google Auth] Existing Google account — logging in');
       }
     } else {
       // Completely new Google user
+      console.log('[Google Auth] Creating new Google user:', normalizedEmail);
       user = new User({
         name,
         email: normalizedEmail,
@@ -194,8 +216,8 @@ router.post('/google', authLimiter, async (req, res) => {
         avatar: picture || null,
         role: 'user'
       });
-
       await user.save();
+      console.log('[Google Auth] ✅ New user saved, id:', user._id);
     }
 
     // Generate our own Handicraft Hub JWT
@@ -206,16 +228,15 @@ router.post('/google', authLimiter, async (req, res) => {
         role: user.role
       },
       process.env.JWT_SECRET,
-      {
-        expiresIn: '7d'
-      }
+      { expiresIn: '7d' }
     );
+
+    console.log('[Google Auth] ✅ JWT issued for:', user.email);
+    console.log('========== GOOGLE AUTH SUCCESS ==========\n');
 
     return res.json({
       message: 'Google authentication successful',
-
       token,
-
       user: {
         id: user._id,
         name: user.name,
@@ -226,10 +247,20 @@ router.post('/google', authLimiter, async (req, res) => {
     });
 
   } catch (error) {
-    console.error(
-      'Google authentication error:',
-      error.message
-    );
+    console.error('========== GOOGLE AUTH ERROR ==========');
+    console.error('Message :', error.message);
+    console.error('Type    :', error.constructor?.name);
+    // Surface the most common failure reasons clearly
+    if (error.message?.includes('Token used too late')) {
+      console.error('Reason  : Token expired — system clock skew?');
+    } else if (error.message?.includes('Invalid token signature')) {
+      console.error('Reason  : Bad signature — wrong GOOGLE_CLIENT_ID?');
+    } else if (error.message?.includes('audience')) {
+      console.error('Reason  : audience mismatch — GOOGLE_CLIENT_ID env var does not match the token');
+      console.error('Env ID  :', process.env.GOOGLE_CLIENT_ID ?? 'NOT SET');
+    }
+    console.error('Full error:', error);
+    console.error('=======================================\n');
 
     return res.status(401).json({
       message: 'Google authentication failed'
