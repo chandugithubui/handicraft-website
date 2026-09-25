@@ -35,12 +35,20 @@ const PORT = env.PORT;
 app.set('trust proxy', 1);
 
 // ── CORS allowed origins ──────────────────────────────────────────────────────
-// Always allow the configured origin + localhost for local development.
-const ALLOWED_ORIGINS = [
-  env.ALLOWED_ORIGIN,
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-].filter(Boolean); // remove any undefined/empty values
+// Loaded entirely from environment variables (ALLOWED_ORIGINS, ALLOWED_ORIGIN, FRONTEND_URL)
+const parseCorsOrigins = () => {
+  const list = [
+    env.ALLOWED_ORIGIN,
+    env.FRONTEND_URL,
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()) : []),
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ].filter(Boolean);
+
+  return Array.from(new Set(list));
+};
+
+const ALLOWED_ORIGINS = parseCorsOrigins();
 
 /* ===========================
    MIDDLEWARE
@@ -62,7 +70,9 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (Postman, server-to-server, curl)
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
     callback(new Error(`CORS: origin '${origin}' not allowed`));
   },
   credentials:    true,

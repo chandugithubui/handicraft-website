@@ -100,8 +100,8 @@ export const googleOAuthConfig: IGoogleOAuthConfig = {
     oauthNonceName: 'oauth_nonce',
     oauthRedirectName: 'oauth_redirect_uri',
     secure: isProduction,
-    // 'lax' allows the cookie to be sent during the top-level GET callback navigation from Google
-    sameSite: isProduction ? 'lax' : 'lax',
+    // Cross-site cookie support between Vercel frontend and Render backend
+    sameSite: (process.env.COOKIE_SAME_SITE as 'lax' | 'strict' | 'none') || (isProduction ? 'none' : 'lax'),
     domain: process.env.COOKIE_DOMAIN || undefined,
   },
 

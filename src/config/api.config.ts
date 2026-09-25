@@ -9,25 +9,13 @@
  *   2. Hostname-based detection   (fallback for local dev)
  */
 
-const resolveApiUrl = () => {
-  // Explicit override always wins (Vercel env var, .env.local, etc.)
+const resolveApiUrl = (): string => {
+  // Purely driven by environment variable REACT_APP_API_URL
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
 
-  const { hostname } = window.location;
-
-  // Local development
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-
-  // Any Vercel preview / production deployment → Render backend
-  if (hostname.includes('vercel.app') || hostname.includes('handicraft')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-
-  // Safe fallback
+  // Fallback for local development
   return 'http://localhost:5000/api';
 };
 
