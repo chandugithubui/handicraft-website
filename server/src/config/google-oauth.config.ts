@@ -113,14 +113,23 @@ export const googleOAuthConfig: IGoogleOAuthConfig = {
     try {
       const parsed = new URL(uri);
       const origin = parsed.origin;
-      return allowedRedirects.some((allowed) => {
+
+      const matchesAllowed = allowedRedirects.some((allowed) => {
         try {
-          const allowedOrigin = new URL(allowed).origin;
-          return origin === allowedOrigin;
+          return origin === new URL(allowed).origin;
         } catch {
           return false;
         }
       });
+
+      if (matchesAllowed) return true;
+
+      // Allow Vercel preview or production deployments for this project
+      if (/^https:\/\/handicraft-website.*\.vercel\.app$/.test(origin)) {
+        return true;
+      }
+
+      return false;
     } catch {
       return false;
     }

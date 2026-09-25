@@ -103,12 +103,11 @@ export class GoogleAuthController {
     try {
       const returnTo = typeof req.query.returnTo === 'string' ? req.query.returnTo : undefined;
 
-      if (returnTo && !googleOAuthConfig.validateRedirectUri(returnTo)) {
-        throw new RedirectUriNotAllowedError();
-      }
+      // Validate or fall back safely to configured frontend URL
+      const safeReturnTo = googleOAuthConfig.getSafeRedirectUri(returnTo);
 
-      const { url, state, nonce, safeReturnTo } =
-        googleAuthService.getAuthorizationUrl(returnTo);
+      const { url, state, nonce } =
+        googleAuthService.getAuthorizationUrl(safeReturnTo);
 
       setStateCookies(res, state, nonce, safeReturnTo);
 
