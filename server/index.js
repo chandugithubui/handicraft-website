@@ -1,19 +1,17 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
-const helmet = require('helmet');
+const express      = require('express');
+const mongoose     = require('mongoose');
+const cors         = require('cors');
+const dotenv       = require('dotenv');
+const path         = require('path');
+const helmet       = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
+const cookieParser = require('cookie-parser');
 
-// Load environment variables
+// Load environment variables FIRST — before importing env.js
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// Guard: JWT_SECRET must be set before the server is allowed to start
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable is not set');
-  process.exit(1);
-}
+// Validated env config — exits process if required vars are missing
+const env = require('./config/env');
 
 // Import route handlers
 const productRoutes = require('./routes/productRoutes');
@@ -30,29 +28,54 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const testimonialRoutes = require('./routes/testimonialRoutes');
 const artisanRoutes = require('./routes/artisanRoutes');
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const app  = express();
+const PORT = env.PORT;
 
-
-// Trust the first reverse proxy (Render)
+// Trust the first reverse proxy (Render, Vercel, etc.)
 app.set('trust proxy', 1);
+
+// ── CORS allowed origins ──────────────────────────────────────────────────────
+// Always allow the configured origin + localhost for local development.
+const ALLOWED_ORIGINS = [
+  env.ALLOWED_ORIGIN,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+].filter(Boolean); // remove any undefined/empty values
 
 /* ===========================
    MIDDLEWARE
 =========================== */
 
 // Security headers
-app.use(helmet());
+// crossOriginOpenerPolicy must be 'same-origin-allow-popups' so the Google
+// One-Tap / popup flow can use window.postMessage to return the credential.
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+}));
 
 // NoSQL injection sanitization
 app.use(mongoSanitize());
 
-// Lock CORS to the specific frontend origin
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Cookie parser — must come before any middleware that reads cookies
+app.use(cookieParser());
+
+// ── CORS config object (reused for both middleware and preflight) ─────────────
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (Postman, server-to-server, curl)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  credentials:    true,
+  methods:        ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+// Respond to ALL preflight OPTIONS requests with the same credentials-aware config
+app.options('*', cors(corsOptions));
 
 // Parse JSON
 app.use(express.json());
@@ -85,7 +108,7 @@ mongoose.connection.on('error', (err) => {
   console.log('MongoDB connection error:', err);
 });
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(env.MONGODB_URI)
   .then(() => console.log('MongoDB connection promise resolved'))
   .catch((err) => console.error('MongoDB connection failed:', err));
 

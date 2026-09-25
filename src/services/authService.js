@@ -1,78 +1,112 @@
+/**
+ * src/services/authService.js
+ *
+ * All HTTP calls to /api/auth/*.
+ * Uses a single pre-configured axios instance so headers,
+ * base URL, and cookie credentials are set in one place.
+ */
+
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
+// ── Axios instance ────────────────────────────────────────────────────────────
+
+/**
+ * Shared instance for all auth requests.
+ *
+ * withCredentials: true  — sends the httpOnly hh_token cookie on every
+ *                          cross-origin request (Vercel → Render backend).
+ */
+const authApi = axios.create({
+  baseURL:         `${API_BASE_URL}/auth`,
+  withCredentials: true,
+  headers:         { 'Content-Type': 'application/json' },
+});
+
+/**
+ * Attach the JWT from localStorage on every request (Bearer header).
+ * The backend accepts EITHER the header OR the cookie — whichever arrives.
+ */
+authApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+  return config;
+});
 
-const API_URL = getApiUrl();
+// ── Auth service functions ────────────────────────────────────────────────────
 
+/**
+ * Register a new local account.
+ * @returns {{ token: string, user: object, message: string }}
+ */
 export const register = async (name, email, password) => {
-  const response = await axios.post(`${API_URL}/auth/register`, {
-    name,
-    email,
-    password
-  });
-  return response.data;
+  const { data } = await authApi.post('/register', { name, email, password });
+  return data;
 };
 
+/**
+ * Sign in with email + password.
+ * @returns {{ token: string, user: object, message: string }}
+ */
 export const login = async (email, password) => {
-  const response = await axios.post(`${API_URL}/auth/login`, {
-    email,
-    password
-  });
-  return response.data;
+  const { data } = await authApi.post('/login', { email, password });
+  return data;
 };
 
+/**
+ * Authenticate (or register) via Google One-Tap / popup.
+ * Sends the raw Google ID token — backend verifies with Google and
+ * issues a Handicraft Hub JWT.
+ *
+ * @param {string} credential - Raw Google ID token from @react-oauth/google
+ * @returns {{ token: string, user: object, message: string }}
+ */
 export const googleLogin = async (credential) => {
-  const response = await axios.post(`${API_URL}/auth/google`, {
-    credential
-  });
-
-  return response.data;
+  const { data } = await authApi.post('/google', { credential });
+  return data;
 };
 
-export const getProfile = async (token) => {
-  const response = await axios.get(`${API_URL}/auth/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return response.data;
+/**
+ * Fetch the authenticated user's profile.
+ * Token is attached automatically by the request interceptor.
+ * @returns {{ user: object }}
+ */
+export const getProfile = async () => {
+  const { data } = await authApi.get('/profile');
+  return data;
 };
 
-// Request password reset email
+/**
+ * Sign out — clears the httpOnly cookie server-side.
+ * Caller is responsible for clearing localStorage / AuthContext state.
+ */
+export const logout = async () => {
+  try {
+    await authApi.post('/logout');
+  } catch {
+    // Ignore network errors on logout — local state is cleared regardless
+  }
+};
+
+/**
+ * Request a password-reset email.
+ * @param {string} email
+ * @returns {{ message: string }}
+ */
 export const forgotPassword = async (email) => {
-  const response = await axios.post(
-    `${API_URL}/auth/forgot-password`,
-    {
-      email
-    }
-  );
-
-  return response.data;
+  const { data } = await authApi.post('/forgot-password', { email });
+  return data;
 };
 
-
-// Reset password using token from email
+/**
+ * Submit a new password using the reset token from the email link.
+ * @param {string} token    - Raw token from URL param
+ * @param {string} password - New password
+ * @returns {{ message: string }}
+ */
 export const resetPassword = async (token, password) => {
-  const response = await axios.post(
-    `${API_URL}/auth/reset-password/${token}`,
-    {
-      password
-    }
-  );
-
-  return response.data;
+  const { data } = await authApi.post(`/reset-password/${token}`, { password });
+  return data;
 };
