@@ -45,8 +45,8 @@ const ProductList = () => {
     const fetchProducts = async () => {
       try {
         const queryParams = new URLSearchParams();
-        queryParams.append('page', currentPage);
-        queryParams.append('limit', 12);
+        queryParams.append('page', String(currentPage));
+        queryParams.append('limit', '12');
         queryParams.append('sort', sort);
         if (search) queryParams.append('search', search);
         if (filters.category) queryParams.append('category', filters.category);
@@ -73,7 +73,7 @@ const ProductList = () => {
   }, [search, filters, currentPage, sort]);
 
 
-  const handleFilterChange = (filterType, value) => {
+  const handleFilterChange = (filterType: string, value: any = '') => {
     setCurrentPage(1);
     if (filterType === 'clear') {
       setFilters({

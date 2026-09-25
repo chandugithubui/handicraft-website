@@ -11,15 +11,10 @@
 const crypto   = require('crypto');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
 
 const User      = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
 const env       = require('../config/env');
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 /**
  * Sign a Handicraft Hub JWT for a user document.
@@ -64,11 +59,10 @@ const register = async ({ name, email, password }) => {
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const user = await User.create({
-    name:         name.trim(),
-    email:        normalizedEmail,
-    password:     hashedPassword,
-    role:         'user',          // never from request body
-    authProvider: 'local',
+    name:     name.trim(),
+    email:    normalizedEmail,
+    password: hashedPassword,
+    role:     'user',
   });
 
   const token = signToken(user);
@@ -92,88 +86,11 @@ const login = async ({ email, password }) => {
     throw err;
   }
 
-  // Account was created via Google — no local password set
-  if (!user.password) {
-    const err = new Error(
-      'This account uses Google Sign-In. Please continue with Google.'
-    );
-    err.statusCode = 400;
-    throw err;
-  }
-
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     const err = new Error('Invalid email or password.');
     err.statusCode = 401;
     throw err;
-  }
-
-  const token = signToken(user);
-  return { token, user: publicUser(user) };
-};
-
-/**
- * Verify a Google ID token, then find-or-create a user.
- * Links Google identity to an existing local account if the
- * verified email matches.
- *
- * @param {string} credential - Raw Google ID token from @react-oauth/google
- */
-const googleAuth = async (credential) => {
-  // 1. Verify token with Google — throws if invalid / expired / wrong audience
-  let ticket;
-  try {
-    ticket = await googleClient.verifyIdToken({
-      idToken:  credential,
-      audience: env.GOOGLE_CLIENT_ID,
-    });
-  } catch (verifyError) {
-    const err = new Error('Google token verification failed.');
-    err.statusCode = 401;
-    err.cause = verifyError;
-    throw err;
-  }
-
-  const payload = ticket.getPayload();
-  const {
-    sub:            googleId,
-    email,
-    name,
-    picture,
-    email_verified: emailVerified,
-  } = payload;
-
-  if (!email || !emailVerified) {
-    const err = new Error('Google email could not be verified.');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-
-  // 2. Lookup order: googleId first, email second
-  let user =
-    (await User.findOne({ googleId })) ||
-    (await User.findOne({ email: normalizedEmail }));
-
-  if (user) {
-    // Link Google identity to an existing local account if not yet linked
-    if (!user.googleId) {
-      user.googleId     = googleId;
-      user.authProvider = 'google';
-      if (!user.avatar && picture) user.avatar = picture;
-      await user.save();
-    }
-  } else {
-    // Brand new Google user
-    user = await User.create({
-      name:         name.trim(),
-      email:        normalizedEmail,
-      googleId,
-      authProvider: 'google',
-      avatar:       picture || null,
-      role:         'user',
-    });
   }
 
   const token = signToken(user);
@@ -213,9 +130,6 @@ const forgotPassword = async (email) => {
 
   // Return early silently if account not found
   if (!user) return { message: SAFE_MESSAGE };
-
-  // Google-only accounts have no password to reset
-  if (!user.password) return { message: SAFE_MESSAGE };
 
   // Generate raw token — only the hash is stored
   const rawToken    = crypto.randomBytes(32).toString('hex');
@@ -302,7 +216,6 @@ const resetPassword = async (rawToken, newPassword) => {
 module.exports = {
   register,
   login,
-  googleAuth,
   getProfile,
   forgotPassword,
   resetPassword,

@@ -17,12 +17,12 @@ import { useNavigate }           from 'react-router-dom';
 import { useAuth }               from '../context/AuthContext';
 import { googleLogin }           from '../services/authService';
 
-/**
- * @param {object}   options
- * @param {string}   [options.redirectTo='/']  - Path to navigate on success
- * @param {Function} [options.onSuccess]       - Optional extra callback after login
- */
-const useGoogleAuth = ({ redirectTo = '/', onSuccess } = {}) => {
+interface UseGoogleAuthOptions {
+  redirectTo?: string;
+  onSuccess?: (user: any) => void;
+}
+
+const useGoogleAuth = ({ redirectTo = '/', onSuccess }: UseGoogleAuthOptions = {}) => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError,   setGoogleError]   = useState('');
 

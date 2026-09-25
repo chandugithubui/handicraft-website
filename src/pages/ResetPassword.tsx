@@ -119,7 +119,7 @@ const ResetPassword = () => {
                 onChange={handleChange}
                 className="form-input"
                 placeholder="Enter new password"
-                minLength="6"
+                minLength={6}
                 required
               />
             </div>
@@ -137,7 +137,7 @@ const ResetPassword = () => {
                 onChange={handleChange}
                 className="form-input"
                 placeholder="Confirm new password"
-                minLength="6"
+                minLength={6}
                 required
               />
             </div>
@@ -145,7 +145,7 @@ const ResetPassword = () => {
             <button
               type="submit"
               className="btn btn-primary btn-lg auth-submit-btn"
-              disabled={loading || success}
+              disabled={loading || Boolean(success)}
             >
               {loading
                 ? 'Resetting...'

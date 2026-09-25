@@ -93,10 +93,10 @@ const PattachitraSlider = () => {
       <Row className="my-5">
         <Col md={3}>
           <h4>Filter by Category</h4>
-          <Button variant={selectedCategory === 'All' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('All')} className="mb-2" block>All</Button>
-          <Button variant={selectedCategory === 'Paintings' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Paintings')} className="mb-2" block>Paintings</Button>
-          <Button variant={selectedCategory === 'Gift Items' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Gift Items')} className="mb-2" block>Gift Items</Button>
-          <Button variant={selectedCategory === 'Home Decor' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Home Decor')} className="mb-2" block>Home Decor</Button>
+          <Button variant={selectedCategory === 'All' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('All')} className="mb-2 w-100">All</Button>
+          <Button variant={selectedCategory === 'Paintings' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Paintings')} className="mb-2 w-100">Paintings</Button>
+          <Button variant={selectedCategory === 'Gift Items' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Gift Items')} className="mb-2 w-100">Gift Items</Button>
+          <Button variant={selectedCategory === 'Home Decor' ? 'primary' : 'outline-primary'} onClick={() => setSelectedCategory('Home Decor')} className="mb-2 w-100">Home Decor</Button>
         </Col>
 
         {/* Products Grid */}

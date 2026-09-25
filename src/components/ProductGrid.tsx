@@ -2,7 +2,13 @@ import React from 'react';
 import ProductCard from './ProductCard';
 import './ProductGrid.css';
 
-const ProductGrid = ({ products, loading, error }) => {
+interface ProductGridProps {
+  products: any[];
+  loading?: boolean;
+  error?: any;
+}
+
+const ProductGrid: React.FC<ProductGridProps> = ({ products, loading = false, error = null }) => {
   if (loading) {
     return (
       <div className="product-grid-loading">

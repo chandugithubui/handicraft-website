@@ -613,7 +613,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {products.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className="no-data">No products found.</td>
+                          <td colSpan={7} className="no-data">No products found.</td>
                         </tr>
                       ) : (
                         products.map((product) => (
@@ -624,7 +624,7 @@ const AdminDashboard = () => {
                                   src={resolveImageUrl(product.imageUrl)}
                                   alt={product.name}
                                   className="product-thumb"
-                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                                 />
                               ) : (
                                 <div className="product-thumb-placeholder">No img</div>
@@ -756,16 +756,16 @@ const AdminDashboard = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th width="20%">Name</th>
-                      <th width="25%">Email</th>
-                      <th width="40%">Message</th>
-                      <th width="15%">Date</th>
+                      <th style={{ width: '20%' }}>Name</th>
+                      <th style={{ width: '25%' }}>Email</th>
+                      <th style={{ width: '40%' }}>Message</th>
+                      <th style={{ width: '15%' }}>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {contacts.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="no-data">
+                        <td colSpan={4} className="no-data">
                           No contact messages yet
                         </td>
                       </tr>
@@ -807,16 +807,16 @@ const AdminDashboard = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th width="40%">Email</th>
-                      <th width="25%">Subscribed Date</th>
-                      <th width="20%">Status</th>
-                      <th width="15%">Actions</th>
+                      <th style={{ width: '40%' }}>Email</th>
+                      <th style={{ width: '25%' }}>Subscribed Date</th>
+                      <th style={{ width: '20%' }}>Status</th>
+                      <th style={{ width: '15%' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {newsletters.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="no-data">
+                        <td colSpan={4} className="no-data">
                           No newsletter subscribers yet
                         </td>
                       </tr>
@@ -900,7 +900,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {coupons.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className="no-data">
+                          <td colSpan={7} className="no-data">
                             No coupons found.
                           </td>
                         </tr>

@@ -11,7 +11,6 @@
 const REQUIRED = [
   'MONGODB_URI',
   'JWT_SECRET',
-  'GOOGLE_CLIENT_ID',
 ];
 
 const missing = REQUIRED.filter((key) => !process.env[key]);
@@ -35,9 +34,6 @@ module.exports = {
   // ── Auth ──────────────────────────────────────────────────────────────────
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
-
-  // ── Google OAuth ──────────────────────────────────────────────────────────
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || 'http://localhost:3000',

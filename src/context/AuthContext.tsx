@@ -64,55 +64,91 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user,    setUser]    = useState(null);
   const [token,   setToken]   = useState(null);
-  // loading stays true until localStorage rehydration completes
-  // so children don't flash an unauthenticated state on first render
+  // loading stays true until rehydration completes
   const [loading, setLoading] = useState(true);
 
-  // ── Rehydrate from localStorage on mount ───────────────────────────────────
+  // ── Rehydrate session on mount (cookies + localStorage fallback) ───────────
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser  = localStorage.getItem('user');
+    let isMounted = true;
 
-    if (storedToken && isTokenValid(storedToken)) {
-      // Token is present and not expired — restore session
-      setToken(storedToken);
+    const checkSession = async () => {
+      // Check if arriving from OAuth redirect
+      const params = new URLSearchParams(window.location.search);
+      const isOAuthSuccess = params.get('oauth') === 'success';
+
+      if (isOAuthSuccess) {
+        // Clean URL without triggering page reload
+        params.delete('oauth');
+        const cleanSearch = params.toString() ? `?${params.toString()}` : '';
+        window.history.replaceState({}, document.title, window.location.pathname + cleanSearch);
+      }
+
+      // 1. Try fetching current user from httpOnly cookie session (/me)
       try {
-        setUser(JSON.parse(storedUser));
+        const { getCurrentUser } = await import('../services/authService');
+        const res = await getCurrentUser();
+        if (res?.user && isMounted) {
+          setUser(res.user);
+          // Sync stored user representation
+          localStorage.setItem('user', JSON.stringify(res.user));
+          setLoading(false);
+          return;
+        }
       } catch {
-        // Corrupted user JSON — clear everything
+        // Cookie session not present or expired — try localStorage fallback below
+      }
+
+      // 2. Fallback to localStorage token if available and valid
+      const storedToken = localStorage.getItem('token');
+      const storedUser  = localStorage.getItem('user');
+
+      if (storedToken && isTokenValid(storedToken)) {
+        if (isMounted) {
+          setToken(storedToken);
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
+        }
+      } else {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
-    } else if (storedToken) {
-      // Token exists but is expired — clean up silently
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
 
-    setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
   /**
-   * Persist a successful auth result (login / register / Google).
-   * Called by Login, Register, and useGoogleAuth hook after a successful API call.
-   *
-   * @param {string} newToken
-   * @param {object} userData  - public user shape: { id, name, email, role, avatar }
+   * Persist a successful auth result (login / register / oauth).
+   * @param {string} [newToken]
+   * @param {object} userData
    */
   const login = useCallback((newToken, userData) => {
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user',  JSON.stringify(userData));
-    setToken(newToken);
-    setUser(userData);
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+    }
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    }
   }, []);
 
   /**
-   * Patch fields on the current user object in context + localStorage.
-   * Useful for profile updates without requiring a full re-login.
-   *
-   * @param {Partial<object>} patch - fields to merge into user
+   * Patch fields on the current user object in context.
    */
   const updateUser = useCallback((patch) => {
     setUser((prev) => {
@@ -124,19 +160,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Sign out:
-   *   1. Ask the backend to clear the httpOnly cookie.
-   *   2. Wipe localStorage.
-   *   3. Clear React state.
-   *
-   * Fire-and-forget on the API call — local state is always cleared
-   * even if the network request fails.
+   * Sign out: clear server session cookie, wipe local storage, reset React state.
    */
   const logout = useCallback(async () => {
     try {
-      await logoutApi(); // clears httpOnly hh_token cookie
+      await logoutApi();
     } catch {
-      // Network failure — proceed with local cleanup anyway
+      // Ignore network errors on logout
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -148,13 +178,13 @@ export const AuthProvider = ({ children }) => {
   // ── Derived state ──────────────────────────────────────────────────────────
 
   /**
-   * isAuthenticated is true only when a non-expired token is present.
-   * Memoised so consumers do not re-render on unrelated state changes.
+   * User is authenticated if user object exists (from verified httpOnly cookie or valid token).
    */
   const isAuthenticated = useMemo(
-    () => isTokenValid(token),
-    [token]
+    () => Boolean(user && (token ? isTokenValid(token) : true)),
+    [user, token]
   );
+
 
   // ── Context value ──────────────────────────────────────────────────────────
 

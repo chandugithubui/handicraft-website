@@ -47,8 +47,6 @@ const ALLOWED_ORIGINS = [
 =========================== */
 
 // Security headers
-// crossOriginOpenerPolicy must be 'same-origin-allow-popups' so the Google
-// One-Tap / popup flow can use window.postMessage to return the credential.
 app.use(helmet({
   crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 }));

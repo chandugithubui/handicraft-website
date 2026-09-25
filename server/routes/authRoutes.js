@@ -41,9 +41,6 @@ router.post('/register',        credentialLimiter, controller.register);
 router.post('/login',           credentialLimiter, controller.login);
 router.post('/logout',                             controller.logout);
 
-// Google OAuth (One Tap / popup credential flow)
-router.post('/google',          credentialLimiter, controller.googleAuth);
-
 // Protected profile — uses auth middleware (reads Bearer token OR cookie)
 router.get('/profile',          auth,              controller.getProfile);
 
@@ -51,4 +48,24 @@ router.get('/profile',          auth,              controller.getProfile);
 router.post('/forgot-password', resetLimiter,      controller.forgotPassword);
 router.post('/reset-password/:token', resetLimiter, controller.resetPassword);
 
+// ── Google OAuth 2.0 & Session Management ──────────────────────────────────────
+let oauthRouter;
+try {
+  // Check if compiled TypeScript exists in dist/
+  oauthRouter = require('../dist/modules/auth/routes/auth.routes').default;
+} catch (_) {
+  try {
+    // Development / non-compiled fallback using ts-node
+    require('ts-node/register');
+    oauthRouter = require('../src/modules/auth/routes/auth.routes').default;
+  } catch (err) {
+    console.warn('[authRoutes] Note: TypeScript OAuth router not initialized:', err.message);
+  }
+}
+
+if (oauthRouter) {
+  router.use('/', oauthRouter);
+}
+
 module.exports = router;
+

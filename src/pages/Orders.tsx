@@ -173,7 +173,7 @@ const Orders = () => {
                               src={getImageUrl(item.image)}
                               alt={item.name}
                               onError={(e) => {
-                                e.target.src = '/images/HandcraftedWoodenBowl.webp';
+                                (e.target as HTMLImageElement).src = '/images/HandcraftedWoodenBowl.webp';
                               }}
                               loading="lazy"
                             />
@@ -204,7 +204,7 @@ const Orders = () => {
                                 src={getImageUrl(item.image)}
                                 alt={item.name}
                                 onError={(e) => {
-                                  e.target.src = '/images/HandcraftedWoodenBowl.webp';
+                                  (e.target as HTMLImageElement).src = '/images/HandcraftedWoodenBowl.webp';
                                 }}
                                 loading="lazy"
                               />

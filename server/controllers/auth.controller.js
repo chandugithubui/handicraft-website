@@ -38,13 +38,19 @@ const setAuthCookie = (res, token) => {
   });
 };
 
-/** Clear the auth cookie on logout. */
+/** Clear ALL auth cookies on logout (legacy + new OAuth). */
 const clearAuthCookie = (res) => {
-  res.clearCookie(COOKIE_NAME, {
+  const opts = {
     httpOnly: true,
     secure:   env.isProduction,
     sameSite: env.isProduction ? 'None' : 'Lax',
-  });
+  };
+  res.clearCookie(COOKIE_NAME, opts);         // hh_token (legacy)
+  res.clearCookie('access_token', opts);      // short-lived access token
+  res.clearCookie('refresh_token', opts);     // long-lived refresh token
+  res.clearCookie('oauth_state', opts);       // CSRF state cookie
+  res.clearCookie('oauth_nonce', opts);       // nonce cookie
+  res.clearCookie('oauth_redirect_uri', opts);// redirect URI cookie
 };
 
 // ── Error handler ─────────────────────────────────────────────────────────────
@@ -112,30 +118,6 @@ const login = async (req, res) => {
     setAuthCookie(res, result.token);
     return res.json({
       message: 'Login successful.',
-      token:   result.token,
-      user:    result.user,
-    });
-  } catch (err) {
-    return handleError(res, err);
-  }
-};
-
-/**
- * POST /api/auth/google
- * Body: { credential }  — raw Google ID token from @react-oauth/google
- */
-const googleAuth = async (req, res) => {
-  const { credential } = req.body;
-
-  if (!credential) {
-    return res.status(400).json({ message: 'Google credential is required.' });
-  }
-
-  try {
-    const result = await authService.googleAuth(credential);
-    setAuthCookie(res, result.token);
-    return res.json({
-      message: 'Google authentication successful.',
       token:   result.token,
       user:    result.user,
     });
@@ -214,7 +196,6 @@ const resetPassword = async (req, res) => {
 module.exports = {
   register,
   login,
-  googleAuth,
   getProfile,
   logout,
   forgotPassword,

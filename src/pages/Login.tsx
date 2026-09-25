@@ -1,38 +1,31 @@
-/**
- * src/pages/Login.jsx
- *
- * Email/password login + Google One-Tap.
- * Google logic is fully encapsulated in useGoogleAuth —
- * this component only owns the email/password form state.
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
-import { GoogleLogin } from '@react-oauth/google';
-
-import { useAuth }      from '../context/AuthContext';
-import useGoogleAuth    from '../hooks/useGoogleAuth';
+import { useAuth } from '../context/AuthContext';
 import { login as loginApi } from '../services/authService';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import './Auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const { login }  = useAuth();
-  const navigate   = useNavigate();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  // ── Google auth (hook handles everything) ──────────────────────────────────
-  const {
-    handleGoogleSuccess,
-    handleGoogleError,
-    googleLoading,
-    googleError,
-  } = useGoogleAuth({ redirectTo: '/' });
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
 
-  // ── Email / password form ──────────────────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get('oauth_error');
+    if (oauthError) {
+      setError(`Google authentication was cancelled or failed (${oauthError}).`);
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -52,10 +45,6 @@ const Login = () => {
     }
   };
 
-  // Combined error — show whichever is set
-  const displayError = error || googleError;
-  const isLoading    = loading || googleLoading;
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="auth-page">
@@ -71,11 +60,18 @@ const Login = () => {
             </p>
           </div>
 
-          {displayError && (
+          {error && (
             <div className="auth-error" role="alert">
-              {displayError}
+              {error}
             </div>
           )}
+
+          {/* ── Google OAuth Button ── */}
+          <GoogleSignInButton label="Continue with Google" />
+
+          <div className="auth-divider">
+            <span>or sign in with email</span>
+          </div>
 
           {/* Email / password form */}
           <form onSubmit={handleSubmit} className="auth-form" noValidate>
@@ -124,32 +120,12 @@ const Login = () => {
             <button
               type="submit"
               className="btn btn-primary btn-lg auth-submit-btn"
-              disabled={isLoading}
+              disabled={loading}
             >
               {loading ? 'Signing in…' : 'Sign In'}
               <FiArrowRight className="btn-icon" />
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="auth-divider"><span>OR</span></div>
-
-          {/* Google button — all logic lives in useGoogleAuth */}
-          <div className="google-login-wrapper">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              text="continue_with"
-              shape="rectangular"
-              size="large"
-              width="350"
-              useOneTap={false}
-            />
-          </div>
-
-          {googleLoading && (
-            <p className="google-loading-text">Signing in with Google…</p>
-          )}
 
           <div className="auth-footer">
             <p className="auth-footer-text">

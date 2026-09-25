@@ -55,7 +55,7 @@ const Cart = () => {
                     src={getImageUrl(item.imageUrl || item.image)}
                     alt={item.name}
                     onError={(e) => {
-                      e.target.src = '/images/placeholder.jpg';
+                      (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
                     }}
                   />
                 </div>
