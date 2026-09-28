@@ -106,7 +106,15 @@ export const AuthProvider = ({ children }) => {
         if (isMounted) {
           setToken(storedToken);
           try {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            const decoded = decodeJwt(storedToken);
+            if (decoded?.permissions && (!parsedUser.permissions || parsedUser.permissions.length === 0)) {
+              parsedUser.permissions = decoded.permissions;
+            }
+            if (decoded?.role && !parsedUser.role) {
+              parsedUser.role = decoded.role;
+            }
+            setUser(parsedUser);
           } catch {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -137,13 +145,21 @@ export const AuthProvider = ({ children }) => {
    * @param {object} userData
    */
   const login = useCallback((newToken, userData) => {
+    let resolvedUser = userData;
     if (newToken) {
       localStorage.setItem('token', newToken);
       setToken(newToken);
+      const decoded = decodeJwt(newToken);
+      if (decoded?.permissions && resolvedUser && (!resolvedUser.permissions || resolvedUser.permissions.length === 0)) {
+        resolvedUser = { ...resolvedUser, permissions: decoded.permissions };
+      }
+      if (decoded?.role && resolvedUser && !resolvedUser.role) {
+        resolvedUser = { ...resolvedUser, role: decoded.role };
+      }
     }
-    if (userData) {
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+    if (resolvedUser) {
+      localStorage.setItem('user', JSON.stringify(resolvedUser));
+      setUser(resolvedUser);
     }
   }, []);
 

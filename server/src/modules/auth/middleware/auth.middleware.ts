@@ -9,7 +9,7 @@ import { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { googleOAuthConfig } from '../../../config/google-oauth.config';
 import { ForbiddenError, UnauthorizedError } from '../../../errors/auth.errors';
-import { JwtAccessPayload } from '../types/auth.types';
+import { JwtAccessPayload, UserRole } from '../types/auth.types';
 import { verifyAccessToken } from '../utils/token.util';
 
 // Extend Express Request interface to include authenticated user
@@ -65,23 +65,30 @@ export const authenticate = (
 };
 
 /**
- * Role-based authorization middleware requiring admin privileges.
+ * Factory that creates a role-based authorization middleware.
+ * Accepts one or more roles that are permitted to proceed.
+ *
+ * Usage:
+ *   router.get('/admin', authenticate, requireRole('admin', 'super_admin'), handler)
  */
-export const requireAdmin = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): void => {
-  if (!req.user) {
-    return next(new UnauthorizedError('Authentication required.'));
-  }
+export const requireRole = (...roles: UserRole[]) =>
+  (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      return next(new UnauthorizedError('Authentication required.'));
+    }
 
-  if (req.user.role !== 'admin') {
-    return next(new ForbiddenError('Administrative privileges required.'));
-  }
+    if (!(roles as string[]).includes(req.user.role)) {
+      return next(new ForbiddenError(`One of the following roles is required: ${roles.join(', ')}.`));
+    }
 
-  return next();
-};
+    return next();
+  };
+
+/**
+ * Convenience shorthand – backwards-compatible with existing imports.
+ * Allows both 'admin' and 'super_admin' to pass.
+ */
+export const requireAdmin = requireRole('admin', 'super_admin');
 
 /**
  * Rate limiter for sensitive OAuth endpoints (authorization redirect, callback).

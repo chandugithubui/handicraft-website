@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiSearch, FiHeart, FiUser, FiShoppingBag, FiMenu, FiX, FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiSearch, FiHeart, FiUser, FiShoppingBag, FiMenu, FiX, FiLogOut, FiSettings, FiShield } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { isAdminUser } from '../utils/authUtils';
+import LoginPromptModal from './common/LoginPromptModal';
 import './HeaderNew.css';
 
 const HeaderNew = () => {
@@ -12,6 +14,10 @@ const HeaderNew = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [loginModal, setLoginModal] = useState<{ isOpen: boolean; type: 'cart' | 'wishlist' }>({
+    isOpen: false,
+    type: 'cart',
+  });
   const userMenuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -144,7 +150,17 @@ const HeaderNew = () => {
               </button>
 
               {/* Wishlist */}
-              <Link to="/wishlist" className="action-btn premium-action-btn" aria-label="Wishlist">
+              <Link
+                to="/wishlist"
+                className="action-btn premium-action-btn"
+                aria-label="Wishlist"
+                onClick={(e) => {
+                  if (!isAuthenticated) {
+                    e.preventDefault();
+                    setLoginModal({ isOpen: true, type: 'wishlist' });
+                  }
+                }}
+              >
                 <FiHeart />
                 {wishlistCount > 0 && <span className="cart-count">{wishlistCount}</span>}
               </Link>
@@ -172,13 +188,31 @@ const HeaderNew = () => {
                           <span className="user-dropdown-email">{user?.email}</span>
                         </div>
                         <div className="user-dropdown-divider" />
+                        {isAdminUser(user) && (
+                          <Link
+                            to="/admin"
+                            className="user-dropdown-item font-semibold text-primary"
+                            role="menuitem"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <FiShield size={14} /> Admin Dashboard
+                          </Link>
+                        )}
                         <Link
-                          to="/profile"
-                          className="user-dropdown-item"
+                          to="/user/dashboard"
+                          className="user-dropdown-item font-medium"
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          <FiSettings size={14} /> My Profile
+                          <FiUser size={14} /> Customer Dashboard
+                        </Link>
+                        <Link
+                          to="/user/dashboard?tab=orders"
+                          className="user-dropdown-item font-medium"
+                          role="menuitem"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <FiSettings size={14} /> My Orders
                         </Link>
                         <button
                           id="logout-btn-desktop"
@@ -201,7 +235,17 @@ const HeaderNew = () => {
               </div>
 
               {/* Cart */}
-              <Link to="/cart" className="action-btn cart-btn premium-action-btn" aria-label="Cart">
+              <Link
+                to="/cart"
+                className="action-btn cart-btn premium-action-btn"
+                aria-label="Cart"
+                onClick={(e) => {
+                  if (!isAuthenticated) {
+                    e.preventDefault();
+                    setLoginModal({ isOpen: true, type: 'cart' });
+                  }
+                }}
+              >
                 <FiShoppingBag />
                 {cartItemCount > 0 && <span className="cart-count">{cartItemCount}</span>}
               </Link>
@@ -295,10 +339,18 @@ const HeaderNew = () => {
                   Wishlist
                 </Link>
               </li>
+              {isAuthenticated && isAdminUser(user) && (
+                <li className="mobile-nav-item">
+                  <Link to="/admin" className="mobile-nav-link font-semibold text-primary" onClick={closeMobileMenu}>
+                    <FiShield size={16} style={{ display: 'inline', marginRight: '6px' }} />
+                    Admin Dashboard
+                  </Link>
+                </li>
+              )}
               <li className="mobile-nav-item">
                 {isAuthenticated ? (
-                  <Link to="/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
-                    My Account
+                  <Link to="/user/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    Customer Dashboard
                   </Link>
                 ) : (
                   <Link to="/login" className="mobile-nav-link" onClick={closeMobileMenu}>
@@ -336,6 +388,16 @@ const HeaderNew = () => {
       {isMobileMenuOpen && (
         <div className="mobile-nav-overlay" onClick={closeMobileMenu}></div>
       )}
+
+      {/* Login Prompt Modal for Guests clicking Wishlist or Cart */}
+      <LoginPromptModal
+        isOpen={loginModal.isOpen}
+        type={loginModal.type}
+        onClose={() => setLoginModal({ isOpen: false, type: 'cart' })}
+        onContinueAsGuest={() => {
+          navigate(loginModal.type === 'cart' ? '/cart' : '/wishlist');
+        }}
+      />
     </>
   );
 };

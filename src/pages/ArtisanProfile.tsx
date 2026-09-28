@@ -1,71 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import {
-  getArtisanBySlug,
-  getArtisanProducts
-} from '../services/artisanService';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiMapPin, FiAward, FiHeart, FiArrowLeft, FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { useArtisanProfile } from '../hooks/api';
+import { LoadingSpinner } from '../components/common';
 import './ArtisanProfile.css';
-
-
 
 const ArtisanProfile = () => {
   const { slug } = useParams();
   const { addToCart } = useCart();
 
-  const [artisan, setArtisan] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data, isLoading: loading, isError, error: queryError } = useArtisanProfile(slug);
+  const artisan = data?.artisan;
+  const products = data?.products || [];
+  const error = isError ? (queryError?.message || 'Failed to load artisan') : '';
 
-  useEffect(() => {
-    const fetchArtisan = async () => {
-      try {
-        setLoading(true);
-        setError('');
-
-        const [artisanData, productData] = await Promise.all([
-          getArtisanBySlug(slug),
-          getArtisanProducts(slug)
-        ]);
-
-        setArtisan(artisanData);
-        setProducts(productData);
-      } catch (error) {
-        console.error('Failed to load artisan:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtisan();
-  }, [slug]);
-
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product: any) => {
     addToCart(product);
   };
 
-
   if (loading) {
     return (
-      <div className="artisan-profile-page">
-        <div className="container">
-          <div className="artisan-not-found">
-            <h2>Loading artisan...</h2>
-          </div>
-        </div>
+      <div className="artisan-profile-page py-5">
+        <LoadingSpinner message="Loading artisan profile..." fullHeight />
       </div>
     );
   }
+
   if (error || !artisan) {
     return (
       <div className="artisan-profile-page">
         <div className="container">
           <div className="artisan-not-found">
             <h2>Artisan Not Found</h2>
-
             <Link to="/" className="btn btn-primary">
               <FiArrowLeft className="btn-icon" />
               Back to Home
@@ -75,6 +42,7 @@ const ArtisanProfile = () => {
       </div>
     );
   }
+
   return (
     <div className="artisan-profile-page">
       {/* Hero Section */}
@@ -128,7 +96,7 @@ const ArtisanProfile = () => {
             </p>
           </div>
           <div className="craft-process-timeline">
-            {artisan.craftProcess.map((process, index) => (
+            {Array.isArray(artisan.craftProcess) && artisan.craftProcess.map((process, index) => (
               <div key={index} className="process-step">
                 <div className="step-number">
                   <span>{process.step}</span>

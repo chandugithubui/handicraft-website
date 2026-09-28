@@ -1,51 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiBox, FiShoppingBag, FiEye, FiPackage, FiClock, FiCheckCircle, FiXCircle, FiTruck, FiChevronUp } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { useMyOrders } from '../hooks/api';
 import './Orders.css';
 
 const Orders = () => {
   const { isAuthenticated, token } = useAuth();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setError('Please login to view your orders');
-      setLoading(false);
-      return;
-    }
+  const {
+    data: orders = [],
+    isLoading: loading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useMyOrders(token, isAuthenticated);
 
-    const fetchOrders = async () => {
-      try {
-        const getApiUrl = () => {
-          if (window.location.hostname === 'localhost' || 
-              window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:5000/api';
-          }
-          if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-              window.location.hostname.includes('vercel.app')) {
-            return 'https://handicraft-website.onrender.com/api';
-          }
-          return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-        };
-        const API_URL = getApiUrl();
-        const response = await axios.get(`${API_URL}/orders/my-orders`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setOrders(response.data);
-      } catch (err) {
-        setError('Failed to fetch orders');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [isAuthenticated, token]);
+  const error = isError ? (queryError?.message || 'Failed to fetch orders') : '';
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/images/HandcraftedWoodenBowl.webp';

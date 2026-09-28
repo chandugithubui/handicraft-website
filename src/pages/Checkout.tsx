@@ -45,7 +45,7 @@ const Checkout = () => {
             <h2 className="auth-title">Authentication Required</h2>
             <p className="auth-description">Please login to proceed with checkout</p>
             <div className="auth-actions">
-              <Link to="/login" className="btn btn-primary">Login</Link>
+              <Link to="/login" state={{ from: '/checkout' }} className="btn btn-primary">Login</Link>
               <Link to="/cart" className="btn btn-outline">Back to Cart</Link>
             </div>
           </div>

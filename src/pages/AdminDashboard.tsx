@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiUsers, FiShoppingCart, FiBox, FiDollarSign, FiLogOut, FiRefreshCw } from 'react-icons/fi';
+import { FiUsers, FiShoppingCart, FiBox, FiDollarSign, FiLogOut, FiRefreshCw, FiShield } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,6 +8,7 @@ import {
 } from '../services/adminService';
 import './AdminDashboard.css';
 import { getAdminCoupons, createCoupon, updateCoupon, deleteCoupon } from '../services/couponService';
+import { http } from '../services/apiClient';
 const AdminDashboard = () => {
   const { user, isAuthenticated, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -106,13 +107,7 @@ const AdminDashboard = () => {
 
   const fetchNewsletters = async () => {
     try {
-      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:5000/api/newsletter/subscribers'
-        : 'https://handicraft-website.onrender.com/api/newsletter/subscribers';
-
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
+      const data = await http.get<{ success: boolean; subscribers: any[] }>('/newsletter/subscribers');
       if (data.success) {
         return data.subscribers;
       }
@@ -123,21 +118,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUnsubscribe = async (email) => {
+  const handleUnsubscribe = async (email: string) => {
     try {
-      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:5000/api/newsletter/unsubscribe'
-        : 'https://handicraft-website.onrender.com/api/newsletter/unsubscribe';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
+      const data = await http.post<{ success: boolean; message: string }>('/newsletter/unsubscribe', { email });
 
       if (data.success) {
         // Refresh the newsletters list
@@ -487,6 +470,15 @@ const AdminDashboard = () => {
             <p className="dashboard-subtitle">Manage your store efficiently</p>
           </div>
           <div className="header-actions">
+            <button
+              onClick={() => navigate('/admin/roles')}
+              className="btn btn-outline"
+              style={{ borderColor: '#6366f1', color: '#6366f1' }}
+              title="Super Admin Roles & Permissions"
+            >
+              <FiShield className="btn-icon" />
+              Roles & Permissions
+            </button>
             <button onClick={fetchDashboardData} className="btn btn-outline refresh-btn">
               <FiRefreshCw className="btn-icon" />
               Refresh

@@ -30,6 +30,7 @@ import {
   toPublicUser,
   verifyRefreshToken,
 } from '../utils/token.util';
+import { resolvePermissions } from '../../../services/auth.service';
 
 export class GoogleAuthService {
   constructor(private strategy: GoogleOAuthStrategy = googleStrategy) {}
@@ -219,6 +220,7 @@ export class GoogleAuthService {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
+      permissions: await resolvePermissions(user.role, user.customPermissions ?? []),
     };
 
     const refreshPayload: JwtRefreshPayload = {
@@ -315,6 +317,7 @@ export class GoogleAuthService {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
+      permissions: await resolvePermissions(user.role, user.customPermissions ?? []),
     };
 
     const refreshPayload: JwtRefreshPayload = {

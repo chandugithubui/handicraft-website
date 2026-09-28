@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiMapPin, FiAward, FiUsers, FiPackage } from 'react-icons/fi';
+import { useCategory, useCategoryProducts } from '../hooks/api';
 import './CategoryPage.css';
 
 // Category data with detailed information
@@ -218,90 +218,19 @@ const exploreCategories = [
   }
 ];
 const CategoryPage = () => {
-
   const { categoryId } = useParams();
-  const [category, setCategory] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Get category data from local data structure
-  const categoryInfo = categoryData[categoryId];
+  // Get category data from local data structure if present
+  const categoryInfo = categoryId ? (categoryData as Record<string, any>)[categoryId] : null;
 
-  useEffect(() => {
-    const fetchCategoryAndProducts = async () => {
-      setLoading(true);
+  const { data: fetchedCategory, isLoading: categoryLoading } = useCategory(categoryId);
+  const { data: products = [], isLoading: productsLoading } = useCategoryProducts(categoryId);
 
-      const getApiUrl = () => {
-        if (
-          window.location.hostname === 'localhost' ||
-          window.location.hostname === '127.0.0.1'
-        ) {
-          return 'http://localhost:5000/api';
-        }
+  const displayCategory = categoryInfo || fetchedCategory;
+  const loading = !categoryInfo && (categoryLoading || productsLoading);
 
-        if (
-          window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-          window.location.hostname.includes('vercel.app')
-        ) {
-          return 'https://handicraft-website.onrender.com/api';
-        }
-
-        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      };
-
-      const API_URL = getApiUrl();
-
-      try {
-        // Use our local category information for known categories
-        if (categoryInfo) {
-          setCategory(categoryInfo);
-        } else {
-          try {
-            const categoryResponse = await axios.get(
-              `${API_URL}/categories/${categoryId}`
-            );
-
-            setCategory(categoryResponse.data);
-          } catch (error) {
-            console.error('Error fetching category:', error);
-            setCategory(null);
-          }
-        }
-
-        // Fetch real products from backend
-        try {
-          let productsUrl;
-
-          if (categoryId === 'all') {
-            productsUrl = `${API_URL}/products?limit=100`;
-          } else {
-            productsUrl = `${API_URL}/products?category=${categoryId}&limit=100`;
-          }
-
-          const productsResponse = await axios.get(productsUrl);
-
-          const fetchedProducts = Array.isArray(productsResponse.data)
-            ? productsResponse.data
-            : productsResponse.data.products || [];
-
-          setProducts(fetchedProducts);
-        } catch (error) {
-          console.error('Error fetching category products:', error);
-          setProducts([]);
-        }
-      } catch (error) {
-        console.error('Error loading category page:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategoryAndProducts();
-  }, [categoryId, categoryInfo]);
   if (loading) return <div className="loading">Loading...</div>;
-  if (!categoryInfo && !category) return <div className="not-found">Category not found</div>;
-
-  const displayCategory = category || categoryInfo;
+  if (!displayCategory) return <div className="not-found">Category not found</div>;
 
   return (
     <div className="category-page">

@@ -1,99 +1,108 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   FiHeart,
   FiShoppingBag,
   FiStar,
   FiShare2,
   FiPlus,
-  FiMinus
+  FiMinus,
+  FiZap,
 } from 'react-icons/fi';
+import { FaHeart } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
-import { getProductById } from '../services/productService';
-import { getProductReviews } from '../services/reviewService';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import { useProductDetail, useProductReviews } from '../hooks/api';
 import ReviewSection from '../components/ReviewSection';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const { addToCart } = useCart();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { addToCart, cartItems } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [averageRating, setAverageRating] = useState(0);
-  const [totalReviews, setTotalReviews] = useState(0);
+  const { data: product, isLoading: loading } = useProductDetail(id);
+  const { data: reviewsData } = useProductReviews(id);
+
+  const averageRating = Number(reviewsData?.averageRating) || 0;
+  const totalReviews = reviewsData?.totalReviews || 0;
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  // Fetch product details
-  const fetchProduct = useCallback(async () => {
-    try {
-      setLoading(true);
+  const productId = id || (product?._id ? String(product._id) : '');
+  const isWishlisted = isInWishlist(productId);
+  const cartItem = cartItems.find((item) => String(item._id) === String(productId));
+  const quantityInCart = cartItem ? cartItem.quantity : 0;
+  const stock = product?.stock !== undefined ? product.stock : 99;
+  const remainingStock = Math.max(0, stock - quantityInCart);
 
-      const productData = await getProductById(id);
-
-      setProduct(productData);
-
-      if (
-        productData?.images &&
-        productData.images.length > 0
-      ) {
-        setSelectedImage(0);
-      }
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      setProduct(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  const fetchReviewSummary = useCallback(async () => {
-    try {
-      const data = await getProductReviews(id);
-
-      setAverageRating(Number(data.averageRating) || 0);
-      setTotalReviews(data.totalReviews || 0);
-    } catch (error) {
-      console.error('Error fetching review summary:', error);
-      setAverageRating(0);
-      setTotalReviews(0);
-    }
-  }, [id]);
-
-  // Fetch product whenever product ID changes
-  useEffect(() => {
-    fetchProduct();
-    fetchReviewSummary();
-  }, [fetchProduct, fetchReviewSummary]);
-
-  // Add product to cart
+  // Add product to cart with stock validation
   const handleAddToCart = () => {
-    if (product) {
-      for (let i = 0; i < quantity; i++) {
-        addToCart(product);
-      }
+    if (!product) return;
+    if (stock <= 0) {
+      setNotice('This product is out of stock.');
+      setTimeout(() => setNotice(null), 3000);
+      return;
+    }
+    if (quantityInCart + quantity > stock) {
+      setNotice(`Cannot add ${quantity} more. Only ${remainingStock} items left available in stock.`);
+      setTimeout(() => setNotice(null), 3500);
+      return;
+    }
+    const res = addToCart(product, quantity);
+    if (!res.success && res.message) {
+      setNotice(res.message);
+      setTimeout(() => setNotice(null), 3000);
+    } else {
+      setNotice(`Added ${quantity} item(s) to your cart!`);
+      setTimeout(() => setNotice(null), 3000);
     }
   };
 
-  // Change product quantity
-  const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change;
+  // Buy Now: Validate stock, add item to cart, and navigate directly to checkout
+  const handleBuyNow = () => {
+    if (!product) return;
 
-    if (
-      newQuantity >= 1 &&
-      newQuantity <= (product?.stock || 10)
-    ) {
+    // Redirect to login if not authenticated, and come back to checkout
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
+    }
+
+    if (stock <= 0) {
+      setNotice('This product is out of stock.');
+      setTimeout(() => setNotice(null), 3000);
+      return;
+    }
+
+    const buyQty = Math.max(1, Math.min(quantity, stock));
+    const res = addToCart(product, buyQty);
+    if (!res.success && res.message && !cartItems.some(item => String(item._id) === String(productId))) {
+      setNotice(res.message);
+      setTimeout(() => setNotice(null), 3000);
+      return;
+    }
+
+    navigate('/checkout');
+  };
+
+  // Change product quantity
+  const handleQuantityChange = (change: number) => {
+    const newQuantity = quantity + change;
+    if (newQuantity >= 1 && newQuantity <= Math.max(1, remainingStock)) {
       setQuantity(newQuantity);
     }
   };
 
   // Toggle wishlist
   const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-
-    // Wishlist functionality to be implemented
+    if (product) {
+      addToWishlist(product);
+    }
   };
 
   // Loading state
@@ -310,65 +319,145 @@ const ProductDetail = () => {
                 Quantity:
               </span>
 
-              <div className="quantity-controls">
+              <div className="quantity-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
                 <button
+                  type="button"
                   className="quantity-btn"
-                  onClick={() =>
-                    handleQuantityChange(-1)
-                  }
+                  onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '8px',
+                    backgroundColor: '#FFF8ED',
+                    border: '1.5px solid #C99A4A',
+                    color: '#6E1717',
+                    cursor: quantity <= 1 ? 'not-allowed' : 'pointer',
+                    opacity: quantity <= 1 ? 0.4 : 1,
+                  }}
                 >
-                  <FiMinus />
+                  <FiMinus style={{ width: '16px', height: '16px', color: '#6E1717', strokeWidth: 3 }} />
                 </button>
 
-                <span className="quantity-value">
+                <span
+                  className="quantity-value"
+                  style={{
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    color: '#6E1717',
+                    minWidth: '36px',
+                    textAlign: 'center',
+                  }}
+                >
                   {quantity}
                 </span>
 
                 <button
+                  type="button"
                   className="quantity-btn"
-                  onClick={() =>
-                    handleQuantityChange(1)
-                  }
-                  disabled={
-                    quantity >=
-                    (product?.stock || 10)
-                  }
+                  onClick={() => handleQuantityChange(1)}
+                  disabled={quantity >= Math.max(1, remainingStock)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '8px',
+                    backgroundColor: '#FFF8ED',
+                    border: '1.5px solid #C99A4A',
+                    color: '#6E1717',
+                    cursor: quantity >= Math.max(1, remainingStock) ? 'not-allowed' : 'pointer',
+                    opacity: quantity >= Math.max(1, remainingStock) ? 0.4 : 1,
+                  }}
                 >
-                  <FiPlus />
+                  <FiPlus style={{ width: '16px', height: '16px', color: '#6E1717', strokeWidth: 3 }} />
                 </button>
 
               </div>
             </div>
 
+            {/* Stock / Cart Notice */}
+            {notice && (
+              <div className="product-notice">
+                {notice}
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="product-actions">
 
+              {/* Add to Cart Button */}
               <button
-                className="btn btn-primary btn-lg add-to-cart-btn"
+                type="button"
+                className="btn add-to-cart-btn"
                 onClick={handleAddToCart}
+                disabled={product.stock === 0 || remainingStock <= 0}
+              >
+                <FiShoppingBag className="btn-icon" />
+                <span>
+                  {product.stock === 0
+                    ? 'Out of Stock'
+                    : remainingStock <= 0
+                    ? `Max in Cart (${quantityInCart})`
+                    : quantityInCart > 0
+                    ? `In Cart (${quantityInCart}) • Add More`
+                    : 'Add to Cart'}
+                </span>
+              </button>
+
+              {/* Buy Now Button */}
+              <button
+                type="button"
+                className="btn buy-now-btn"
+                onClick={handleBuyNow}
                 disabled={product.stock === 0}
               >
-                <FiShoppingBag />
-                Add to Cart
+                <FiZap className="btn-icon" />
+                <span>Buy Now</span>
               </button>
 
+              {/* Wishlist Button */}
               <button
-                className={`btn btn-outline btn-lg wishlist-btn ${isWishlisted ? 'active' : ''
-                  }`}
+                type="button"
+                className={`btn wishlist-btn ${isWishlisted ? 'active' : ''}`}
                 onClick={handleWishlist}
+                title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                aria-label={isWishlisted ? 'Saved in Wishlist' : 'Add to Wishlist'}
               >
-                <FiHeart />
-
-                {isWishlisted
-                  ? 'Wishlisted'
-                  : 'Wishlist'}
+                {isWishlisted ? (
+                  <FaHeart style={{ width: '18px', height: '18px', color: '#E53E3E' }} />
+                ) : (
+                  <FiHeart style={{ width: '18px', height: '18px' }} />
+                )}
+                <span>{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
               </button>
 
-              <button className="btn btn-ghost btn-lg share-btn">
+              {/* Share Button */}
+              <button
+                type="button"
+                className="btn btn-ghost btn-lg share-btn"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: product.name,
+                      text: product.description,
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    setNotice('Product link copied to clipboard!');
+                    setTimeout(() => setNotice(null), 2500);
+                  }
+                }}
+                title="Share product"
+              >
                 <FiShare2 />
-                Share
+                <span>Share</span>
               </button>
 
             </div>

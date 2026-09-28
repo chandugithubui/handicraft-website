@@ -1,5 +1,4 @@
-import { getTestimonials } from '../services/testimonialService';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import HeroSection from '../components/HeroSection';
 import BenefitsStrip from '../components/BenefitsStrip';
 import CategorySection from '../components/CategorySection';
@@ -11,7 +10,7 @@ import { FaShoppingBag, FaHeart, FaStar, FaAward, FaLeaf, FaShieldAlt, FaTruck, 
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { getProducts } from '../services/productService';
+import { useProducts, useTestimonials, useSubscribeNewsletter } from '../hooks/api';
 import './Home.css';
 
 const Home = () => {
@@ -21,72 +20,39 @@ const Home = () => {
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
 
-  const [bestSellers, setBestSellers] = useState([]);
-  const [bestSellersLoading, setBestSellersLoading] = useState(true);
-  const [bestSellersError, setBestSellersError] = useState('');
-
-  const [testimonials, setTestimonials] = useState([]);
-  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
-  const [testimonialsError, setTestimonialsError] = useState('');
-
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
 
-  // Fetch Best Sellers from database
-  // 1. Fetch Best Sellers
-  useEffect(() => {
-    const fetchBestSellers = async () => {
-      try {
-        setBestSellersLoading(true);
-        setBestSellersError('');
+  // 1. Fetch Best Sellers with React Query
+  const {
+    data: allProducts = [],
+    isLoading: bestSellersLoading,
+    isError: isProductsError,
+  } = useProducts('?limit=100');
 
-        const products = await getProducts('?limit=100');
+  const bestSellersError = isProductsError ? 'Unable to load best sellers.' : '';
 
-        const featuredProducts = products.filter(
-          (product) => product.featured === true
-        );
+  const featuredProducts = allProducts.filter(
+    (product: any) => product.featured === true || product.isFeatured === true
+  );
+  const bestSellers =
+    featuredProducts.length > 0
+      ? featuredProducts.slice(0, 8)
+      : allProducts.slice(0, 8);
 
-        const productsToShow =
-          featuredProducts.length > 0
-            ? featuredProducts.slice(0, 8)
-            : products.slice(0, 8);
+  // 2. Fetch Testimonials with React Query
+  const {
+    data: testimonials = [],
+    isLoading: testimonialsLoading,
+    isError: isTestimonialsError,
+  } = useTestimonials();
 
-        setBestSellers(productsToShow);
-      } catch (error) {
-        console.error('Error fetching best sellers:', error);
-        setBestSellersError('Unable to load best sellers.');
-      } finally {
-        setBestSellersLoading(false);
-      }
-    };
+  const testimonialsError = isTestimonialsError ? 'Unable to load testimonials.' : '';
 
-    fetchBestSellers();
-  }, []);
+  // 3. Newsletter mutation hook
+  const subscribeMutation = useSubscribeNewsletter();
 
-
-  // 2. Fetch Testimonials
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        setTestimonialsLoading(true);
-        setTestimonialsError('');
-
-        const data = await getTestimonials();
-
-        setTestimonials(data);
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-        setTestimonialsError('Unable to load testimonials.');
-      } finally {
-        setTestimonialsLoading(false);
-      }
-    };
-
-    fetchTestimonials();
-  }, []);
-
-
-  const handleViewDetails = (product) => {
+  const handleViewDetails = (product: any) => {
     setSelectedProduct(product);
     setShowModal(true);
   };
@@ -96,27 +62,27 @@ const Home = () => {
     setSelectedProduct(null);
   };
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product: any) => {
     const productWithId = {
       ...product,
       _id: product._id,
-      price: Number(product.price)
+      price: Number(product.price),
     };
 
     addToCart(productWithId);
   };
 
-  const handleWishlist = (product) => {
+  const handleWishlist = (product: any) => {
     const productWithId = {
       ...product,
       _id: product._id,
-      price: Number(product.price)
+      price: Number(product.price),
     };
 
     addToWishlist(productWithId);
   };
 
-  const handleNewsletterSubscribe = async (e) => {
+  const handleNewsletterSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Email validation - more permissive regex
@@ -128,19 +94,7 @@ const Home = () => {
     }
 
     try {
-      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:5000/api/newsletter/subscribe'
-        : 'https://handicraft-website.onrender.com/api/newsletter/subscribe';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: newsletterEmail }),
-      });
-
-      const data = await response.json();
+      const data = await subscribeMutation.mutateAsync({ email: newsletterEmail });
 
       if (data.success) {
         setNewsletterStatus('success');
@@ -150,12 +104,13 @@ const Home = () => {
         setNewsletterStatus('error');
         setNewsletterMessage(data.message || 'Subscription failed. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Newsletter subscription error:', error);
       setNewsletterStatus('error');
-      setNewsletterMessage('An error occurred. Please try again later.');
+      setNewsletterMessage(error?.message || 'An error occurred. Please try again later.');
     }
   };
+
   return (
     <div className="home-page">
       {/* New Hero Section */}

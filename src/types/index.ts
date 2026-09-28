@@ -7,12 +7,15 @@
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export interface User {
-  _id: string;
+  _id?: string;
+  id?: string;
   name?: string;
   displayName?: string;
   email: string;
   picture?: string;
-  role: 'user' | 'admin';
+  avatar?: string | null;
+  role: string;
+  permissions?: string[];
   /** Auth provider: local email/password or Google OAuth */
   provider?: 'local' | 'google';
   createdAt?: string;
@@ -37,7 +40,11 @@ export interface Product {
   description: string;
   price: number;
   originalPrice?: number;
-  images: string[];
+  images?: string[];
+  image?: string;
+  imageUrl?: string;
+  material?: string;
+  sku?: string;
   category: string;
   subCategory?: string;
   stock: number;
@@ -46,6 +53,7 @@ export interface Product {
   artisan?: Artisan;
   tags?: string[];
   isFeatured?: boolean;
+  featured?: boolean;
   createdAt?: string;
 }
 
@@ -90,9 +98,11 @@ export interface WishlistContextValue {
 // ── Order ─────────────────────────────────────────────────────────────────────
 
 export interface OrderItem {
-  product: Product;
+  product?: Product | string;
   quantity: number;
   price: number;
+  name?: string;
+  image?: string;
 }
 
 export interface ShippingAddress {
@@ -116,15 +126,17 @@ export interface Order {
     status: string;
     updateTime: string;
   };
-  itemsPrice: number;
-  shippingPrice: number;
-  taxPrice: number;
-  totalPrice: number;
-  isPaid: boolean;
-  isDelivered: boolean;
+  itemsPrice?: number;
+  shippingPrice?: number;
+  taxPrice?: number;
+  totalPrice?: number;
+  totalAmount?: number;
+  isPaid?: boolean;
+  isDelivered?: boolean;
   paidAt?: string;
   deliveredAt?: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | string;
+  orderStatus?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | string;
   createdAt: string;
 }
 

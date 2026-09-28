@@ -1,7 +1,7 @@
-// src/components/ProductList.js
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getPaginatedProducts } from "../services/productService";
+import { usePaginatedProducts } from "../hooks/api";
+import { LoadingSpinner } from "./common";
 import ProductFilters from "./ProductFilters";
 import ProductGrid from "./ProductGrid";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -9,17 +9,8 @@ import "./productList.css";
 
 const ProductList = () => {
   const [searchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState('newest');
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalProducts: 0,
-    limit: 12
-  });
-
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({
     category: '',
@@ -41,37 +32,26 @@ const ProductList = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const queryParams = new URLSearchParams();
-        queryParams.append('page', String(currentPage));
-        queryParams.append('limit', '12');
-        queryParams.append('sort', sort);
-        if (search) queryParams.append('search', search);
-        if (filters.category) queryParams.append('category', filters.category);
-        if (filters.material) queryParams.append('material', filters.material);
-        if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
-        if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
+  const queryParams = new URLSearchParams();
+  queryParams.append('page', String(currentPage));
+  queryParams.append('limit', '12');
+  queryParams.append('sort', sort);
+  if (search) queryParams.append('search', search);
+  if (filters.category) queryParams.append('category', filters.category);
+  if (filters.material) queryParams.append('material', filters.material);
+  if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
+  if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
 
-        const url = queryParams.toString()
-          ? `?${queryParams.toString()}`
-          : '';
+  const url = queryParams.toString() ? `?${queryParams.toString()}` : '';
 
-        const productData = await getPaginatedProducts(url);
-
-        setProducts(productData.products);
-        setPagination(productData.pagination);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [search, filters, currentPage, sort]);
-
+  const { data, isLoading: loading } = usePaginatedProducts(url);
+  const products = data?.products || [];
+  const pagination = data?.pagination || {
+    currentPage,
+    totalPages: 1,
+    totalProducts: 0,
+    limit: 12
+  };
 
   const handleFilterChange = (filterType: string, value: any = '') => {
     setCurrentPage(1);
@@ -94,11 +74,7 @@ const ProductList = () => {
   };
 
   if (loading) {
-    return (
-      <div className="text-center my-5">
-        <div className="spinner-border text-primary"></div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading products..." fullHeight />;
   }
 
   return (

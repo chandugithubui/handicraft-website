@@ -15,11 +15,34 @@ const ReviewSection = ({ productId }) => {
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [canReview, setCanReview] = useState(false);
+  const [eligibilityReason, setEligibilityReason] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     rating: 5,
     comment: ''
   });
+
+  // Check verified buyer review eligibility
+  const checkReviewEligibility = useCallback(async () => {
+    if (!isAuthenticated || !token || !productId) {
+      setCanReview(false);
+      setEligibilityReason(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/reviews/can-review/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setCanReview(data.canReview === true);
+      setEligibilityReason(data.reason || null);
+    } catch (err) {
+      setCanReview(false);
+    }
+  }, [productId, isAuthenticated, token]);
 
   // Fetch reviews for the current product
   const fetchReviews = useCallback(async () => {
@@ -38,10 +61,11 @@ const ReviewSection = ({ productId }) => {
     }
   }, [productId]);
 
-  // Fetch reviews whenever the product changes
+  // Fetch reviews & check eligibility whenever product or auth changes
   useEffect(() => {
     fetchReviews();
-  }, [fetchReviews]);
+    checkReviewEligibility();
+  }, [fetchReviews, checkReviewEligibility]);
 
   // Submit a new review
   const handleSubmit = async (e) => {
@@ -219,19 +243,30 @@ const ReviewSection = ({ productId }) => {
 
           <hr />
 
-          {/* Write Review Button */}
-          {isAuthenticated && (
-            <Button
-              variant="primary"
-              onClick={() =>
-                setShowForm(!showForm)
-              }
-              className="mb-3"
-            >
-              {showForm
-                ? 'Cancel'
-                : 'Write a Review'}
-            </Button>
+          {/* Write Review Button / Verified Buyer Status */}
+          {isAuthenticated ? (
+            canReview ? (
+              <Button
+                variant="primary"
+                onClick={() => setShowForm(!showForm)}
+                className="mb-3"
+                style={{ backgroundColor: '#6E1717', borderColor: '#6E1717' }}
+              >
+                {showForm ? 'Cancel' : 'Write a Review (Verified Buyer)'}
+              </Button>
+            ) : eligibilityReason === 'already_reviewed' ? (
+              <div className="p-3 mb-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-medium flex items-center gap-2">
+                <span>✓ You have already reviewed this product. Thank you for your feedback!</span>
+              </div>
+            ) : (
+              <div className="p-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-xs font-medium flex items-center gap-2">
+                <span>🛡️ Only verified buyers who have purchased this product can write a review.</span>
+              </div>
+            )
+          ) : (
+            <div className="p-3 mb-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 text-xs font-medium">
+              Please <a href="/login" className="text-[#6E1717] font-semibold underline">sign in</a> to write a review. Only verified buyers who have purchased this item can submit a review.
+            </div>
           )}
 
           {/* Review Form */}

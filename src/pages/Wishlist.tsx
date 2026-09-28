@@ -48,14 +48,20 @@ const Wishlist = () => {
         </div>
 
         <div className="wishlist-grid">
-          {wishlistItems.map((product) => (
-            <div key={product._id} className="wishlist-item">
-              <div className="wishlist-item-image">
-                <img 
-                  src={product.image.startsWith('/') ? product.image : `/${product.image}`} 
-                  alt={product.name} 
-                />
-              </div>
+          {wishlistItems.map((product) => {
+            const rawImg = product.image || product.imageUrl || '/images/HandcraftedWoodenBowl.webp';
+            const imgSrc = rawImg.startsWith('http') || rawImg.startsWith('/') ? rawImg : `/${rawImg}`;
+            return (
+              <div key={product._id} className="wishlist-item">
+                <div className="wishlist-item-image">
+                  <img 
+                    src={imgSrc} 
+                    alt={product.name} 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/HandcraftedWoodenBowl.webp';
+                    }}
+                  />
+                </div>
               <div className="wishlist-item-details">
                 <h3>{product.name}</h3>
                 <p className="wishlist-item-description">{product.description}</p>
@@ -78,7 +84,8 @@ const Wishlist = () => {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       </div>
     </div>

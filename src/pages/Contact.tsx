@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiMail, FiMapPin, FiPhone, FiSend, FiMessageSquare, FiFacebook, FiInstagram, FiTwitter } from 'react-icons/fi';
-import axios from 'axios';
+import { useSubmitContact } from '../hooks/api';
 import './Contact.css';
 
 const Contact = () => {
@@ -10,41 +10,28 @@ const Contact = () => {
     message: '',
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
+  const submitContactMutation = useSubmitContact();
+  const isSubmitting = submitContactMutation.isPending;
 
-  const getApiUrl = () => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api';
-    }
-    if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-        window.location.hostname.includes('vercel.app')) {
-      return 'https://handicraft-website.onrender.com/api';
-    }
-    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-  };
-
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
-      await axios.post(`${getApiUrl()}/contacts`, formData);
+      await submitContactMutation.mutateAsync(formData);
       setResponseMessage('Message sent successfully!');
       setFormData({ name: '', email: '', message: '' });
-    } catch (error) {
-      setResponseMessage('There was an error submitting your message. Please try again.');
+    } catch (error: any) {
+      setResponseMessage(error?.message || 'There was an error submitting your message. Please try again.');
       console.error(error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

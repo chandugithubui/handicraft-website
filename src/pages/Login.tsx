@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { login as loginApi } from '../services/authService';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { getRedirectUrlAfterLogin } from '../utils/authUtils';
 import './Auth.css';
 
 const Login = () => {
@@ -11,12 +12,14 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from;
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate(from || getRedirectUrlAfterLogin(user), { replace: true });
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -24,7 +27,7 @@ const Login = () => {
     if (oauthError) {
       setError(`Google authentication was cancelled or failed (${oauthError}).`);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -37,7 +40,8 @@ const Login = () => {
     try {
       const response = await loginApi(formData.email, formData.password);
       login(response.token, response.user);
-      navigate('/', { replace: true });
+      const redirectUrl = from || getRedirectUrlAfterLogin(response.user);
+      navigate(redirectUrl, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {

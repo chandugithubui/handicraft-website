@@ -1,76 +1,119 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/**
+ * src/context/CartContext.tsx
+ *
+ * Bridge Context powering Redux-backed Cart State with MongoDB Server Persistence.
+ * Completely replaces localStorage with Redux and Database storage.
+ */
 
-const CartContext = createContext(null);
+import React, { createContext, useContext, useEffect, useRef } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import {
+  addToCart as reduxAddToCart,
+  removeFromCart as reduxRemoveFromCart,
+  updateQuantity as reduxUpdateQuantity,
+  clearCart as reduxClearCart,
+  clearStockAlert as reduxClearStockAlert,
+  fetchCartFromServer,
+  saveItemToServer,
+  removeItemFromServer,
+  clearServerCart,
+  syncCartWithServer,
+  CartItem,
+} from '../store/slices/cartSlice';
+import { useAuth } from './AuthContext';
 
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+interface CartContextValue {
+  cartItems: CartItem[];
+  addToCart: (product: any, quantity?: number) => { success: boolean; message?: string };
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotal: () => number;
+  getCartItemCount: () => number;
+  stockAlert: string | null;
+  clearStockAlert: () => void;
+  loading: boolean;
+}
 
-  // Load cart from localStorage on mount
+const CartContext = createContext<CartContextValue | null>(null);
+
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const dispatch = useAppDispatch();
+  const { items: cartItems, stockAlert, loading } = useAppSelector((state) => state.cart);
+  const { isAuthenticated, token } = useAuth();
+  const hasSyncedRef = useRef(false);
+
+  // Sync / fetch cart from MongoDB when user logs in
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-  }, []);
-
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  const addToCart = (product, quantity = 1) => {
-    // Check if product has stock
-    if (product.stock !== undefined && product.stock <= 0) {
-      alert('This product is out of stock');
-      return;
-    }
-
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item._id === product._id);
-      
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + quantity;
-        // Check if adding would exceed stock
-        if (product.stock !== undefined && newQuantity > product.stock) {
-          alert(`Only ${product.stock} items available in stock`);
-          return prevItems;
+    if (isAuthenticated && token) {
+      if (!hasSyncedRef.current) {
+        hasSyncedRef.current = true;
+        if (cartItems.length > 0) {
+          // Sync any offline items to MongoDB
+          dispatch(syncCartWithServer(cartItems));
+        } else {
+          // Fetch existing cart from MongoDB
+          dispatch(fetchCartFromServer());
         }
-        return prevItems.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: newQuantity }
-            : item
-        );
       }
-      
-      // Check if initial quantity exceeds stock
-      if (product.stock !== undefined && quantity > product.stock) {
-        alert(`Only ${product.stock} items available in stock`);
-        return prevItems;
-      }
-      
-      return [...prevItems, { ...product, quantity }];
-    });
-  };
-
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item._id !== productId));
-  };
-
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
+    } else {
+      hasSyncedRef.current = false;
     }
-    
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === productId ? { ...item, quantity } : item
-      )
-    );
+  }, [isAuthenticated, token, dispatch]);
+
+  const addToCart = (product: any, quantity: number = 1) => {
+    const stock = product.stock !== undefined ? product.stock : 999;
+
+    if (stock <= 0) {
+      return { success: false, message: 'This product is out of stock' };
+    }
+
+    const existing = cartItems.find((i) => i._id === product._id);
+    const existingQty = existing ? existing.quantity : 0;
+
+    if (existingQty >= stock) {
+      return {
+        success: false,
+        message: `Maximum stock limit reached (${stock} items)`,
+      };
+    }
+
+    const addedQty = Math.min(quantity, stock - existingQty);
+
+    // 1. Optimistic Update in Redux
+    dispatch(reduxAddToCart({ product, quantity: addedQty }));
+
+    // 2. Persist to MongoDB if authenticated
+    if (isAuthenticated) {
+      dispatch(saveItemToServer({ productId: product._id, quantity: existingQty + addedQty }));
+    }
+
+    return { success: true };
+  };
+
+  const removeFromCart = (productId: string) => {
+    dispatch(reduxRemoveFromCart(productId));
+    if (isAuthenticated) {
+      dispatch(removeItemFromServer(productId));
+    }
+  };
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    dispatch(reduxUpdateQuantity({ productId, quantity }));
+    if (isAuthenticated) {
+      if (quantity <= 0) {
+        dispatch(removeItemFromServer(productId));
+      } else {
+        dispatch(saveItemToServer({ productId, quantity }));
+      }
+    }
   };
 
   const clearCart = () => {
-    setCartItems([]);
+    dispatch(reduxClearCart());
+    if (isAuthenticated) {
+      dispatch(clearServerCart());
+    }
   };
 
   const getCartTotal = () => {
@@ -81,14 +124,21 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
-  const value = {
+  const clearStockAlert = () => {
+    dispatch(reduxClearStockAlert());
+  };
+
+  const value: CartContextValue = {
     cartItems,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
     getCartTotal,
-    getCartItemCount
+    getCartItemCount,
+    stockAlert,
+    clearStockAlert,
+    loading,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
@@ -101,3 +151,5 @@ export const useCart = () => {
   }
   return context;
 };
+
+export default CartContext;
