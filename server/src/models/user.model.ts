@@ -129,7 +129,6 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       unique: true,
       sparse: true,
-      default: null,
       index: true,
     },
 

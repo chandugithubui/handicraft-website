@@ -208,6 +208,7 @@ describe('Auth Routes Integration Tests', () => {
         userId: 'user-auth-01',
         email: 'artisan@handicrafthub.com',
         role: 'user',
+        permissions: [],
       });
 
       const mockUserProfile = {

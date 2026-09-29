@@ -89,7 +89,7 @@ async function main() {
   } else {
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await UserModel.create({
+    const superAdminData: Record<string, unknown> = {
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
@@ -97,7 +97,9 @@ async function main() {
       authProviders: ['local'],
       customPermissions: [],
       refreshTokens: [],
-    });
+      // Deliberately omit googleId so the sparse unique index is not triggered
+    };
+    await UserModel.create(superAdminData);
 
     console.log('\n✅  Super Admin user created successfully!');
     console.log('─'.repeat(50));
