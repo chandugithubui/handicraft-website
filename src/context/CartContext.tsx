@@ -43,9 +43,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isAuthenticated, token } = useAuth();
   const hasSyncedRef = useRef(false);
 
-  // Sync / fetch cart from MongoDB when user logs in
+  // Sync / fetch cart from MongoDB when user logs in, or clear when logged out
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       if (!hasSyncedRef.current) {
         hasSyncedRef.current = true;
         if (cartItems.length > 0) {
@@ -58,8 +58,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else {
       hasSyncedRef.current = false;
+      if (cartItems.length > 0) {
+        dispatch(reduxClearCart());
+      }
     }
-  }, [isAuthenticated, token, dispatch]);
+  }, [isAuthenticated, dispatch]);
 
   const addToCart = (product: any, quantity: number = 1) => {
     const stock = product.stock !== undefined ? product.stock : 999;
@@ -117,10 +120,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const getCartTotal = () => {
+    if (!isAuthenticated) return 0;
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const getCartItemCount = () => {
+    if (!isAuthenticated) return 0;
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 

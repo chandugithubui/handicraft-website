@@ -13,13 +13,19 @@ export const orderKeys = {
  * Hook to fetch current user's orders
  */
 export const useMyOrders = (token?: string | null, enabled: boolean = true) => {
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
   return useQuery<Order[], Error>({
     queryKey: orderKeys.myOrders(),
     queryFn: () => {
-      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : undefined;
+      const config = activeToken ? { headers: { Authorization: `Bearer ${activeToken}` } } : undefined;
       return http.get<Order[]>('/orders/my-orders', config);
     },
-    enabled: enabled && (Boolean(token) || Boolean(localStorage.getItem('token'))),
+    enabled: enabled,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -27,11 +33,15 @@ export const useMyOrders = (token?: string | null, enabled: boolean = true) => {
  * Hook to fetch single order by ID
  */
 export const useOrderDetail = (orderId?: string, token?: string | null) => {
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
   return useQuery<Order, Error>({
     queryKey: orderKeys.detail(orderId),
     queryFn: () => {
       if (!orderId) throw new Error('Order ID is required');
-      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : undefined;
+      const config = activeToken ? { headers: { Authorization: `Bearer ${activeToken}` } } : undefined;
       return http.get<Order>(`/orders/${orderId}`, config);
     },
     enabled: Boolean(orderId),

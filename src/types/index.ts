@@ -50,7 +50,10 @@ export interface Product {
   stock: number;
   rating?: number;
   reviewCount?: number;
+  numReviews?: number;
   artisan?: Artisan;
+  artisanName?: string;
+  dimensions?: string;
   tags?: string[];
   isFeatured?: boolean;
   featured?: boolean;

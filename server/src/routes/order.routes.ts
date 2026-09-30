@@ -83,9 +83,10 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
     }
 
     const totalAmount = Math.max(0, subtotal + shippingAmount - discountAmount);
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
 
     const order = new Order({
-      user: req.user?.userId || req.user?.id,
+      user: userId,
       items: validatedItems,
       shippingAddress,
       paymentMethod: paymentMethod || 'COD',
@@ -135,7 +136,7 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
 // GET user orders
 router.get('/my-orders', auth, async (req: Request, res: Response): Promise<Response> => {
   try {
-    const userId = req.user?.userId || req.user?.id;
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
     const orders = await Order.find({ user: userId }).sort({ createdAt: -1 }).lean();
 
     const ordersWithFixedImages = orders.map((order: any) => {
@@ -172,7 +173,7 @@ router.get('/:id', auth, async (req: Request, res: Response): Promise<Response> 
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    const userId = req.user?.userId || req.user?.id;
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
     if (
       !order.user ||
       (order.user.toString() !== userId && req.user?.role !== 'admin' && req.user?.role !== 'super_admin')

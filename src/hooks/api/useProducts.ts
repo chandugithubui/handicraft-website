@@ -23,11 +23,18 @@ export const productKeys = {
 
 /**
  * Hook to fetch products list
+ * @param queryParams  - URL query string e.g. '?limit=100'
+ * @param options      - React Query overrides (e.g. { enabled: false })
  */
-export const useProducts = (queryParams: string = '') => {
+export const useProducts = (
+  queryParams: string = '',
+  options: { enabled?: boolean } = {}
+) => {
   return useQuery<Product[], Error>({
     queryKey: productKeys.list(queryParams),
     queryFn: () => getProducts(queryParams),
+    enabled: options.enabled !== false, // default true unless caller passes false
+    ...options,
   });
 };
 

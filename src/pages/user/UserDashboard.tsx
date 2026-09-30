@@ -96,7 +96,7 @@ export const UserDashboard: React.FC = () => {
 
   // Fetch dashboard summary stats
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       setStatsLoading(true);
       http
         .get<{ success: boolean; data: any }>('/user/dashboard-summary')

@@ -31,6 +31,8 @@ interface WishlistState {
 
 const loadInitialWishlist = (): WishlistItem[] => {
   try {
+    const hasUser = localStorage.getItem('token') || localStorage.getItem('user');
+    if (!hasUser) return [];
     const cached = localStorage.getItem('wishlist_cache') || localStorage.getItem('wishlist');
     if (cached) {
       const parsed = JSON.parse(cached);
@@ -130,7 +132,10 @@ export const wishlistSlice = createSlice({
 
     clearWishlist: (state) => {
       state.items = [];
-      persistWishlist(state.items);
+      try {
+        localStorage.removeItem('wishlist_cache');
+        localStorage.removeItem('wishlist');
+      } catch (e) {}
     },
 
     setWishlistItems: (state, action: PayloadAction<WishlistItem[]>) => {

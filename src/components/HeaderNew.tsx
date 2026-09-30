@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiSearch, FiHeart, FiUser, FiShoppingBag, FiMenu, FiX, FiLogOut, FiSettings, FiShield } from 'react-icons/fi';
+import { FiHeart, FiUser, FiShoppingBag, FiMenu, FiX, FiLogOut, FiSettings, FiShield } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -10,8 +10,6 @@ import './HeaderNew.css';
 
 const HeaderNew = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loginModal, setLoginModal] = useState<{ isOpen: boolean; type: 'cart' | 'wishlist' }>({
@@ -25,8 +23,8 @@ const HeaderNew = () => {
   const { getWishlistCount } = useWishlist();
   const { getCartItemCount } = useCart();
 
-  const cartItemCount = getCartItemCount();
-  const wishlistCount = getWishlistCount();
+  const cartItemCount = isAuthenticated ? getCartItemCount() : 0;
+  const wishlistCount = isAuthenticated ? getWishlistCount() : 0;
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -55,17 +53,6 @@ const HeaderNew = () => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
     document.body.style.overflow = 'auto';
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setIsSearchOpen(false);
-      setIsMobileMenuOpen(false);
-      document.body.style.overflow = 'auto';
-      setSearchQuery('');
-    }
   };
 
   /** Handles logout: shows loading feedback, clears session, redirects to home */
@@ -140,14 +127,6 @@ const HeaderNew = () => {
 
             {/* Right Actions */}
             <div className="header-actions">
-              {/* Search – desktop only */}
-              <button
-                className="action-btn premium-action-btn hide-mobile"
-                onClick={() => setIsSearchOpen((prev) => !prev)}
-                aria-label="Search"
-              >
-                <FiSearch />
-              </button>
 
               {/* Wishlist */}
               <Link
@@ -253,27 +232,6 @@ const HeaderNew = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
-        {isSearchOpen && (
-          <div className="search-bar premium-search-bar">
-            <div className="container">
-              <form onSubmit={handleSearch} className="search-input-wrapper">
-                <FiSearch className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search for handicrafts, artisans, categories..."
-                  className="search-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
-                <button type="button" className="search-close" onClick={() => setIsSearchOpen(false)}>
-                  <FiX />
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Mobile Navigation Drawer */}
@@ -302,19 +260,6 @@ const HeaderNew = () => {
               </div>
             </div>
           )}
-
-          <div className="mobile-drawer-search">
-            <form onSubmit={handleSearch} className="mobile-search-form">
-              <FiSearch className="mobile-search-icon" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="mobile-search-input"
-              />
-            </form>
-          </div>
 
           <nav className="mobile-nav">
             <ul className="mobile-nav-list">

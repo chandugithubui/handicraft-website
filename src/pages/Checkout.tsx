@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiMapPin, FiCreditCard, FiTruck, FiLock } from 'react-icons/fi';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/orderService';
 import { validateCoupon } from '../services/couponService';
+import { orderKeys } from '../hooks/api/useOrders';
 import RazorpayPaymentForm from '../components/RazorpayPaymentForm';
 import './Checkout.css';
 
 const Checkout = () => {
+  const queryClient = useQueryClient();
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -99,81 +102,57 @@ const Checkout = () => {
       setCouponLoading(false);
     }
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    // Validate form
-    if (!shippingAddress.fullName || !shippingAddress.address || !shippingAddress.city ||
-      !shippingAddress.state || !shippingAddress.postalCode || !shippingAddress.phone) {
+  const validateShippingForm = () => {
+    if (
+      !shippingAddress.fullName ||
+      !shippingAddress.address ||
+      !shippingAddress.city ||
+      !shippingAddress.state ||
+      !shippingAddress.postalCode ||
+      !shippingAddress.phone
+    ) {
       setError('Please fill in all shipping fields');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateShippingForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-
-
       const orderData = {
         items: cartItems.map(item => ({
           product: item._id,
           quantity: item.quantity
         })),
-
         shippingAddress,
-
         paymentMethod: 'COD',
-
-        couponCode: appliedCoupon
-          ? appliedCoupon.code
-          : null
+        couponCode: appliedCoupon ? appliedCoupon.code : null
       };
 
-      await createOrder(orderData, token);
+      const res = await createOrder(orderData, token);
+      queryClient.invalidateQueries({ queryKey: orderKeys.myOrders() });
       clearCart();
-      navigate('/order-success');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to place order');
+      navigate('/order-success', { state: { order: res?.order || res } });
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to place order');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRazorpayPayment = async (paymentResponse) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const orderData = {
-        items: cartItems.map(item => ({
-          product: item._id,
-          quantity: item.quantity
-        })),
-
-        shippingAddress,
-
-        paymentMethod: 'Razorpay',
-
-        couponCode: appliedCoupon
-          ? appliedCoupon.code
-          : null,
-
-        paymentId: paymentResponse.razorpay_payment_id
-      };
-
-      await createOrder(orderData, token);
-
-      clearCart();
-      navigate('/order-success');
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        'Payment failed'
-      );
-    } finally {
-      setLoading(false);
-    }
+  const handleRazorpaySuccess = (createdOrder: any) => {
+    queryClient.invalidateQueries({ queryKey: orderKeys.myOrders() });
+    clearCart();
+    navigate('/order-success', { state: { order: createdOrder } });
   };
 
   if (cartItems.length === 0) {
@@ -367,8 +346,14 @@ const Checkout = () => {
                     <div className="razorpay-section">
                       <RazorpayPaymentForm
                         amount={total}
-                        onSuccess={handleRazorpayPayment}
+                        cartItems={cartItems}
+                        shippingAddress={shippingAddress}
+                        couponCode={appliedCoupon ? appliedCoupon.code : null}
+                        user={user}
+                        validateForm={validateShippingForm}
+                        onSuccess={handleRazorpaySuccess}
                         onError={(err) => setError(err)}
+                        loading={loading}
                       />
                     </div>
                   )}

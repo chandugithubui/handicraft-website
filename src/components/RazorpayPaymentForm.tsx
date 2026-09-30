@@ -1,109 +1,205 @@
-import React, { useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import React, { useEffect, useState, useRef } from 'react';
+import { Button, Spinner } from 'react-bootstrap';
+import {
+  createRazorpayOrder,
+  verifyAndCreateRazorpayOrder,
+} from '../services/paymentService';
 
-const RazorpayPaymentForm = ({ amount, onSuccess, onError }) => {
+interface RazorpayPaymentFormProps {
+  amount: number;
+  cartItems: any[];
+  shippingAddress: {
+    fullName: string;
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone: string;
+  };
+  couponCode?: string | null;
+  user?: any;
+  validateForm: () => boolean;
+  onSuccess: (order: any) => void;
+  onError: (error: string) => void;
+  loading?: boolean;
+}
+
+const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
+  amount,
+  cartItems,
+  shippingAddress,
+  couponCode,
+  user,
+  validateForm,
+  onSuccess,
+  onError,
+  loading: parentLoading = false,
+}) => {
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Per-checkout idempotency key to prevent double submissions on network retries
+  const idempotencyKeyRef = useRef<string>(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  );
+
   useEffect(() => {
-    // Load Razorpay script
+    // Check if SDK already loaded
+    if ((window as any).Razorpay) {
+      setScriptLoaded(true);
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    script.onerror = () => {
+      console.error('Failed to load Razorpay SDK');
+      onError('Unable to load payment gateway. Please check your internet connection or ad-blocker.');
+    };
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
-  }, []);
+  }, [onError]);
 
   const handlePayment = async () => {
+    // 1. Client-side form validation check
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!scriptLoaded || !(window as any).Razorpay) {
+      onError('Payment gateway is still initializing. Please wait a moment and try again.');
+      return;
+    }
+
+    setIsProcessing(true);
+
     try {
-      const getApiUrl = () => {
-        // Check if we're in local development
-        if (window.location.hostname === 'localhost' || 
-            window.location.hostname === '127.0.0.1') {
-          return 'http://localhost:5000/api';
-        }
-        // Check if we're in production (Vercel deployment)
-        if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-            window.location.hostname.includes('vercel.app')) {
-          return 'https://handicraft-website.onrender.com/api';
-        }
-        return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      };
-      const API_URL = getApiUrl();
-      // Create Razorpay order
-      const response = await fetch(`${API_URL}/payment/create-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount }),
+      // 2. Create server-verified Razorpay order with actual cart items & coupon
+      const formattedItems = cartItems.map((item) => ({
+        product: item._id,
+        quantity: item.quantity,
+      }));
+
+      const orderData = await createRazorpayOrder({
+        amount,
+        items: formattedItems,
+        couponCode: couponCode || null,
       });
 
-      const orderData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(orderData.message || 'Failed to create order');
+      if (!orderData || !orderData.orderId) {
+        throw new Error('Invalid order response received from payment gateway');
       }
 
+      // 3. Configure Razorpay modal options
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
-        currency: orderData.currency,
+        currency: orderData.currency || 'INR',
         name: 'Handicraft Hub',
-        description: 'Payment for handicraft products',
+        description: `Order for ${cartItems.length} handcrafted item(s)`,
         order_id: orderData.orderId,
-        handler: async function (response) {
-          // Verify payment on server
-          const verifyResponse = await fetch(`${API_URL}/payment/verify-payment`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        prefill: {
+          name: shippingAddress.fullName || user?.name || user?.displayName || '',
+          email: user?.email || '',
+          contact: shippingAddress.phone || '',
+        },
+        theme: {
+          color: '#B3541E',
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+          },
+        },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            // 4. Atomic signature verification & order placement on backend
+            const result = await verifyAndCreateRazorpayOrder({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-            }),
-          });
+              items: formattedItems,
+              shippingAddress,
+              couponCode: couponCode || null,
+              idempotencyKey: idempotencyKeyRef.current,
+            });
 
-          const verifyData = await verifyResponse.json();
-
-          if (verifyData.success) {
-            onSuccess(response);
-          } else {
-            onError('Payment verification failed');
+            if (result && result.success) {
+              onSuccess(result.order);
+            } else {
+              onError(result?.message || 'Payment verification failed. Please contact support.');
+            }
+          } catch (verificationError: any) {
+            console.error('Order verification error:', verificationError);
+            onError(
+              verificationError.response?.data?.message ||
+              verificationError.message ||
+              'Payment was captured, but we encountered an issue finalizing your order. Our team will verify it shortly.'
+            );
+          } finally {
+            setIsProcessing(false);
           }
-        },
-        prefill: {
-          name: '',
-          email: '',
-          contact: '',
-        },
-        theme: {
-          color: '#e67e22',
         },
       };
 
-      const rzp = new window.Razorpay(options);
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', (failResponse: any) => {
+        setIsProcessing(false);
+        const reason = failResponse?.error?.description || failResponse?.error?.reason || 'Payment failed';
+        onError(`Payment failed: ${reason}`);
+      });
+
       rzp.open();
-    } catch (error) {
-      onError(error.message);
+    } catch (error: any) {
+      console.error('Razorpay initialization error:', error);
+      setIsProcessing(false);
+      onError(
+        error.response?.data?.message ||
+        error.message ||
+        'Unable to initialize payment. Please try again.'
+      );
     }
   };
+
+  const isLoading = parentLoading || isProcessing;
 
   return (
     <div className="razorpay-payment-form">
       <Button
         variant="primary"
         size="lg"
-        className="w-100"
+        className="w-100 place-order-btn"
         onClick={handlePayment}
+        disabled={isLoading || !scriptLoaded}
+        style={{
+          backgroundColor: '#B3541E',
+          borderColor: '#B3541E',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+        }}
       >
-        Pay ₹{amount} with Razorpay
+        {isLoading && <Spinner animation="border" size="sm" />}
+        {isLoading ? 'Processing Payment…' : `Pay ₹${amount.toLocaleString()} with Razorpay`}
       </Button>
       <div className="mt-3 text-center">
-        <small className="text-muted">
-          Secure payment via Razorpay (Cards, UPI, Net Banking, Wallets)
+        <small className="text-muted" style={{ fontSize: '12px' }}>
+          🔒 Secure 256-bit encrypted checkout via Razorpay (UPI, Credit/Debit Cards, Net Banking, Wallets)
         </small>
       </div>
     </div>

@@ -1,46 +1,52 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
+/**
+ * Creates an order on the backend with credentials and optional token.
+ */
+export const createOrder = async (orderData: any, token?: string | null) => {
+  const config: { headers?: Record<string, string> } = {};
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
+  if (activeToken && activeToken !== 'null' && activeToken !== 'undefined') {
+    config.headers = { Authorization: `Bearer ${activeToken}` };
   }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
 
-const API_URL = getApiUrl();
-
-export const createOrder = async (orderData, token) => {
-  const response = await axios.post(`${API_URL}/orders`, orderData, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const response = await apiClient.post('/orders', orderData, config);
   return response.data;
 };
 
-export const getMyOrders = async (token) => {
-  const response = await axios.get(`${API_URL}/orders/my-orders`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+/**
+ * Fetches current authenticated user's orders.
+ */
+export const getMyOrders = async (token?: string | null) => {
+  const config: { headers?: Record<string, string> } = {};
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
+  if (activeToken && activeToken !== 'null' && activeToken !== 'undefined') {
+    config.headers = { Authorization: `Bearer ${activeToken}` };
+  }
+
+  const response = await apiClient.get('/orders/my-orders', config);
   return response.data;
 };
 
-export const getOrderById = async (orderId, token) => {
-  const response = await axios.get(`${API_URL}/orders/${orderId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+/**
+ * Fetches single order by ID.
+ */
+export const getOrderById = async (orderId: string, token?: string | null) => {
+  const config: { headers?: Record<string, string> } = {};
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
+  if (activeToken && activeToken !== 'null' && activeToken !== 'undefined') {
+    config.headers = { Authorization: `Bearer ${activeToken}` };
+  }
+
+  const response = await apiClient.get(`/orders/${orderId}`, config);
   return response.data;
 };

@@ -31,6 +31,8 @@ interface CartState {
 
 const loadInitialCart = (): CartItem[] => {
   try {
+    const hasUser = localStorage.getItem('token') || localStorage.getItem('user');
+    if (!hasUser) return [];
     const cached = localStorage.getItem('cart_cache') || localStorage.getItem('cart');
     if (cached) {
       const parsed = JSON.parse(cached);
@@ -205,7 +207,10 @@ export const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
       state.stockAlert = null;
-      persistCart(state.items);
+      try {
+        localStorage.removeItem('cart_cache');
+        localStorage.removeItem('cart');
+      } catch (e) {}
     },
 
     clearStockAlert: (state) => {

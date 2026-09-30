@@ -24,7 +24,10 @@ export interface AuthenticatedUserPayload {
 export const extractToken = (req: Request): string | null => {
   const authHeader = req.header('Authorization');
   if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.slice(7);
+    const candidate = authHeader.slice(7).trim();
+    if (candidate && candidate !== 'null' && candidate !== 'undefined') {
+      return candidate;
+    }
   }
   return (req as any).cookies?.[COOKIE_NAME] ?? null;
 };

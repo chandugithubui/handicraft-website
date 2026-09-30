@@ -9,10 +9,13 @@ export const testimonialKeys = {
 
 /**
  * Hook to fetch all testimonials
+ * @param options - React Query overrides (e.g. { enabled: false })
  */
-export const useTestimonials = () => {
+export const useTestimonials = (options: { enabled?: boolean } = {}) => {
   return useQuery<Testimonial[], Error>({
     queryKey: testimonialKeys.list(),
     queryFn: () => http.get<Testimonial[]>('/testimonials'),
+    enabled: options.enabled !== false, // default true unless caller passes false
+    ...options,
   });
 };

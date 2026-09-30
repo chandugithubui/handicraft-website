@@ -1,97 +1,59 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
-const API_URL =
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api'
-    : 'https://handicraft-website.onrender.com/api';
+const getHeaders = (token?: string | null): Record<string, string> => {
+  const activeToken = (token && token !== 'null' && token !== 'undefined')
+    ? token
+    : localStorage.getItem('token');
+
+  if (activeToken && activeToken !== 'null' && activeToken !== 'undefined') {
+    return { Authorization: `Bearer ${activeToken}` };
+  }
+  return {};
+};
 
 export const validateCoupon = async (
-  code,
-  cartTotal,
-  token
+  code: string,
+  cartTotal: number,
+  token?: string | null
 ) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/coupons/validate`,
-      {
-        code,
-        cartTotal
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-export const getAdminCoupons = async (token) => {
-  const response = await axios.get(
-    `${API_URL}/coupons`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
+  const response = await apiClient.post(
+    '/coupons/validate',
+    { code, cartTotal },
+    { headers: getHeaders(token) }
   );
-
   return response.data;
 };
 
-export const createCoupon = async (couponData, token) => {
-  const response = await axios.post(
-    `${API_URL}/coupons`,
-    couponData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
-
+export const getAdminCoupons = async (token?: string | null) => {
+  const response = await apiClient.get('/coupons', {
+    headers: getHeaders(token),
+  });
   return response.data;
 };
-export const updateCoupon = async (couponId, couponData, token) => {
-  const response = await axios.put(
-    `${API_URL}/coupons/${couponId}`,
-    couponData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
 
+export const createCoupon = async (couponData: any, token?: string | null) => {
+  const response = await apiClient.post('/coupons', couponData, {
+    headers: getHeaders(token),
+  });
   return response.data;
 };
-export const deleteCoupon = async (couponId, token) => {
-  const response = await axios.delete(
-    `${API_URL}/coupons/${couponId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
 
+export const updateCoupon = async (couponId: string, couponData: any, token?: string | null) => {
+  const response = await apiClient.put(`/coupons/${couponId}`, couponData, {
+    headers: getHeaders(token),
+  });
+  return response.data;
+};
+
+export const deleteCoupon = async (couponId: string, token?: string | null) => {
+  const response = await apiClient.delete(`/coupons/${couponId}`, {
+    headers: getHeaders(token),
+  });
   return response.data;
 };
 
 // Get active coupons for customers
 export const getActiveCoupons = async () => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/coupons/active`
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching active coupons:', error);
-    throw error;
-  }
+  const response = await apiClient.get('/coupons/active');
+  return response.data;
 };

@@ -36,17 +36,20 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { isAuthenticated, token } = useAuth();
   const hasFetchedRef = useRef(false);
 
-  // Sync / fetch wishlist from MongoDB when user logs in
+  // Sync / fetch wishlist from MongoDB when user logs in, or clear when logged out
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       if (!hasFetchedRef.current) {
         hasFetchedRef.current = true;
         dispatch(fetchWishlistFromServer());
       }
     } else {
       hasFetchedRef.current = false;
+      if (wishlistItems.length > 0) {
+        dispatch(reduxClearWishlist());
+      }
     }
-  }, [isAuthenticated, token, dispatch]);
+  }, [isAuthenticated, dispatch]);
 
   const addToWishlist = (product: any) => {
     dispatch(reduxAddToWishlist(product));
@@ -70,9 +73,16 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const clearWishlist = () => {
     dispatch(reduxClearWishlist());
+    if (isAuthenticated) {
+      // Clear every item on the server so it doesn't come back on refresh
+      wishlistItems.forEach((item) => {
+        dispatch(removeFromWishlistOnServer(item._id));
+      });
+    }
   };
 
   const getWishlistCount = () => {
+    if (!isAuthenticated) return 0;
     return wishlistItems.length;
   };
 

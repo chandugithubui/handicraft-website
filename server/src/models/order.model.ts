@@ -36,6 +36,10 @@ export interface IOrder extends Document {
   couponCode?: string | null;
   discountAmount: number;
   totalAmount: number;
+  paymentId?: string | null;
+  razorpayOrderId?: string | null;
+  razorpaySignature?: string | null;
+  idempotencyKey?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -117,11 +121,34 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
+    paymentId: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    razorpayOrderId: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    razorpaySignature: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    idempotencyKey: {
+      type: String,
+      default: null,
+      trim: true,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+orderSchema.index({ paymentId: 1 }, { unique: true, sparse: true });
+orderSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
 export const Order = mongoose.models.Order || mongoose.model<IOrder>('Order', orderSchema);
 export default Order;

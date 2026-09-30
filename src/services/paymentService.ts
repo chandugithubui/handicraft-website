@@ -1,35 +1,59 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+export interface CreateRazorpayOrderInput {
+  amount?: number;
+  items?: Array<{ product: string; quantity: number }>;
+  couponCode?: string | null;
+}
 
-const API_URL = getApiUrl();
+export interface VerifyAndCreateOrderInput {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  items: Array<{ product: string; quantity: number }>;
+  shippingAddress: any;
+  couponCode?: string | null;
+  idempotencyKey?: string;
+}
 
-export const createRazorpayOrder = async (amount) => {
-  const response = await axios.post(
-    `${API_URL}/payment/create-order`,
-    { amount }
-  );
+/**
+ * Initializes a Razorpay order on the backend.
+ * The backend verifies items and calculates the true server-side amount.
+ */
+export const createRazorpayOrder = async (input: CreateRazorpayOrderInput | number) => {
+  const payload = typeof input === 'number' ? { amount: input } : input;
+  const response = await apiClient.post<{
+    orderId: string;
+    amount: number;
+    currency: string;
+    keyId: string;
+  }>('/payment/create-order', payload);
   return response.data;
 };
 
-export const verifyRazorpayPayment = async (paymentData) => {
-  const response = await axios.post(
-    `${API_URL}/payment/verify-payment`,
-    paymentData
-  );
+/**
+ * Industry-standard atomic verification & order placement with idempotency.
+ */
+export const verifyAndCreateRazorpayOrder = async (payload: VerifyAndCreateOrderInput) => {
+  const response = await apiClient.post<{
+    success: boolean;
+    message: string;
+    order: any;
+  }>('/payment/verify-and-create-order', payload);
+  return response.data;
+};
+
+/**
+ * Legacy standalone payment verification
+ */
+export const verifyRazorpayPayment = async (paymentData: {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) => {
+  const response = await apiClient.post<{
+    success: boolean;
+    message: string;
+  }>('/payment/verify-payment', paymentData);
   return response.data;
 };

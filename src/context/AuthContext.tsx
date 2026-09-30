@@ -1,17 +1,19 @@
 /**
- * src/context/AuthContext.jsx
+ * src/context/AuthContext.tsx
  *
  * Global authentication state.
  *
- * Improvements over the original:
- *  - Token expiry guard on rehydration — an expired JWT in localStorage
- *    is silently cleared instead of being treated as valid.
- *  - updateUser() helper — lets Profile page patch user fields in context
- *    without a full re-login.
- *  - logout() calls the backend to clear the httpOnly cookie before
- *    wiping local state.
- *  - isAuthenticated is derived from both token presence AND expiry,
- *    not just token presence.
+ * Session strategy
+ * ─────────────────
+ * Access token  : 15 minutes  (JWT in localStorage + Bearer header)
+ * Refresh token : 7 days      (httpOnly cookie, rotated on every use)
+ *
+ * A proactive silent-refresh loop fires ~60 s before each access token
+ * expires, calls POST /api/auth/refresh, and swaps in the new token
+ * transparently — no user interaction needed.
+ *
+ * The user is only asked to log in again once the 7-day refresh token
+ * itself expires — NOT every 15 minutes.
  */
 
 import React, {
@@ -19,22 +21,21 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useRef,
   useCallback,
   useMemo,
 } from 'react';
-import { logout as logoutApi } from '../services/authService';
+import { logout as logoutApi, refreshTokens } from '../services/authService';
+import { useDispatch } from 'react-redux';
+import { clearCart }     from '../store/slices/cartSlice';
+import { clearWishlist } from '../store/slices/wishlistSlice';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Decode a JWT payload without verifying the signature.
- * We only use this client-side to check the `exp` claim so we
- * don't show a stale session on page load.
- *
- * @param {string} token
- * @returns {object|null} decoded payload, or null if malformed
- */
-const decodeJwt = (token) => {
+/** Decode a JWT payload (client-side only — no signature verification). */
+const decodeJwt = (token: string): Record<string, any> | null => {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(atob(base64));
@@ -44,129 +45,241 @@ const decodeJwt = (token) => {
 };
 
 /**
- * Returns true if the token exists and has not yet expired.
- * Adds a 10-second buffer so we never present an about-to-expire token.
- *
- * @param {string|null} token
+ * Returns true when the token exists and has not expired.
+ * Applies a 10-second buffer to avoid edge-case races.
  */
-const isTokenValid = (token) => {
+const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
   const payload = decodeJwt(token);
   if (!payload?.exp) return false;
-  // exp is in seconds; subtract 10s buffer
   return payload.exp * 1000 > Date.now() + 10_000;
 };
 
-// ── Context ───────────────────────────────────────────────────────────────────
+/**
+ * Milliseconds from now until 60 s before the token expires.
+ * Returns 0 when the token is already expired or imminently expiring.
+ */
+const msUntilRefresh = (token: string | null): number => {
+  if (!token) return 0;
+  const payload = decodeJwt(token);
+  if (!payload?.exp) return 0;
+  const refreshAt = payload.exp * 1000 - 60_000; // 60 s before expiry
+  return Math.max(refreshAt - Date.now(), 0);
+};
 
-const AuthContext = createContext(null);
+/** Keys to wipe from localStorage on logout. */
+const LOCAL_STORAGE_KEYS = [
+  'token', 'user',
+  'cart',  'cart_cache',
+  'wishlist', 'wishlist_cache',
+];
 
-export const AuthProvider = ({ children }) => {
-  const [user,    setUser]    = useState(null);
-  const [token,   setToken]   = useState(null);
-  // loading stays true until rehydration completes
-  const [loading, setLoading] = useState(true);
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
 
-  // ── Rehydrate session on mount (cookies + localStorage fallback) ───────────
+interface AuthUser {
+  id:            string;
+  name:          string;
+  email:         string;
+  role:          string;
+  avatar?:       string | null;   // stored profile image
+  picture?:      string | null;   // Google profile picture (alias for avatar)
+  displayName?:  string | null;   // Google display name   (alias for name)
+  provider?:     string | null;   // auth provider: 'google' | 'local'
+  authProvider?: string | null;   // alternative provider field name
+  authProviders?: string[];       // list of linked providers
+  permissions?:  string[];
+  [key: string]: any;             // forward-compatible with any extra server fields
+}
+
+interface AuthContextValue {
+  user:            AuthUser | null;
+  token:           string   | null;
+  loading:         boolean;
+  isAuthenticated: boolean;
+  login:           (token: string, user: AuthUser) => void;
+  logout:          () => Promise<void>;
+  updateUser:      (patch: Partial<AuthUser>) => void;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Context
+// ─────────────────────────────────────────────────────────────────────────────
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user,    setUser]    = useState<AuthUser | null>(null);
+  const [token,   setToken]   = useState<string   | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const dispatch     = useDispatch();
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Cancel pending timer ───────────────────────────────────────────────────
+
+  const cancelRefreshTimer = useCallback(() => {
+    if (refreshTimer.current !== null) {
+      clearTimeout(refreshTimer.current);
+      refreshTimer.current = null;
+    }
+  }, []);
+
+  // ── Schedule the next silent refresh ──────────────────────────────────────
+
+  /**
+   * Sets a timer to transparently swap the access token before it expires.
+   *
+   * Success → stores new token, re-schedules itself.
+   * Failure → full logout (refresh token expired — happens after 7 days only).
+   */
+  const scheduleRefresh = useCallback((currentToken: string) => {
+    cancelRefreshTimer();
+
+    const delay = msUntilRefresh(currentToken);
+
+    refreshTimer.current = setTimeout(async () => {
+      try {
+        const res        = await refreshTokens();
+        const newToken   = res?.tokens?.accessToken ?? res?.token ?? null;
+        const newUser    = res?.user ?? null;
+
+        if (!newToken) throw new Error('No token in refresh response');
+
+        localStorage.setItem('token', newToken);
+        setToken(newToken);
+
+        if (newUser) {
+          localStorage.setItem('user', JSON.stringify(newUser));
+          setUser(newUser);
+        }
+
+        scheduleRefresh(newToken); // re-arm for the next cycle
+      } catch {
+        // Refresh token expired or revoked.
+        // This happens at most once per 7 days — not every 15 minutes.
+        doLogout();
+      }
+    }, delay);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cancelRefreshTimer]);
+
+  // ── doLogout (internal — does not depend on logout useCallback below) ──────
+
+  const doLogout = useCallback(async () => {
+    cancelRefreshTimer();
+    try { await logoutApi(); } catch { /* ignore */ }
+    LOCAL_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
+    dispatch(clearCart());
+    dispatch(clearWishlist());
+    setToken(null);
+    setUser(null);
+  }, [cancelRefreshTimer, dispatch]);
+
+  // ── Rehydrate on mount ─────────────────────────────────────────────────────
+
   useEffect(() => {
-    let isMounted = true;
+    let alive = true;
 
-    const checkSession = async () => {
-      // Check if arriving from OAuth redirect
+    const restore = async () => {
+      // Strip oauth success query param if present (from redirect flow)
       const params = new URLSearchParams(window.location.search);
-      const isOAuthSuccess = params.get('oauth') === 'success';
-
-      if (isOAuthSuccess) {
-        // Clean URL without triggering page reload
+      if (params.get('oauth') === 'success') {
         params.delete('oauth');
-        const cleanSearch = params.toString() ? `?${params.toString()}` : '';
-        window.history.replaceState({}, document.title, window.location.pathname + cleanSearch);
+        const clean = params.size ? `?${params.toString()}` : '';
+        window.history.replaceState({}, '', window.location.pathname + clean);
       }
 
-      // 1. Try fetching current user from httpOnly cookie session (/me)
+      // ── Strategy 1: cookie session via /me ─────────────────────────────────
       try {
         const { getCurrentUser } = await import('../services/authService');
         const res = await getCurrentUser();
-        if (res?.user && isMounted) {
+
+        if (res?.user && alive) {
+          const freshToken = res?.tokens?.accessToken ?? res?.token ?? null;
+
           setUser(res.user);
-          // Sync stored user representation
           localStorage.setItem('user', JSON.stringify(res.user));
+
+          if (freshToken) {
+            localStorage.setItem('token', freshToken);
+            setToken(freshToken);
+            scheduleRefresh(freshToken);
+          }
+
           setLoading(false);
           return;
         }
       } catch {
-        // Cookie session not present or expired — try localStorage fallback below
+        // /me failed — no cookie session, try localStorage below
       }
 
-      // 2. Fallback to localStorage token if available and valid
+      // ── Strategy 2: valid localStorage token ──────────────────────────────
       const storedToken = localStorage.getItem('token');
       const storedUser  = localStorage.getItem('user');
 
       if (storedToken && isTokenValid(storedToken)) {
-        if (isMounted) {
-          setToken(storedToken);
+        if (alive) {
           try {
-            const parsedUser = JSON.parse(storedUser);
-            const decoded = decodeJwt(storedToken);
-            if (decoded?.permissions && (!parsedUser.permissions || parsedUser.permissions.length === 0)) {
-              parsedUser.permissions = decoded.permissions;
-            }
-            if (decoded?.role && !parsedUser.role) {
-              parsedUser.role = decoded.role;
-            }
+            const parsedUser: AuthUser = JSON.parse(storedUser ?? '');
+            setToken(storedToken);
             setUser(parsedUser);
+            scheduleRefresh(storedToken);
           } catch {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            LOCAL_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
+            dispatch(clearCart());
+            dispatch(clearWishlist());
           }
         }
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      } else if (storedToken) {
+        // ── Strategy 3: expired token — attempt silent refresh ────────────────
+        try {
+          const res      = await refreshTokens();
+          const newToken = res?.tokens?.accessToken ?? res?.token ?? null;
+
+          if (newToken && alive) {
+            localStorage.setItem('token', newToken);
+            setToken(newToken);
+            if (res?.user) {
+              localStorage.setItem('user', JSON.stringify(res.user));
+              setUser(res.user);
+            }
+            scheduleRefresh(newToken);
+          }
+        } catch {
+          // Refresh token also expired → clean slate, user must re-login
+          LOCAL_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
+          dispatch(clearCart());
+          dispatch(clearWishlist());
+        }
       }
 
-      if (isMounted) {
-        setLoading(false);
-      }
+      if (alive) setLoading(false);
     };
 
-    checkSession();
+    restore();
 
     return () => {
-      isMounted = false;
+      alive = false;
+      cancelRefreshTimer();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Actions ────────────────────────────────────────────────────────────────
+  // ── Public actions ─────────────────────────────────────────────────────────
 
-  /**
-   * Persist a successful auth result (login / register / oauth).
-   * @param {string} [newToken]
-   * @param {object} userData
-   */
-  const login = useCallback((newToken, userData) => {
-    let resolvedUser = userData;
-    if (newToken) {
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      const decoded = decodeJwt(newToken);
-      if (decoded?.permissions && resolvedUser && (!resolvedUser.permissions || resolvedUser.permissions.length === 0)) {
-        resolvedUser = { ...resolvedUser, permissions: decoded.permissions };
-      }
-      if (decoded?.role && resolvedUser && !resolvedUser.role) {
-        resolvedUser = { ...resolvedUser, role: decoded.role };
-      }
-    }
-    if (resolvedUser) {
-      localStorage.setItem('user', JSON.stringify(resolvedUser));
-      setUser(resolvedUser);
-    }
-  }, []);
+  /** Called after every successful login / register / Google auth. */
+  const login = useCallback((newToken: string, userData: AuthUser) => {
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user',  JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+    scheduleRefresh(newToken); // arm the silent-refresh cycle
+  }, [scheduleRefresh]);
 
-  /**
-   * Patch fields on the current user object in context.
-   */
-  const updateUser = useCallback((patch) => {
+  /** Patch specific fields on the user object without re-login. */
+  const updateUser = useCallback((patch: Partial<AuthUser>) => {
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...patch };
@@ -175,36 +288,22 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  /**
-   * Sign out: clear server session cookie, wipe local storage, reset React state.
-   */
-  const logout = useCallback(async () => {
-    try {
-      await logoutApi();
-    } catch {
-      // Ignore network errors on logout
-    } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setToken(null);
-      setUser(null);
-    }
-  }, []);
+  /** Public logout — exposed via context. */
+  const logout = doLogout;
 
-  // ── Derived state ──────────────────────────────────────────────────────────
+  // ── Derived ────────────────────────────────────────────────────────────────
 
   /**
-   * User is authenticated if user object exists (from verified httpOnly cookie or valid token).
+   * isAuthenticated is true when:
+   *   - user object is present (from any auth method), AND
+   *   - either no token (cookie-only session) or the token is not yet expired
    */
   const isAuthenticated = useMemo(
     () => Boolean(user && (token ? isTokenValid(token) : true)),
     [user, token]
   );
 
-
-  // ── Context value ──────────────────────────────────────────────────────────
-
-  const value = useMemo(() => ({
+  const value = useMemo<AuthContextValue>(() => ({
     user,
     token,
     loading,
@@ -221,14 +320,10 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-/**
- * Hook to consume auth context.
- * Throws a clear error if used outside <AuthProvider>.
- */
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an <AuthProvider>');
-  }
-  return context;
+// ── Hook ──────────────────────────────────────────────────────────────────────
+
+export const useAuth = (): AuthContextValue => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+  return ctx;
 };
