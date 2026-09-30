@@ -24,7 +24,6 @@ import OrderSuccess from './pages/OrderSuccess';
 import Orders from './pages/Orders';
 import ArtisanProfile from './pages/ArtisanProfile';
 import Wishlist from './pages/Wishlist';
-import Profile from './pages/Profile';
 import UserDashboard from './pages/user/UserDashboard';
 
 // Admin Architecture

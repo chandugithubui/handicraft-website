@@ -14,7 +14,6 @@ const Orders = () => {
     isLoading: loading,
     isError,
     error: queryError,
-    refetch,
   } = useMyOrders(token, isAuthenticated);
 
   const error = isError ? (queryError?.message || 'Failed to fetch orders') : '';

@@ -27,7 +27,7 @@ const Login = () => {
     if (oauthError) {
       setError(`Google authentication was cancelled or failed (${oauthError}).`);
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, from]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));

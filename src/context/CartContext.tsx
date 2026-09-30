@@ -40,7 +40,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
   const { items: cartItems, stockAlert, loading } = useAppSelector((state) => state.cart);
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const hasSyncedRef = useRef(false);
 
   // Sync / fetch cart from MongoDB when user logs in, or clear when logged out
@@ -62,7 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         dispatch(reduxClearCart());
       }
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addToCart = (product: any, quantity: number = 1) => {
     const stock = product.stock !== undefined ? product.stock : 999;

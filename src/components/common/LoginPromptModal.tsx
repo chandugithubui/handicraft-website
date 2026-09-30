@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiLock, FiX, FiHeart, FiShoppingBag } from 'react-icons/fi';
+import { FiX, FiHeart, FiShoppingBag } from 'react-icons/fi';
 
 interface LoginPromptModalProps {
   isOpen: boolean;

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
-import { FiShield, FiAlertTriangle, FiArrowLeft } from 'react-icons/fi';
+import { FiAlertTriangle, FiArrowLeft } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { isAdminUser, hasUserPermission } from '../../utils/authUtils';
 import LoadingSpinner from '../common/LoadingSpinner';

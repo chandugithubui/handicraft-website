@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { http } from '../../services/apiClient';
 import { Coupon, ValidateCouponInput, ValidateCouponResponse } from '../../types/api';
 

@@ -84,7 +84,6 @@ export const RolesPermissions: React.FC = () => {
     isLoading: rolesLoading,
     isRefetching: rolesRefetching,
     refetch: refetchRoles,
-    error: rolesError,
   } = useRoles(isAuthenticated);
 
   const {
@@ -92,7 +91,6 @@ export const RolesPermissions: React.FC = () => {
     isLoading: usersLoading,
     isRefetching: usersRefetching,
     refetch: refetchUsers,
-    error: usersError,
   } = useUsersWithRoles(isAuthenticated && activeTab === 'assignments');
 
   const {

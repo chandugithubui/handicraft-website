@@ -6,7 +6,7 @@
  * Styled with Indian Artisan Theme (Maroon #6E1717, Gold #C99A4A, Terracotta #C85A2E).
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FiMail,
   FiSearch,
@@ -15,7 +15,6 @@ import {
   FiX,
   FiMessageSquare,
 } from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
 import { http } from '../../services/apiClient';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Pagination from '../../components/common/Pagination';
@@ -29,7 +28,7 @@ export const AdminContacts: React.FC = () => {
   const [totalContacts, setTotalContacts] = useState(0);
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
 
-  const fetchContacts = async (page: number = currentPage) => {
+  const fetchContacts = useCallback(async (page: number = currentPage) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -57,11 +56,11 @@ export const AdminContacts: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, currentPage]);
 
   useEffect(() => {
     fetchContacts(1);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
