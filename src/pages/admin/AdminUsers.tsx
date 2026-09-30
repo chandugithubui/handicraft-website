@@ -6,7 +6,7 @@
  * Styled with Indian Artisan Theme (Maroon #6E1717, Gold #C99A4A, Terracotta #C85A2E).
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiUsers,
@@ -16,7 +16,6 @@ import {
   FiUser,
   FiFilter,
 } from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
 import { http } from '../../services/apiClient';
 import RoleBadge from '../../components/rbac/RoleBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -31,7 +30,7 @@ export const AdminUsers: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const fetchUsers = async (page: number = currentPage) => {
+  const fetchUsers = useCallback(async (page: number = currentPage) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -62,12 +61,12 @@ export const AdminUsers: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleFilter, searchTerm, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
     fetchUsers(1);
-  }, [roleFilter]);
+  }, [roleFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

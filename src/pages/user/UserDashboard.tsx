@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   FiUser,
   FiPackage,
@@ -44,7 +44,6 @@ import { http } from '../../services/apiClient';
 type TabKey = 'overview' | 'orders' | 'wishlist' | 'cart' | 'settings';
 
 export const UserDashboard: React.FC = () => {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isAuthenticated, token, logout, updateUser } = useAuth();
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
@@ -67,19 +66,24 @@ export const UserDashboard: React.FC = () => {
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
   const [profileErrorMsg, setProfileErrorMsg] = useState('');
 
-  // Dashboard statistics from server
-  const [dashboardStats, setDashboardStats] = useState<{
-    totalOrders: number;
-    pendingOrders: number;
-    deliveredOrders: number;
-    totalSpent: number;
-  }>({
-    totalOrders: 0,
-    pendingOrders: 0,
-    deliveredOrders: 0,
-    totalSpent: 0,
-  });
-  const [statsLoading, setStatsLoading] = useState(false);
+  // Dashboard statistics from server — fetched silently on mount
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    http
+      .get<{ success: boolean; data: any }>('/user/dashboard-summary')
+      .then((res) => {
+        if (res?.data?.user) {
+          setEditProfile({
+            name: res.data.user.name || '',
+            phone: res.data.user.phone || '',
+            address: res.data.user.address || '',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load dashboard summary:', err);
+      });
+  }, [isAuthenticated, token]);
 
   // Fetch orders using existing TanStack Query hook
   const {
@@ -93,38 +97,6 @@ export const UserDashboard: React.FC = () => {
     setActiveTab(tab);
     setSearchParams({ tab });
   };
-
-  // Fetch dashboard summary stats
-  useEffect(() => {
-    if (isAuthenticated) {
-      setStatsLoading(true);
-      http
-        .get<{ success: boolean; data: any }>('/user/dashboard-summary')
-        .then((res) => {
-          if (res?.data?.stats) {
-            setDashboardStats({
-              totalOrders: res.data.stats.totalOrders || 0,
-              pendingOrders: res.data.stats.pendingOrders || 0,
-              deliveredOrders: res.data.stats.deliveredOrders || 0,
-              totalSpent: res.data.stats.totalSpent || 0,
-            });
-          }
-          if (res?.data?.user) {
-            setEditProfile({
-              name: res.data.user.name || '',
-              phone: res.data.user.phone || '',
-              address: res.data.user.address || '',
-            });
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to load dashboard summary:', err);
-        })
-        .finally(() => {
-          setStatsLoading(false);
-        });
-    }
-  }, [isAuthenticated, token]);
 
   // Handle Save Profile
   const handleSaveProfile = async (e: React.FormEvent) => {

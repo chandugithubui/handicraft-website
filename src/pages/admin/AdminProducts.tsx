@@ -6,7 +6,7 @@
  * Styled with Indian Artisan Theme (Maroon #6E1717, Terracotta #C85A2E, Gold #C99A4A).
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FiBox,
   FiPlus,
@@ -79,7 +79,7 @@ export const AdminProducts: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const fetchProducts = async (page: number = currentPage) => {
+  const fetchProducts = useCallback(async (page: number = currentPage) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -110,12 +110,12 @@ export const AdminProducts: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryFilter, searchTerm, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
     fetchProducts(1);
-  }, [categoryFilter]);
+  }, [categoryFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
