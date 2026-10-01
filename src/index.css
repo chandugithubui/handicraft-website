@@ -10,3 +10,18 @@
 .main-content {
   min-height: calc(100vh - var(--header-height) - var(--announcement-bar-height) - 300px);
 }
+
+/* ── Admin sidebar mobile drawer ─────────────────────────────────────────────
+   Controlled by data-open attribute set from React state.
+   Uses a plain CSS rule so Tailwind class-order specificity never interferes.
+   The md:!translate-x-0 Tailwind class on the aside overrides this on desktop.
+────────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .admin-sidebar[data-open="true"] {
+    transform: translateX(0);
+  }
+}
