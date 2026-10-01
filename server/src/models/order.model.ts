@@ -123,7 +123,6 @@ const orderSchema = new Schema<IOrder>(
     },
     paymentId: {
       type: String,
-      default: null,
       trim: true,
     },
     razorpayOrderId: {
@@ -138,7 +137,6 @@ const orderSchema = new Schema<IOrder>(
     },
     idempotencyKey: {
       type: String,
-      default: null,
       trim: true,
     },
   },
