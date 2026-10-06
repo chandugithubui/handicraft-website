@@ -13,14 +13,9 @@ const localCategories = [
   { _id: 'gifts', name: 'Gifts', slug: 'gifts' }
 ];
 
-const ProductFilters = ({ onFilterChange, activeFilters }) => {
+const ProductFilters = ({ onFilterChange, activeFilters, expandedSections, onToggleSection }) => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [expandedSections, setExpandedSections] = useState({
-    category: true,
-    material: false,
-    price: false
-  });
 
   const materials = ['Wood', 'Metal', 'Clay', 'Fabric', 'Stone', 'Bamboo'];
 
@@ -30,10 +25,7 @@ const ProductFilters = ({ onFilterChange, activeFilters }) => {
   }, []);
 
   const toggleSection = (section) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+    onToggleSection(section);
   };
 
   const handleFilterChange = (filterType, value) => {

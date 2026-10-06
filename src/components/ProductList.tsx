@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePaginatedProducts } from "../hooks/api";
-import { LoadingSpinner } from "./common";
 import ProductFilters from "./ProductFilters";
 import ProductGrid from "./ProductGrid";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -19,18 +18,28 @@ const ProductList = () => {
     maxPrice: ''
   });
 
-  // Read category and search from URL on component mount
+  // Accordion open/close state lifted here so it survives loading re-renders.
+  // ProductFilters is a pure display component — it must never own this state,
+  // because the loading early-return below unmounts it and resets local state.
+  const [expandedSections, setExpandedSections] = useState({
+    category: true,
+    material: false,
+    price: false
+  });
+
+  // Read category and search from URL on component mount only.
+  // Dependency array intentionally uses [] so this runs once — we only want
+  // to seed from URL on first load, not re-run on every render.
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
-    const searchFromUrl = searchParams.get('search');
-
+    const searchFromUrl   = searchParams.get('search');
     if (categoryFromUrl) {
       setFilters(prev => ({ ...prev, category: categoryFromUrl }));
     }
     if (searchFromUrl) {
       setSearch(searchFromUrl);
     }
-  }, [searchParams]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const queryParams = new URLSearchParams();
   queryParams.append('page', String(currentPage));
@@ -73,9 +82,9 @@ const ProductList = () => {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner message="Loading products..." fullHeight />;
-  }
+  // Do NOT early-return with <LoadingSpinner> here.
+  // An early return unmounts <ProductFilters> and resets its accordion state.
+  // Instead, pass `loading` to <ProductGrid> which handles its own skeleton/spinner.
 
   return (
     <div className="products-page">
@@ -96,11 +105,15 @@ const ProductList = () => {
         </div>
 
         <div className="products-layout">
-          {/* Filters Sidebar */}
+          {/* Filters Sidebar — always mounted so accordion state is preserved */}
           <div className="products-sidebar">
             <ProductFilters
               onFilterChange={handleFilterChange}
               activeFilters={filters}
+              expandedSections={expandedSections}
+              onToggleSection={(section: string) =>
+                setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
+              }
             />
           </div>
 
