@@ -35,14 +35,29 @@
 }
 
 .category-label {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-4);
-  backdrop-filter: blur(10px);
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff8ed;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  line-height: 1.4;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 576px) {
+  .category-label {
+    font-size: 11px;
+    padding: 8px 14px;
+    letter-spacing: 0.7px;
+  }
 }
 
 .category-title {
@@ -335,17 +350,18 @@
   transform: translateY(-4px);
 }
 
-.product-card-image {
+
+/* Product Images - Categories Page */
+.category-page .category-products .product-card-image {
+  display: block;
   width: 100%;
-  aspect-ratio: 4/3;
-  overflow: hidden;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+  background: #f5eee5;
 }
 
-.product-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 .product-card-name {
   font-size: var(--font-size-lg);
@@ -644,5 +660,191 @@
     font-size: 15px;
     margin: 0;
     padding: 0 10px 12px;
+  }
+}
+
+/* Category hero CTA */
+.category-page .category-hero-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.category-page .category-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px 24px;
+  background: #fff8ee;
+  color: #702019;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.category-page .category-hero-cta:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+}
+
+.category-page .category-products {
+  scroll-margin-top: 100px;
+}
+
+@media (max-width: 480px) {
+  .category-page .category-hero-cta {
+    width: 100%;
+  }
+}
+
+
+/* ==========================================
+   CATEGORY PRODUCTS - PAGINATION
+========================================== */
+
+.category-page .category-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin: 36px auto 16px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+.category-page .category-pagination button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 115px;
+  padding: 12px 20px;
+  border: 1px solid #7b201c;
+  border-radius: 8px;
+  background: #fff;
+  color: #7b201c;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-page .category-pagination button:hover:not(:disabled) {
+  background: #7b201c;
+  color: #fff;
+}
+
+.category-page .category-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.category-page .category-pagination span {
+  color: #3b2b27;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .category-page .category-pagination {
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .category-page .category-pagination button {
+    min-width: 90px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .category-page .category-pagination span {
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   CATEGORY HERO — TEXT IMPROVEMENTS
+========================================= */
+
+.category-hero h1 {
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.category-hero p {
+  color: #fff8ef;
+  line-height: 1.8;
+}
+
+.category-hero .hero-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 10px 20px;
+
+  background: #fff1d6;
+  color: #781b16;
+
+  border: 1px solid #e6c58e;
+  border-radius: 50px;
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  box-shadow: 0 4px 14px rgba(35, 10, 5, 0.12);
+}
+
+/* Explore Our Crafts — Card Refinements */
+
+.category-page .explore-craft-card {
+  background: #ffffff;
+  border: 1px solid #eee5dc;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(70, 35, 20, 0.04);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+@media (hover: hover) {
+  .category-page .explore-craft-card:hover {
+    transform: translateY(-6px);
+    border-color: #c58b70;
+    box-shadow: 0 12px 28px rgba(70, 35, 20, 0.12);
+  }
+}
+
+.category-page .explore-craft-card:focus-visible {
+  outline: 3px solid #b65b36;
+  outline-offset: 3px;
+}
+
+.category-page .explore-craft-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-page .explore-craft-content {
+  flex: 1;
+}
+
+.category-page .explore-craft-link {
+  padding-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-page .explore-craft-card,
+  .category-page .explore-craft-image img {
+    transition: none;
   }
 }

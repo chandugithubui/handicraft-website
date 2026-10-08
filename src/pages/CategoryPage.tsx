@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiMapPin, FiAward, FiUsers, FiPackage } from 'react-icons/fi';
-import { useCategory, useCategoryProducts } from '../hooks/api';
+import { FiMapPin, FiAward } from 'react-icons/fi';
+import { useCategory, useCategoryProducts, useArtisans } from '../hooks/api';
 import './CategoryPage.css';
 
 // Category data with detailed information
@@ -10,7 +10,7 @@ const categoryData = {
     id: 'all',
     name: 'All Categories',
     label: 'Explore All Crafts',
-    image: '/images/pattachitra1.jpg.jpg',
+    image: '/images/pattachitra1.jpg',
     heroImage: '/images/homepagedesign.png',
     description: 'Discover the rich heritage of Indian handicrafts. From traditional paintings to intricate wood carvings, explore our complete collection of artisan-crafted treasures.',
     origin: 'Across India',
@@ -51,7 +51,7 @@ const categoryData = {
     name: 'Pattachitra',
     label: 'Traditional Paintings',
     image: '/images/pattachitra1.jpg.jpg',
-    heroImage: '/images/pattachitrawall.jpg',
+    heroImage: '/images/pattachitra1.jpg',
     description: 'Pattachitra is a traditional cloth-based scroll painting from Odisha, India. The name comes from the Sanskrit words "patta" (cloth) and "chitra" (picture). These paintings depict Hindu mythology, especially stories of Lord Jagannath.',
     origin: 'Puri, Odisha (dating back to 5th century BC)',
     history: 'Originating in the Jagannath Temple of Puri, Pattachitra has been practiced for over 2000 years. Artists use natural colors made from stones, minerals, and plants to create intricate mythological scenes on treated cloth.',
@@ -71,7 +71,7 @@ const categoryData = {
     name: 'Palm Leaf Crafts',
     label: 'Ancient Art Form',
     image: '/images/pattachitrawall.jpg',
-    heroImage: '/images/woodentray.jpg',
+    heroImage:  '/images/palmleaf_1.png',
     description: 'Palm leaf engraving is an ancient Odia art form where dried palm leaves are intricately engraved with traditional patterns and mythological stories. This delicate craft requires immense patience and precision.',
     origin: 'Odisha, India (ancient Kalinga region)',
     history: 'Dating back to the 3rd century BC, palm leaf manuscripts were used to record religious texts and stories. The art evolved into decorative craft with intricate cut-work patterns.',
@@ -89,8 +89,8 @@ const categoryData = {
     id: 'wooden',
     name: 'Wooden Crafts',
     label: 'Carved Masterpieces',
-    image: '/images/handcraftedwoodenBowl2.jpg',
-    heroImage: '/images/handcraftwooden.jpg',
+    image: '/images/carvedwooden.jpg',
+    heroImage: '/images/carvedwooden.jpg',
     description: 'Wood carving in Odisha is a centuries-old tradition creating beautiful decorative items, furniture, and religious artifacts. Artisans use traditional tools to carve intricate patterns into high-quality wood.',
     origin: 'Saharanpur & Odisha (dating back to Mughal era)',
     history: 'Wood carving flourished during the Mughal era and continues in regions like Saharanpur and Odisha. Each region has its distinctive style and patterns.',
@@ -109,7 +109,7 @@ const categoryData = {
     name: 'Handwoven Sarees',
     label: 'Elegant Weaves',
     image: '/images/relatedProduct.webp',
-    heroImage: '/images/relatedProduct.webp',
+    heroImage: '/images/saree.jpeg',
     description: 'Indian handwoven sarees represent the pinnacle of textile artistry. Each region has unique weaving techniques, patterns, and cultural significance passed down through generations.',
     origin: 'Various regions across India',
     history: 'Handloom weaving in India dates back over 5000 years. Each region developed distinctive styles like Banarasi, Kanjeevaram, Ikat, and Bomkai.',
@@ -173,30 +173,31 @@ const categoryData = {
     artisans: []
   }
 };
+
 const exploreCategories = [
   {
     id: 'pattachitra',
     name: 'Pattachitra',
     description: 'Traditional hand-painted stories from Odisha.',
-    image: '/images/pattachitra1.jpg.jpg'
+    image: '/images/pattachitra1.jpg'
   },
   {
     id: 'palm-leaf',
     name: 'Palm Leaf Art',
     description: 'Intricate engraving inspired by ancient Odia traditions.',
-    image: '/images/woodentray.jpg'
+    image: '/images/palmleaf_1.png'
   },
   {
     id: 'wooden',
     name: 'Wooden Crafts',
     description: 'Hand-carved decorative pieces crafted by skilled artisans.',
-    image: '/images/handcraftwooden.jpg'
+    image: '/images/carvedwooden.jpg'
   },
   {
     id: 'sarees',
     name: 'Handwoven Sarees',
     description: 'Traditional Indian handloom weaving and timeless patterns.',
-    image: '/images/relatedProduct.webp'
+    image: '/images/saree.jpeg'
   },
   {
     id: 'sculptures',
@@ -217,14 +218,38 @@ const exploreCategories = [
     image: '/images/GiftsItems.webp'
   }
 ];
+
 const CategoryPage = () => {
   const { categoryId } = useParams();
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const productsPerPage = 8;
 
   // Get category data from local data structure if present
   const categoryInfo = categoryId ? (categoryData as Record<string, any>)[categoryId] : null;
 
   const { data: fetchedCategory, isLoading: categoryLoading } = useCategory(categoryId);
   const { data: products = [], isLoading: productsLoading } = useCategoryProducts(categoryId);
+
+  const totalPages = Math.ceil(products.length / productsPerPage);
+
+  const startIndex = (currentPage - 1) * productsPerPage;
+
+  const paginatedProducts = products.slice(
+    startIndex,
+    startIndex + productsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryId]);
+
+  const {
+    data: artisans = [],
+    isLoading: artisansLoading,
+    isError: artisansError,
+  } = useArtisans();
 
   const displayCategory = categoryInfo || fetchedCategory;
   const loading = !categoryInfo && (categoryLoading || productsLoading);
@@ -241,17 +266,10 @@ const CategoryPage = () => {
             <span className="category-label">{displayCategory.label}</span>
             <h1 className="category-title">{displayCategory.name}</h1>
             <p className="category-description">{displayCategory.description}</p>
-            <div className="category-stats">
-              <div className="stat-item">
-                <FiUsers className="stat-icon" />
-                <span className="stat-value">{displayCategory.artisanCount || 0}</span>
-                <span className="stat-label">Artisans</span>
-              </div>
-              <div className="stat-item">
-                <FiPackage className="stat-icon" />
-                <span className="stat-value">{displayCategory.productCount || 0}</span>
-                <span className="stat-label">Products</span>
-              </div>
+            <div className="category-hero-actions">
+              <a href="#category-products" className="category-hero-cta">
+                Explore Collection <span aria-hidden="true">→</span>
+              </a>
             </div>
           </div>
           <div className="category-hero-image">
@@ -352,76 +370,154 @@ const CategoryPage = () => {
         )}
 
         {/* Artisan Showcase */}
-        {displayCategory.artisans && displayCategory.artisans.length > 0 && (
-          <div className="artisan-showcase">
-            <div className="section-header">
-              <h2 className="section-title">Master Artisans</h2>
-              <Link to="/artisans" className="section-link">
-                View All Artisans →
-              </Link>
-            </div>
+
+        {/* Artisan Showcase */}
+        <div className="artisan-showcase">
+          <div className="section-header">
+            <h2 className="section-title">Master Artisans</h2>
+
+            <Link to="/artisans" className="section-link">
+              View All Artisans →
+            </Link>
+          </div>
+
+          {artisansLoading ? (
+            <p>Loading artisans...</p>
+          ) : artisansError ? (
+            <p>Unable to load artisans right now.</p>
+          ) : artisans.length === 0 ? (
+            <p>No artisans available yet.</p>
+          ) : (
             <div className="artisan-grid">
-              {displayCategory.artisans.map((artisan) => (
-                <Link key={artisan.id} to={`/artisan/${artisan.slug}`} className="artisan-card">
+              {artisans.slice(0, 3).map((artisan) => (
+                <Link
+                  key={artisan._id}
+                  to={artisan.slug ? `/artisan/${artisan.slug}` : '/artisans'}
+                  className="artisan-card"
+                >
                   <div className="artisan-card-image">
-                    <img src={artisan.image} alt={artisan.name} />
+                    <img
+                      src={artisan.image || '/images/path_to_image_of_artisans_working.jpg'}
+                      alt={artisan.name}
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src =
+                          '/images/path_to_image_of_artisans_working.jpg';
+                      }}
+                    />
                   </div>
+
                   <div className="artisan-card-info">
                     <h3 className="artisan-card-name">{artisan.name}</h3>
-                    <p className="artisan-card-specialty">{artisan.specialty}</p>
-                    <p className="artisan-card-years">{artisan.years} years experience</p>
+
+                    <p className="artisan-card-specialty">
+                      {artisan.specialty || artisan.specialization || artisan.craft || 'Traditional Handicrafts'}
+                    </p>
+
+                    {(artisan.years != null || artisan.experience != null) && (
+                      <p className="artisan-card-years">
+                        {artisan.years ?? artisan.experience} years experience
+                      </p>
+                    )}
                   </div>
                 </Link>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
 
         {/* Products Section */}
-<div className="category-products">
-  <div className="section-header">
-    <h2 className="section-title">
-      Products in {displayCategory.name}
-    </h2>
-  </div>
+        <div className="category-products" id="category-products">
+          <div className="section-header">
+            <h2 className="section-title">
+              Products in {displayCategory.name}
+            </h2>
+          </div>
 
-  {products.length > 0 ? (
-    <div className="products-grid">
-      {products.map((product) => (
-        <Link
-          key={product._id}
-          to={`/product/${product._id}`}
-          className="product-card"
-        >
-          <img
-            src={product.imageUrl || product.image}
-            alt={product.name}
-            className="product-card-image"
-            loading="lazy"
-          />
+          {products.length > 0 ? (
+            <>
+              <div className="products-grid">
+                {paginatedProducts.map((product) => (
+                  <Link
+                    key={product._id}
+                    to={`/product/${product._id}`}
+                    className="product-card"
+                  >
 
-          <h3 className="product-card-name">
-            {product.name}
-          </h3>
+                    <img
+                      src={product.imageUrl || product.image || '/images/heropic.png'}
+                      alt={product.name}
+                      className="product-card-image"
+                      loading="lazy"
+                      onError={(event) => {
+                        const img = event.currentTarget;
+                        img.onerror = null;
+                        img.src = '/images/heropic.png';
+                      }}
+                    />
 
-          <p className="product-card-description">
-            {product.description}
-          </p>
 
-          <p className="product-card-price">
-            ₹{Number(product.price).toLocaleString('en-IN')}
-          </p>
-        </Link>
-      ))}
+                    <h3 className="product-card-name">
+                      {product.name}
+                    </h3>
+
+                    <p className="product-card-description">
+                      {product.description}
+                    </p>
+
+                    <p className="product-card-price">
+                      ₹{Number(product.price).toLocaleString('en-IN')}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <div className="category-pagination">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage((page) => page - 1);
+                      document.getElementById('category-products')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                      });
+                    }}
+                  >
+                    ← Previous
+                  </button>
+
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage((page) => page + 1);
+                      document.getElementById('category-products')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                      });
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+
+            <p className="no-products">
+              No products available in this category yet.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
-  ) : (
-    <p className="no-products">
-      No products available in this category yet.
-    </p>
-  )}
-   </div>
-  </div>
-</div>
   );
 };
 
