@@ -23,6 +23,15 @@ import userRoutes from './user.routes';
 
 const router = Router();
 
+// Health check endpoint
+router.get('/health', (_req, res) => {
+    res.status(200).json({
+        success: true,
+        status: 'healthy',
+        message: 'Handicraft Hub API is running',
+    });
+});
+
 router.use('/products', productRoutes);
 router.use('/artisans', artisanRoutes);
 router.use('/contacts', contactRoutes);
