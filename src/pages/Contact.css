@@ -701,3 +701,214 @@
   .contact-page .contact-hero .hero-subtitle { max-width: 50%; font-size: 9.5px; }
   .info-text { font-size: .74rem; }
 }
+
+
+/* Contact page - redesigned editorial hero */
+
+.contact-page .contact-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(1440px, calc(100% - 48px));
+  max-width: none;
+  height: auto;
+  min-height: 370px;
+  margin: 28px auto 0;
+  padding: 65px clamp(28px, 6vw, 90px);
+  border: 1px solid #e8d3bf;
+  border-radius: 24px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(115deg, #fff8ee, #f0ddca);
+}
+
+.contact-page .contact-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 760px;
+  padding: 0;
+  display: block;
+}
+
+.contact-page .contact-hero-eyebrow {
+  display: block;
+  margin-bottom: 20px;
+  color: #8b342b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.contact-page .contact-hero .hero-title {
+  width: auto;
+  max-width: 750px;
+  margin: 0 0 22px;
+  color: #712823;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.6rem, 4.8vw, 4.8rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+}
+
+.contact-page .contact-hero .hero-title span {
+  display: block;
+  color: #b2533e;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.contact-page .contact-hero .hero-subtitle {
+  width: auto;
+  max-width: 540px;
+  margin: 0 0 28px;
+  color: #684e40;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+.contact-page .contact-hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 9px;
+  background: #812d27;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.contact-page .contact-hero-button:hover {
+  background: #65211d;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.contact-page .contact-hero-decoration {
+  position: absolute;
+  width: 460px;
+  height: 460px;
+  top: -210px;
+  right: -100px;
+  border: 1px solid rgba(142, 63, 43, 0.15);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 50px rgba(160, 76, 48, 0.035),
+    0 0 0 100px rgba(160, 76, 48, 0.025);
+  pointer-events: none;
+}
+
+.contact-page #contact-form {
+  scroll-margin-top: 110px;
+}
+
+@media (max-width: 767px) {
+  .contact-page .contact-hero {
+    width: calc(100% - 24px);
+    min-height: auto;
+    padding: 48px 24px;
+    margin-top: 16px;
+    border-radius: 18px;
+  }
+
+  .contact-page .contact-hero .hero-title {
+    font-size: clamp(2.3rem, 9vw, 3.2rem);
+    letter-spacing: -0.5px;
+  }
+
+  .contact-page .contact-hero .hero-subtitle {
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .contact-page .contact-hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.3px;
+  }
+
+  .contact-page .contact-hero-decoration {
+    width: 240px;
+    height: 240px;
+    top: -140px;
+    right: -120px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-page .contact-hero-button {
+    transition: none;
+  }
+}
+
+/* =====================================
+   CONTACT PAGE - FINAL UI REFINEMENTS
+===================================== */
+
+/* Submit button */
+.contact-page .contact-form .submit-btn {
+  background: #812d27 !important;
+  color: #ffffff !important;
+  border: 1px solid #812d27 !important;
+  border-radius: 9px;
+  min-height: 48px;
+  font-weight: 600;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.contact-page .contact-form .submit-btn:hover:not(:disabled) {
+  background: #65211d !important;
+  transform: translateY(-2px);
+}
+
+.contact-page .contact-form .submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Quick Help heading */
+.contact-page .support-card .support-title {
+  color: #ffffff !important;
+}
+
+/* Contact information icons */
+.contact-page .info-item .info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff !important;
+}
+
+.contact-page .info-item .info-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Input focus */
+.contact-page .contact-form .form-input:focus {
+  outline: none;
+  border-color: #812d27;
+  box-shadow: 0 0 0 3px rgba(129, 45, 39, 0.1);
+}
+
+/* Smooth interactions */
+@media (prefers-reduced-motion: reduce) {
+  .contact-page .contact-form .submit-btn {
+    transition: none;
+  }
+
+  .contact-page .contact-form .submit-btn:hover {
+    transform: none;
+  }
+}

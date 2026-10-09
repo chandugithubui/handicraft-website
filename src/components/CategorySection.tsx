@@ -8,19 +8,19 @@ const CategorySection = () => {
       id: 'pattachitra',
       name: 'Pattachitra',
       label: 'Traditional Paintings',
-      image: '/images/pattachitra1.jpg.jpg'
+      image: '/images/pattachitra1.jpg'
     },
     {
       id: 'palm-leaf',
       name: 'Palm Leaf Crafts',
       label: 'Ancient Art Form',
-      image: '/images/pattachitrawall.jpg'
+      image: '/images/palmleaf.png'
     },
     {
       id: 'sarees',
       name: 'Handwoven Sarees',
       label: 'Elegant Weaves',
-      image: '/images/relatedProduct.webp'
+      image: '/images/saree.jpeg'
     },
     {
       id: 'wooden',

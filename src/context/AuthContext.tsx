@@ -86,7 +86,7 @@ interface AuthUser {
   avatar?:       string | null;   // stored profile image
   picture?:      string | null;   // Google profile picture (alias for avatar)
   displayName?:  string | null;   // Google display name   (alias for name)
-  provider?:     string | null;   // auth provider: 'google' | 'local'
+  provider?: 'local' | 'google';   // auth provider: 'google' | 'local'
   authProvider?: string | null;   // alternative provider field name
   authProviders?: string[];       // list of linked providers
   permissions?:  string[];

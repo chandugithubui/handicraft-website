@@ -17,7 +17,7 @@ const ProductFilters = ({ onFilterChange, activeFilters, expandedSections, onTog
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  const materials = ['Wood', 'Metal', 'Clay', 'Fabric', 'Stone', 'Bamboo'];
+  const materials = ['Wood', 'Metal', 'Clay', 'Fabric', 'Stone', 'Bamboo', 'Palm Leaf'];
 
   useEffect(() => {
     // Use local categories instead of fetching from backend

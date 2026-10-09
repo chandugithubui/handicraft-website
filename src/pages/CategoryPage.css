@@ -843,8 +843,205 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .category-page .explore-craft-card,
   .category-page .explore-craft-image img {
     transition: none;
+  }
+}
+
+
+/* =========================================
+   EXPLORE OUR CRAFTS - CIRCULAR DESIGN
+========================================= */
+
+.category-page .explore-crafts-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.category-page .explore-craft-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.category-page .explore-craft-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f0dfd1;
+  background: #f5eee5;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.category-page .explore-craft-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.category-page .explore-craft-name {
+  margin: 0;
+  color: #442c25;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@media (hover: hover) {
+  .category-page .explore-craft-card:hover {
+    transform: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .category-page .explore-craft-card:hover .explore-craft-image {
+    border-color: #9b4435;
+    box-shadow: 0 8px 20px rgba(75, 25, 15, 0.15);
+  }
+
+  .category-page .explore-craft-card:hover img {
+    transform: scale(1.08);
+  }
+}
+
+.category-page .explore-craft-card:focus-visible {
+  outline: 3px solid #9b4435;
+  outline-offset: 5px;
+  border-radius: 8px;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .category-page .explore-crafts-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+/* Mobile: horizontal scrolling */
+@media (max-width: 600px) {
+  .category-page .explore-crafts-grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 4px 2px 14px;
+    scrollbar-width: thin;
+  }
+
+  .category-page .explore-craft-card {
+    flex: 0 0 110px;
+    scroll-snap-align: start;
+  }
+
+  .category-page .explore-craft-image {
+    aspect-ratio: 1 / 1;
+  }
+
+  .category-page .explore-craft-name {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .category-page .explore-craft-image,
+  .category-page .explore-craft-image img {
+    transition: none;
+  }
+}
+
+
+/* =========================================
+   MASTER ARTISANS — COMPACT CARD DESIGN
+========================================= */
+
+@media (min-width: 769px) {
+  .category-page .artisan-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .category-page .artisan-card-image {
+    aspect-ratio: auto;
+    height: 240px;
+  }
+
+  .category-page .artisan-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+  }
+
+  .category-page .artisan-card-image img {
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  .category-page .artisan-card-name {
+    font-size: 17px;
+    margin-bottom: 5px;
+  }
+
+  .category-page .artisan-card-specialty,
+  .category-page .artisan-card-years {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+
+/* =========================================
+   CATEGORY PRODUCTS — COMPACT DESKTOP CARDS
+========================================= */
+
+@media (min-width: 769px) {
+  .category-page .products-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .category-page .category-products .product-card-image {
+    width: 100%;
+    height: 190px;
+    aspect-ratio: auto;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .category-page .category-products .product-card-name {
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 12px 14px 6px;
+  }
+
+  .category-page .category-products .product-card-description {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0 14px 10px;
+  }
+
+  .category-page .category-products .product-card-price {
+    font-size: 17px;
+    padding: 0 14px 14px;
   }
 }

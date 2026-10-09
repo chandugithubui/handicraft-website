@@ -167,7 +167,7 @@ export const AdminUsers: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+           <table className="w-full min-w-[950px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#FFFDF9] border-b border-gray-100 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                   <th className="py-3 px-4">User</th>
@@ -226,7 +226,7 @@ export const AdminUsers: React.FC = () => {
                         className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[#6E1717] hover:bg-[#FFF8ED] font-semibold transition-colors no-underline border border-transparent hover:border-[#EBD8BC]"
                       >
                         <FiShield className="w-3.5 h-3.5 text-[#C99A4A]" />
-                        <span>Edit Role</span>
+                        <span className="whitespace-nowrap">Edit Role</span>
                       </Link>
                     </td>
                   </tr>

@@ -33,11 +33,12 @@ const WishlistContext = createContext<WishlistContextValue | null>(null);
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
   const { items: wishlistItems, loading } = useAppSelector((state) => state.wishlist);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const hasFetchedRef = useRef(false);
 
-  // Sync / fetch wishlist from MongoDB when user logs in, or clear when logged out
+  // Wait for AuthContext to finish rehydrating before syncing with server
   useEffect(() => {
+    if (authLoading) return; // don't act on stale isAuthenticated=false during load
     if (isAuthenticated) {
       if (!hasFetchedRef.current) {
         hasFetchedRef.current = true;
@@ -49,7 +50,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         dispatch(reduxClearWishlist());
       }
     }
-  }, [isAuthenticated, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addToWishlist = (product: any) => {
     dispatch(reduxAddToWishlist(product));

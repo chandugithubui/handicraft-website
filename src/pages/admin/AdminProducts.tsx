@@ -327,7 +327,7 @@ export const AdminProducts: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[850px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#FFFDF9] border-b border-gray-100 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                   <th className="py-3 px-4">Item Details</th>

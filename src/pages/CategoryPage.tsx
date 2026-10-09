@@ -71,7 +71,7 @@ const categoryData = {
     name: 'Palm Leaf Crafts',
     label: 'Ancient Art Form',
     image: '/images/pattachitrawall.jpg',
-    heroImage:  '/images/palmleaf_1.png',
+    heroImage: '/images/palmleaf_1.png',
     description: 'Palm leaf engraving is an ancient Odia art form where dried palm leaves are intricately engraved with traditional patterns and mythological stories. This delicate craft requires immense patience and precision.',
     origin: 'Odisha, India (ancient Kalinga region)',
     history: 'Dating back to the 3rd century BC, palm leaf manuscripts were used to record religious texts and stories. The art evolved into decorative craft with intricate cut-work patterns.',
@@ -281,6 +281,7 @@ const CategoryPage = () => {
       <div className="container">
         {/* Category Information Section */}
         {categoryId === 'all' ? (
+
           <div className="craft-info-panel">
             <h2 className="panel-title">Explore Our Crafts</h2>
 
@@ -290,6 +291,7 @@ const CategoryPage = () => {
                   key={category.id}
                   to={`/category/${category.id}`}
                   className="explore-craft-card"
+                  aria-label={`Explore ${category.name}`}
                 >
                   <div className="explore-craft-image">
                     <img
@@ -299,18 +301,14 @@ const CategoryPage = () => {
                     />
                   </div>
 
-                  <div className="explore-craft-content">
-                    <h3>{category.name}</h3>
-                    <p>{category.description}</p>
-
-                    <span className="explore-craft-link">
-                      Explore Craft →
-                    </span>
-                  </div>
+                  <h3 className="explore-craft-name">
+                    {category.name}
+                  </h3>
                 </Link>
               ))}
             </div>
           </div>
+
         ) : (
           <div className="craft-info-panel">
             <h2 className="panel-title">About This Craft</h2>

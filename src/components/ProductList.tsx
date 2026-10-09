@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePaginatedProducts } from "../hooks/api";
 import ProductFilters from "./ProductFilters";
@@ -19,20 +19,24 @@ const ProductList = () => {
   });
 
   // Accordion open/close state lifted here so it survives loading re-renders.
-  // ProductFilters is a pure display component — it must never own this state,
-  // because the loading early-return below unmounts it and resets local state.
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     material: false,
     price: false
   });
 
+  // Ref to the products content area — used for pagination scroll only.
+  const productsMainRef = useRef<HTMLDivElement>(null);
+
+  // Track whether the last page change came from a pagination button click
+  // (as opposed to a filter/sort/search resetting page to 1).
+  // We use a ref so it doesn't trigger renders.
+  
+
   // Read category and search from URL on component mount only.
-  // Dependency array intentionally uses [] so this runs once — we only want
-  // to seed from URL on first load, not re-run on every render.
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
-    const searchFromUrl   = searchParams.get('search');
+    const searchFromUrl = searchParams.get('search');
     if (categoryFromUrl) {
       setFilters(prev => ({ ...prev, category: categoryFromUrl }));
     }
@@ -40,6 +44,12 @@ const ProductList = () => {
       setSearch(searchFromUrl);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll to the top of the products content area when the page changes
+  // AND the change came from a pagination button (not a filter reset).
+  // Using requestAnimationFrame ensures we scroll after the new skeleton/content
+  // has been painted so the layout height is correct when we scroll.
+
 
   const queryParams = new URLSearchParams();
   queryParams.append('page', String(currentPage));
@@ -63,6 +73,7 @@ const ProductList = () => {
   };
 
   const handleFilterChange = (filterType: string, value: any = '') => {
+    // Filter/sort/search resets to page 1 — NOT a pagination click, don't scroll.
     setCurrentPage(1);
     if (filterType === 'clear') {
       setFilters({
@@ -82,6 +93,24 @@ const ProductList = () => {
     }
   };
 
+  /** Change page from a pagination button — marks the ref so scroll fires. */
+  const handlePageChange = (page: number) => {
+    if (page === currentPage || loading) return;
+
+    const el = productsMainRef.current;
+
+    if (el) {
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - 100;
+
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: "instant",
+      });
+    }
+
+    setCurrentPage(page);
+  };
   // Do NOT early-return with <LoadingSpinner> here.
   // An early return unmounts <ProductFilters> and resets its accordion state.
   // Instead, pass `loading` to <ProductGrid> which handles its own skeleton/spinner.
@@ -118,7 +147,7 @@ const ProductList = () => {
           </div>
 
           {/* Products Grid */}
-          <div className="products-main">
+          <div className="products-main" ref={productsMainRef}>
             {/* Search Bar */}
             <div className="products-search">
               <input
@@ -136,7 +165,7 @@ const ProductList = () => {
                 value={sort}
                 onChange={(e) => {
                   setSort(e.target.value);
-                  setCurrentPage(1);
+                  setCurrentPage(1); // sort reset — not a pagination click, no scroll
                 }}
               >
                 <option value="newest">Newest</option>
@@ -160,20 +189,18 @@ const ProductList = () => {
                 <button
                   className="pagination-btn"
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
+                  onClick={() => handlePageChange(currentPage - 1)}
                 >
                   Previous
                 </button>
 
                 {[...Array(pagination.totalPages)].map((_, index) => {
                   const pageNumber = index + 1;
-
                   return (
                     <button
                       key={pageNumber}
-                      className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''
-                        }`}
-                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''}`}
+                      onClick={() => handlePageChange(pageNumber)}
                     >
                       {pageNumber}
                     </button>
@@ -183,7 +210,7 @@ const ProductList = () => {
                 <button
                   className="pagination-btn"
                   disabled={currentPage === pagination.totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
+                  onClick={() => handlePageChange(currentPage + 1)}
                 >
                   Next
                 </button>

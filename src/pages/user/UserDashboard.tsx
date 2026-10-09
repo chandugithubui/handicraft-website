@@ -45,9 +45,13 @@ type TabKey = 'overview' | 'orders' | 'wishlist' | 'cart' | 'settings';
 
 export const UserDashboard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isAuthenticated, token, logout, updateUser } = useAuth();
+  const { user, isAuthenticated, token, loading: authLoading, logout, updateUser } = useAuth();
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const { wishlistItems, removeFromWishlist, addToWishlist } = useWishlist();
+
+  // Reliable token — AuthContext state first, localStorage fallback
+  // Ensures API calls work even during the brief rehydration window
+  const activeToken = token || localStorage.getItem('token');
 
   // Active Tab from query param or default to 'overview'
   const initialTab = (searchParams.get('tab') as TabKey) || 'overview';
@@ -66,9 +70,12 @@ export const UserDashboard: React.FC = () => {
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
   const [profileErrorMsg, setProfileErrorMsg] = useState('');
 
-  // Dashboard statistics from server — fetched silently on mount
+  // Dashboard summary — wait for auth to finish loading before firing
   useEffect(() => {
-    if (!isAuthenticated) return;
+    // Don't fire until AuthContext has finished rehydrating from localStorage
+    if (authLoading) return;
+    if (!isAuthenticated || !activeToken) return;
+
     http
       .get<{ success: boolean; data: any }>('/user/dashboard-summary')
       .then((res) => {
@@ -83,14 +90,14 @@ export const UserDashboard: React.FC = () => {
       .catch((err) => {
         console.error('Failed to load dashboard summary:', err);
       });
-  }, [isAuthenticated, token]);
+  }, [authLoading, isAuthenticated, activeToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fetch orders using existing TanStack Query hook
+  // Fetch orders — pass activeToken so it works on first render after refresh
   const {
     data: orders = [],
     isLoading: ordersLoading,
     refetch: refetchOrders,
-  } = useMyOrders(token, isAuthenticated);
+  } = useMyOrders(activeToken, !authLoading && isAuthenticated);
 
   // Sync tab with URL
   const handleTabChange = (tab: TabKey) => {

@@ -36,36 +36,36 @@ import {
   FiUser,
   FiHome,
 } from 'react-icons/fi';
-import { useAuth }           from '../../context/AuthContext';
-import RoleBadge             from '../../components/rbac/RoleBadge';
+import { useAuth } from '../../context/AuthContext';
+import RoleBadge from '../../components/rbac/RoleBadge';
 import { hasUserPermission } from '../../utils/authUtils';
 
 interface NavItem {
-  name:        string;
-  path:        string;
-  icon:        React.ComponentType<{ className?: string }>;
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
   permission?: string;
-  exact?:      boolean;
+  exact?: boolean;
 }
 
 export const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
-  const navigate         = useNavigate();
-  const location         = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [isLoggingOut,      setIsLoggingOut]      = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // ── Navigation items ──────────────────────────────────────────────────────
   const navItems: NavItem[] = [
-    { name: 'Overview',           path: '/admin',             icon: FiGrid,         exact: true },
-    { name: 'Orders',             path: '/admin/orders',      icon: FiShoppingCart, permission: 'orders:read' },
-    { name: 'Products',           path: '/admin/products',    icon: FiBox,          permission: 'products:read' },
-    { name: 'Coupons',            path: '/admin/coupons',     icon: FiTag,          permission: 'coupons:read' },
-    { name: 'Users',              path: '/admin/users',       icon: FiUsers,        permission: 'users:read' },
-    { name: 'Inquiries',          path: '/admin/contacts',    icon: FiMail,         permission: 'messages:read' },
-    { name: 'Subscribers',        path: '/admin/subscribers', icon: FiSend,         permission: 'marketing:read' },
-    { name: 'Roles & Permissions',path: '/admin/roles',       icon: FiShield,       permission: 'roles:read' },
+    { name: 'Overview', path: '/admin', icon: FiGrid, exact: true },
+    { name: 'Orders', path: '/admin/orders', icon: FiShoppingCart, permission: 'orders:read' },
+    { name: 'Products', path: '/admin/products', icon: FiBox, permission: 'products:read' },
+    { name: 'Coupons', path: '/admin/coupons', icon: FiTag, permission: 'coupons:read' },
+    { name: 'Users', path: '/admin/users', icon: FiUsers, permission: 'users:read' },
+    { name: 'Inquiries', path: '/admin/contacts', icon: FiMail, permission: 'messages:read' },
+    { name: 'Subscribers', path: '/admin/subscribers', icon: FiSend, permission: 'marketing:read' },
+    { name: 'Roles & Permissions', path: '/admin/roles', icon: FiShield, permission: 'roles:read' },
   ];
 
   const filteredNavItems = navItems.filter(
@@ -79,7 +79,7 @@ export const AdminLayout: React.FC = () => {
   );
 
   // ── Close helpers ─────────────────────────────────────────────────────────
-  const openMobileSidebar  = () => setMobileSidebarOpen(true);
+  const openMobileSidebar = () => setMobileSidebarOpen(true);
   const closeMobileSidebar = useCallback(() => setMobileSidebarOpen(false), []);
 
   // Close drawer on route change
@@ -301,7 +301,9 @@ export const AdminLayout: React.FC = () => {
       </aside>
 
       {/* ── MAIN CONTENT AREA ───────────────────────────────────────────── */}
-      <div className="md:ml-64 min-h-screen flex flex-col min-w-0">
+
+      <div className="w-full md:w-[calc(100%-280px)] md:ml-[280px] min-h-screen flex flex-col min-w-0">
+
 
         {/* Desktop top navbar */}
         <div className="hidden md:flex h-14 bg-white border-b border-[#EBD8BC]/60 px-8 items-center justify-between sticky top-0 z-30 shadow-sm">
@@ -331,7 +333,7 @@ export const AdminLayout: React.FC = () => {
         </div>
 
         {/* Page content — pt-20 offsets the fixed mobile header */}
-        <main className="flex-1 w-full pt-20 md:pt-0">
+        <main className="flex-1 w-full min-w-0 pt-20 md:pt-0">
           <div className="w-full max-w-7xl mx-auto px-3 py-4 sm:px-5 sm:py-5 lg:px-8 lg:py-8">
             <Outlet />
           </div>

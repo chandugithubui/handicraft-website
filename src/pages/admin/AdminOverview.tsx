@@ -121,17 +121,16 @@ export const AdminOverview: React.FC = () => {
           <LoadingSpinner message="Loading dashboard statistics..." />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-start">
           {/* Revenue */}
-          <div className="bg-white rounded-2xl p-5 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                Total Revenue
-              </span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                <FiDollarSign className="w-4 h-4" />
-              </div>
+          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">            <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Total Revenue
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <FiDollarSign className="w-4 h-4" />
             </div>
+          </div>
             <div className="mt-3">
               <h3 className="text-2xl font-bold text-gray-900 tracking-tight font-serif">
                 {formatCurrency(stats?.totalRevenue ?? stats?.totalSales ?? 0)}
@@ -144,7 +143,7 @@ export const AdminOverview: React.FC = () => {
           </div>
 
           {/* Orders */}
-          <div className="bg-white rounded-2xl p-5 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                 Total Orders
@@ -165,7 +164,7 @@ export const AdminOverview: React.FC = () => {
           </div>
 
           {/* Products */}
-          <div className="bg-white rounded-2xl p-5 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                 Live Products
@@ -186,7 +185,7 @@ export const AdminOverview: React.FC = () => {
           </div>
 
           {/* Users */}
-          <div className="bg-white rounded-2xl p-5 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
+          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                 Registered Users
@@ -289,8 +288,8 @@ export const AdminOverview: React.FC = () => {
               No orders have been placed yet.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="w-full max-w-full overflow-x-auto">
+              <table className="w-full min-w-[650px] text-left border-collapse">
                 <thead>
                   <tr className="bg-[#FFFDF9] border-b border-gray-100 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                     <th className="py-2.5 px-4">Order ID</th>
@@ -324,9 +323,9 @@ export const AdminOverview: React.FC = () => {
                       <td className="py-3 px-4 text-gray-500 text-[11px]">
                         {order.createdAt
                           ? new Date(order.createdAt).toLocaleDateString('en-IN', {
-                              month: 'short',
-                              day: 'numeric',
-                            })
+                            month: 'short',
+                            day: 'numeric',
+                          })
                           : '—'}
                       </td>
                     </tr>

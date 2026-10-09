@@ -30,8 +30,10 @@ const ProductDetail = () => {
   const { data: reviewsData } = useProductReviews(id);
   const { data: allProducts = [] } = useProducts();
 
-  const averageRating = Number(reviewsData?.averageRating ?? product?.rating ?? 5.0);
-  const totalReviews = Number(reviewsData?.totalReviews ?? product?.numReviews ?? (reviewsData?.reviews?.length || 1));
+  // averageRating — 0 when no reviews. Never fall back to a non-zero default.
+  const averageRating = Number(reviewsData?.averageRating ?? product?.rating ?? 0);
+  // totalReviews — 0 when no reviews. Never fake a minimum of 1.
+  const totalReviews  = Number(reviewsData?.totalReviews  ?? product?.numReviews ?? 0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -255,25 +257,34 @@ const ProductDetail = () => {
 
               {/* Rating */}
               <div className="product-rating">
-                <div className="rating-stars" style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    if (averageRating >= star) {
-                      return <FaStar key={star} style={{ color: '#F59E0B', fontSize: '18px' }} />;
-                    } else if (averageRating >= star - 0.5) {
-                      return <FaStarHalfAlt key={star} style={{ color: '#F59E0B', fontSize: '18px' }} />;
-                    } else {
-                      return <FaRegStar key={star} style={{ color: '#D1D5DB', fontSize: '18px' }} />;
-                    }
-                  })}
-                </div>
+                {totalReviews === 0 ? (
+                  /* No reviews yet — never show a fabricated rating */
+                  <span className="no-reviews-label" style={{ fontSize: '14px', color: '#9CA3AF' }}>
+                    No reviews yet
+                  </span>
+                ) : (
+                  <>
+                    <div className="rating-stars" style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        if (averageRating >= star) {
+                          return <FaStar key={star} style={{ color: '#F59E0B', fontSize: '18px' }} />;
+                        } else if (averageRating >= star - 0.5) {
+                          return <FaStarHalfAlt key={star} style={{ color: '#F59E0B', fontSize: '18px' }} />;
+                        } else {
+                          return <FaRegStar key={star} style={{ color: '#D1D5DB', fontSize: '18px' }} />;
+                        }
+                      })}
+                    </div>
 
-                <span className="rating-value" style={{ fontWeight: 600, color: '#1F2937', marginLeft: '4px' }}>
-                  {averageRating > 0 ? averageRating.toFixed(1) : '5.0'}
-                </span>
+                    <span className="rating-value" style={{ fontWeight: 600, color: '#1F2937', marginLeft: '4px' }}>
+                      {averageRating.toFixed(1)}
+                    </span>
 
-                <span className="review-count" style={{ color: '#6B7280', fontSize: '14px' }}>
-                  ({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})
-                </span>
+                    <span className="review-count" style={{ color: '#6B7280', fontSize: '14px' }}>
+                      ({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -447,7 +458,22 @@ const ProductDetail = () => {
             <div className="product-meta">
               <div className="meta-item">
                 <span className="meta-label">Category:</span>
-                <span className="meta-value">{product.category || 'Handicrafts'}</span>
+                <span className="meta-value">
+                  {/* Map internal slugs to customer-facing labels */}
+                  {(() => {
+                    const categoryLabels: Record<string, string> = {
+                      pattachitra: 'Pattachitra',
+                      'palm-leaf':  'Palm Leaf',
+                      sarees:       'Sarees',
+                      wooden:       'Wooden Crafts',
+                      sculptures:   'Sculptures',
+                      decor:        'Home Decor',
+                      gifts:        'Gifts',
+                    };
+                    const slug = (product.category || '').toLowerCase();
+                    return categoryLabels[slug] || product.category || 'Handicrafts';
+                  })()}
+                </span>
               </div>
 
               <div className="meta-item">

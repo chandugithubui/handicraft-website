@@ -135,8 +135,8 @@ export const AdminContacts: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+           <div className="w-full max-w-full overflow-x-auto">
+             <table className="w-full min-w-[750px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#FFFDF9] border-b border-gray-100 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
                   <th className="py-3 px-4">Sender</th>
