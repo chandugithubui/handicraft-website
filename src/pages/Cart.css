@@ -439,3 +439,17 @@
     font-size: var(--font-size-xl);
   }
 }
+
+/* Stock Warning */
+.stock-warning {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background-color: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: #92400E;
+}

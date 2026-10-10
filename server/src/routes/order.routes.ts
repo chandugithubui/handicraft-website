@@ -12,36 +12,71 @@ import { Coupon } from '../models/coupon.model';
 import { User } from '../models/user.model';
 import { auth } from '../middleware/auth.middleware';
 import sendEmail from '../utils/sendEmail';
+import { calculateShipping } from '../utils/pricing';
 
 const router = Router();
 
 // POST create order
 router.post('/', auth, async (req: Request, res: Response): Promise<Response> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  let transactionCommitted = false;
+
   try {
     const { items, shippingAddress, paymentMethod, couponCode } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
 
-    const validatedItems: any[] = [];
+    // Strict quantity validation: no type coercion, safe integer only
     for (const item of items) {
-      if (!mongoose.Types.ObjectId.isValid(item.product)) {
-        return res.status(400).json({ message: `Invalid product ID: ${item.product}` });
-      }
+      const qty = item.quantity;
 
-      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
-        return res.status(400).json({ message: 'Product quantity must be a positive integer' });
-      }
-
-      const product = await Product.findById(item.product);
-      if (!product) {
-        return res.status(404).json({ message: `Product not found: ${item.product}` });
-      }
-
-      if (product.stock < item.quantity) {
+      // Reject non-numbers (strings, null, undefined, boolean)
+      if (typeof qty !== 'number') {
+        await session.abortTransaction();
         return res.status(400).json({
-          message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+          message: `Invalid quantity for product ${item.product}. Quantity must be a number, received ${typeof qty}.`
+        });
+      }
+
+      // Reject unsafe integers, NaN, Infinity, non-positive
+      if (!Number.isSafeInteger(qty) || qty <= 0) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          message: `Invalid quantity for product ${item.product}. Must be a safe positive integer.`
+        });
+      }
+    }
+
+    // Aggregate quantities for duplicate product IDs to prevent overselling
+    const productMap = new Map<string, number>();
+    for (const item of items) {
+      const productId = String(item.product);
+      const qty = item.quantity; // Already validated as safe integer
+      const existing = productMap.get(productId) || 0;
+      productMap.set(productId, existing + qty);
+    }
+
+    const validatedItems: any[] = [];
+    for (const [productId, totalQty] of productMap.entries()) {
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        await session.abortTransaction();
+        return res.status(400).json({ message: `Invalid product ID: ${productId}` });
+      }
+
+      const product = await Product.findById(productId).session(session);
+      if (!product) {
+        await session.abortTransaction();
+        return res.status(404).json({ message: `Product not found: ${productId}` });
+      }
+
+      if (product.stock < totalQty) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${totalQty}`,
         });
       }
 
@@ -49,19 +84,19 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
         product: product._id,
         name: product.name,
         price: product.price,
-        quantity: item.quantity,
+        quantity: totalQty,
         image: product.imageUrl,
       });
     }
 
     const subtotal = validatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const shippingAmount = subtotal >= 1000 ? 0 : 50;
+    const shippingAmount = calculateShipping(subtotal);
 
     let discountAmount = 0;
     let appliedCoupon: any = null;
 
     if (couponCode) {
-      const coupon = await Coupon.findOne({ code: couponCode.trim().toUpperCase() });
+      const coupon = await Coupon.findOne({ code: couponCode.trim().toUpperCase() }).session(session);
       if (
         coupon &&
         coupon.isActive &&
@@ -99,28 +134,59 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
       totalAmount,
     });
 
-    await order.save();
+    await order.save({ session });
 
-    // Decrement stock
+    // Atomically decrement stock with concurrency protection within transaction
+    // If ANY product fails, entire transaction rolls back
     for (const item of validatedItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+      const updateResult = await Product.updateOne(
+        {
+          _id: item.product,
+          stock: { $gte: item.quantity } // Atomic check
+        },
+        {
+          $inc: { stock: -item.quantity }
+        },
+        { session }
+      );
+
+      // If stock update failed (concurrent purchase exhausted stock), abort transaction
+      if (updateResult.modifiedCount === 0) {
+        await session.abortTransaction();
+        const failedProduct = await Product.findById(item.product);
+        return res.status(400).json({
+          message: `Insufficient stock for "${failedProduct?.name}". Order cancelled, no changes made.`
+        });
+      }
     }
 
+    // Increment coupon usage within transaction
     if (appliedCoupon) {
-      await Coupon.findByIdAndUpdate(appliedCoupon._id, {
-        $inc: { usedCount: 1 },
-      });
+      await Coupon.findByIdAndUpdate(
+        appliedCoupon._id,
+        { $inc: { usedCount: 1 } },
+        { session }
+      );
     }
 
-    const customer = await User.findById(req.user?.userId || req.user?.id).select('name email');
-    if (customer?.email) {
-      sendEmail({
-        to: customer.email,
-        subject: 'Order Confirmation - Handicraft Hub',
-        html: `<h2>Order Confirmation</h2><p>Hi ${customer.name}, your order #${order._id} has been placed.</p><p>Total Amount: ₹${totalAmount}</p>`,
-      }).catch((e: any) => console.error('Order email error:', e.message));
+    // Commit transaction - all or nothing
+    await session.commitTransaction();
+    transactionCommitted = true;
+
+    // Send email ONLY after successful transaction commit
+    // Email failure does NOT affect order success
+    try {
+      const customer = await User.findById(req.user?.userId || req.user?.id).select('name email');
+      if (customer?.email) {
+        await sendEmail({
+          to: customer.email,
+          subject: 'Order Confirmation - Handicraft Hub',
+          html: `<h2>Order Confirmation</h2><p>Hi ${customer.name}, your order #${order._id} has been placed.</p><p>Total Amount: ₹${totalAmount}</p>`,
+        });
+      }
+    } catch (emailError: any) {
+      // Log email failure but do not fail the order response
+      console.error('Order confirmation email failed:', emailError.message);
     }
 
     return res.status(201).json({
@@ -128,8 +194,14 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
       order,
     });
   } catch (error: any) {
+    // Only abort if transaction was not already committed
+    if (!transactionCommitted) {
+      await session.abortTransaction();
+    }
     console.error('Order creation error:', error);
     return res.status(500).json({ message: error.message || 'Server error during order creation' });
+  } finally {
+    session.endSession();
   }
 });
 

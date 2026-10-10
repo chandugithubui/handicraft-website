@@ -193,6 +193,22 @@
   box-shadow: 0 0 0 3px rgba(110, 23, 23, 0.1);
 }
 
+.form-input.error {
+  border-color: #DC2626;
+}
+
+.form-input.error:focus {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.field-error {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: #DC2626;
+  margin-top: -4px;
+}
+
 .form-input::placeholder {
   color: #9A9585;
 }

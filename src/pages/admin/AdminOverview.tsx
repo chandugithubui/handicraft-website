@@ -123,9 +123,10 @@ export const AdminOverview: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-start">
           {/* Revenue */}
-          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
+            <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              Total Revenue
+              VALID ORDER VALUE
             </span>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               <FiDollarSign className="w-4 h-4" />
@@ -133,11 +134,11 @@ export const AdminOverview: React.FC = () => {
           </div>
             <div className="mt-3">
               <h3 className="text-2xl font-bold text-gray-900 tracking-tight font-serif">
-                {formatCurrency(stats?.totalRevenue ?? stats?.totalSales ?? 0)}
+                {formatCurrency(stats?.totalRevenue ?? 0)}
               </h3>
               <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                 <FiTrendingUp className="w-3.5 h-3.5" />
-                <span>All-time completed sales</span>
+                <span>Valid orders (excl. cancelled/failed)</span>
               </p>
             </div>
           </div>
@@ -188,7 +189,7 @@ export const AdminOverview: React.FC = () => {
           <div className="bg-white rounded-2xl p-4 border border-[#EBD8BC]/60 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                Registered Users
+                Total Customers
               </span>
               <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                 <FiUsers className="w-4 h-4" />
@@ -199,7 +200,7 @@ export const AdminOverview: React.FC = () => {
                 {stats?.totalUsers ?? 0}
               </h3>
               <p className="text-[11px] text-gray-500 font-medium mt-1">
-                Active customer accounts
+                Registered customer accounts
               </p>
             </div>
           </div>

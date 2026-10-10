@@ -1,0 +1,142 @@
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding-right: 40px !important;
+}
+
+.autocomplete-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  pointer-events: auto;
+}
+
+.autocomplete-icon.open {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.autocomplete-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background-color: #FFFFFF;
+  border: 1px solid #E0D5C5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  animation: slideDown 0.15s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autocomplete-suggestion {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #292522;
+}
+
+.autocomplete-suggestion:hover {
+  background-color: #FFF8ED;
+}
+
+.autocomplete-suggestion.highlighted {
+  background-color: #F7E7CE;
+  color: #6E1717;
+  font-weight: 500;
+}
+
+.autocomplete-no-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #E0D5C5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #6B7280;
+  animation: slideDown 0.15s ease;
+}
+
+/* Scrollbar styling */
+.autocomplete-suggestions::-webkit-scrollbar {
+  width: 8px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .autocomplete-suggestions {
+    max-height: 200px;
+  }
+
+  .autocomplete-suggestion {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .autocomplete-icon {
+    right: 10px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Touch-friendly for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .autocomplete-suggestion {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}

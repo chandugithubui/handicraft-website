@@ -8,6 +8,8 @@ import { createOrder } from '../services/orderService';
 import { validateCoupon } from '../services/couponService';
 import { orderKeys } from '../hooks/api/useOrders';
 import RazorpayPaymentForm from '../components/RazorpayPaymentForm';
+import Autocomplete from '../components/Autocomplete';
+import { getStateNames, searchCities } from '../data/indianLocations';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -29,12 +31,18 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponMessage, setCouponMessage] = useState('');
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State and City autocomplete
+  const [stateSuggestions] = useState<string[]>(getStateNames());
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -58,10 +66,75 @@ const Checkout = () => {
   }
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setShippingAddress({
       ...shippingAddress,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+  };
+
+  const handleStateChange = (value: string) => {
+    setShippingAddress(prev => ({
+      ...prev,
+      state: value,
+      // Clear city if state changes and city is not valid for new state
+      city: ''
+    }));
+
+    // Update city suggestions for the new state
+    setCitySuggestions(searchCities(value, ''));
+
+    // Clear state field error
+    if (fieldErrors.state) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated.state;
+        return updated;
+      });
+    }
+
+    // Clear city field error too since we're resetting it
+    if (fieldErrors.city) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated.city;
+        return updated;
+      });
+    }
+  };
+
+  const handleCityChange = (value: string) => {
+    setShippingAddress(prev => ({
+      ...prev,
+      city: value
+    }));
+
+    // Clear city field error
+    if (fieldErrors.city) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated.city;
+        return updated;
+      });
+    }
+  };
+
+  const handleCityFocus = () => {
+    if (!shippingAddress.state) {
+      setFieldErrors(prev => ({
+        ...prev,
+        city: 'Please select a state first'
+      }));
+    }
   };
   const handleApplyCoupon = async () => {
     setCouponMessage('');
@@ -103,17 +176,54 @@ const Checkout = () => {
     }
   };
   const validateShippingForm = () => {
-    if (
-      !shippingAddress.fullName ||
-      !shippingAddress.address ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.postalCode ||
-      !shippingAddress.phone
-    ) {
-      setError('Please fill in all shipping fields');
+    const errors: Record<string, string> = {};
+
+    if (!shippingAddress.fullName.trim()) {
+      errors.fullName = 'Full name is required';
+    }
+
+    if (!shippingAddress.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (!/^[6-9]\d{9}$/.test(shippingAddress.phone.trim())) {
+      errors.phone = 'Please enter a valid 10-digit Indian mobile number';
+    }
+
+    if (!shippingAddress.address.trim()) {
+      errors.address = 'Address is required';
+    } else if (shippingAddress.address.trim().length < 10) {
+      errors.address = 'Please enter a complete address';
+    }
+
+    if (!shippingAddress.city.trim()) {
+      errors.city = 'City is required';
+    }
+
+    if (!shippingAddress.state.trim()) {
+      errors.state = 'State is required';
+    } else {
+      // Validate state is from the Indian states/UTs list
+      const validStates = getStateNames();
+      const isValidState = validStates.some(
+        state => state.toLowerCase() === shippingAddress.state.trim().toLowerCase()
+      );
+      if (!isValidState) {
+        errors.state = 'Please select a valid Indian state or Union Territory';
+      }
+    }
+
+    if (!shippingAddress.postalCode.trim()) {
+      errors.postalCode = 'Postal code is required';
+    } else if (!/^\d{6}$/.test(shippingAddress.postalCode.trim())) {
+      errors.postalCode = 'Please enter a valid 6-digit PIN code';
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setError('Please fix the errors in the form');
       return false;
     }
+
     setError('');
     return true;
   };
@@ -121,11 +231,17 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isSubmitting) {
+      return; // Prevent double submission
+    }
+
     if (!validateShippingForm()) {
       return;
     }
 
+    setIsSubmitting(true);
     setLoading(true);
+    setError('');
 
     try {
       const orderData = {
@@ -144,6 +260,7 @@ const Checkout = () => {
       navigate('/order-success', { state: { order: res?.order || res } });
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Failed to place order');
+      setIsSubmitting(false);
     } finally {
       setLoading(false);
     }
@@ -217,10 +334,13 @@ const Checkout = () => {
                       name="fullName"
                       value={shippingAddress.fullName}
                       onChange={handleChange}
-                      className="form-input"
+                      className={`form-input ${fieldErrors.fullName ? 'error' : ''}`}
                       required
                       placeholder="Enter your full name"
                     />
+                    {fieldErrors.fullName && (
+                      <span className="field-error">{fieldErrors.fullName}</span>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -230,10 +350,14 @@ const Checkout = () => {
                       name="phone"
                       value={shippingAddress.phone}
                       onChange={handleChange}
-                      className="form-input"
+                      className={`form-input ${fieldErrors.phone ? 'error' : ''}`}
                       required
-                      placeholder="Enter your phone number"
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
                     />
+                    {fieldErrors.phone && (
+                      <span className="field-error">{fieldErrors.phone}</span>
+                    )}
                   </div>
                 </div>
 
@@ -244,37 +368,48 @@ const Checkout = () => {
                     name="address"
                     value={shippingAddress.address}
                     onChange={handleChange}
-                    className="form-input"
+                    className={`form-input ${fieldErrors.address ? 'error' : ''}`}
                     required
                     placeholder="Street address, apartment, etc."
                   />
+                  {fieldErrors.address && (
+                    <span className="field-error">{fieldErrors.address}</span>
+                  )}
                 </div>
 
                 <div className="form-grid">
                   <div className="form-group">
-                    <label className="form-label">City *</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={shippingAddress.city}
-                      onChange={handleChange}
-                      className="form-input"
+                    <label className="form-label">State / Union Territory *</label>
+                    <Autocomplete
+                      name="state"
+                      value={shippingAddress.state}
+                      onChange={handleStateChange}
+                      suggestions={stateSuggestions}
+                      placeholder="Select or type your state"
                       required
-                      placeholder="Enter your city"
+                      hasError={Boolean(fieldErrors.state)}
                     />
+                    {fieldErrors.state && (
+                      <span className="field-error">{fieldErrors.state}</span>
+                    )}
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">State *</label>
-                    <input
-                      type="text"
-                      name="state"
-                      value={shippingAddress.state}
-                      onChange={handleChange}
-                      className="form-input"
+                    <label className="form-label">City *</label>
+                    <Autocomplete
+                      name="city"
+                      value={shippingAddress.city}
+                      onChange={handleCityChange}
+                      suggestions={citySuggestions}
+                      placeholder={shippingAddress.state ? "Select or type your city" : "Select state first"}
                       required
-                      placeholder="Enter your state"
+                      disabled={!shippingAddress.state}
+                      hasError={Boolean(fieldErrors.city)}
+                      onFocus={handleCityFocus}
                     />
+                    {fieldErrors.city && (
+                      <span className="field-error">{fieldErrors.city}</span>
+                    )}
                   </div>
                 </div>
 
@@ -286,10 +421,14 @@ const Checkout = () => {
                       name="postalCode"
                       value={shippingAddress.postalCode}
                       onChange={handleChange}
-                      className="form-input"
+                      className={`form-input ${fieldErrors.postalCode ? 'error' : ''}`}
                       required
-                      placeholder="Enter postal code"
+                      placeholder="6-digit PIN code"
+                      maxLength={6}
                     />
+                    {fieldErrors.postalCode && (
+                      <span className="field-error">{fieldErrors.postalCode}</span>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -362,7 +501,7 @@ const Checkout = () => {
                     <button
                       type="submit"
                       className="btn btn-primary btn-lg place-order-btn"
-                      disabled={loading}
+                      disabled={loading || isSubmitting}
                     >
                       {loading ? 'Processing...' : 'Place Order'}
                     </button>

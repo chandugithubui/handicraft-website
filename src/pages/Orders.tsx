@@ -39,7 +39,8 @@ const Orders = () => {
     return `/images/${fixedPath}`;
   };
 
-  const getStatusInfo = (status) => {
+  const getStatusInfo = (status: string) => {
+    const normalizedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     const statusMap = {
       'Pending': { icon: <FiClock />, color: 'pending', label: 'Pending' },
       'Processing': { icon: <FiPackage />, color: 'processing', label: 'Processing' },
@@ -47,7 +48,45 @@ const Orders = () => {
       'Delivered': { icon: <FiCheckCircle />, color: 'delivered', label: 'Delivered' },
       'Cancelled': { icon: <FiXCircle />, color: 'cancelled', label: 'Cancelled' }
     };
-    return statusMap[status] || { icon: <FiClock />, color: 'pending', label: status };
+    return statusMap[normalizedStatus] || { icon: <FiClock />, color: 'pending', label: normalizedStatus };
+  };
+
+  const getPaymentStatusInfo = (paymentStatus: string, paymentMethod: string) => {
+    if (paymentMethod === 'COD') {
+      return { label: 'Cash on Delivery', color: 'pending' };
+    }
+    const statusMap = {
+      'paid': { label: 'Paid', color: 'success' },
+      'pending': { label: 'Payment Pending', color: 'pending' },
+      'failed': { label: 'Payment Failed', color: 'error' }
+    };
+    return statusMap[paymentStatus] || { label: paymentStatus, color: 'pending' };
+  };
+
+  const getOrderStatusSteps = (currentStatus: string, isCancelled: boolean) => {
+    const normalizedStatus = currentStatus.toLowerCase();
+
+    if (isCancelled) {
+      return [
+        { status: 'pending', label: 'Order Placed', icon: <FiClock />, completed: true },
+        { status: 'cancelled', label: 'Cancelled', icon: <FiXCircle />, completed: true, isCancelled: true }
+      ];
+    }
+
+    const steps = [
+      { status: 'pending', label: 'Order Placed', icon: <FiClock />, completed: false },
+      { status: 'processing', label: 'Processing', icon: <FiPackage />, completed: false },
+      { status: 'shipped', label: 'Shipped', icon: <FiTruck />, completed: false },
+      { status: 'delivered', label: 'Delivered', icon: <FiCheckCircle />, completed: false }
+    ];
+
+    const statusOrder = ['pending', 'processing', 'shipped', 'delivered'];
+    const currentIndex = statusOrder.indexOf(normalizedStatus);
+
+    return steps.map((step, index) => ({
+      ...step,
+      completed: index <= currentIndex
+    }));
   };
 
   if (loading) {
@@ -113,13 +152,17 @@ const Orders = () => {
           </div>
         ) : (
           <div className="orders-list">
-            {orders.map((order) => {
+            {orders.map((order: any) => {
               const statusInfo = getStatusInfo(order.orderStatus);
+              const paymentInfo = getPaymentStatusInfo(order.paymentStatus, order.paymentMethod);
+              const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
+              const statusSteps = getOrderStatusSteps(order.orderStatus, isCancelled);
+
               return (
                 <div key={order._id} className="order-card">
                   <div className="order-card-header">
                     <div className="order-info">
-                      <span className="order-id">#{order._id.slice(-8)}</span>
+                      <span className="order-id">Order #{order._id.slice(-8).toUpperCase()}</span>
                       <span className="order-date">
                         {new Date(order.createdAt).toLocaleDateString('en-IN', {
                           day: 'numeric',
@@ -166,6 +209,26 @@ const Orders = () => {
 
                   {expandedOrder === order._id && (
                     <div className="order-details-expanded">
+                      {/* Order Status Timeline */}
+                      <div className="order-status-timeline">
+                        <h4>Order Status</h4>
+                        <div className="status-timeline">
+                          {statusSteps.map((step, index) => (
+                            <div key={step.status} className={`timeline-step ${step.completed ? 'completed' : ''} ${step.isCancelled ? 'cancelled' : ''}`}>
+                              <div className="timeline-icon">
+                                {step.icon}
+                              </div>
+                              <div className="timeline-content">
+                                <span className="timeline-label">{step.label}</span>
+                              </div>
+                              {index < statusSteps.length - 1 && (
+                                <div className={`timeline-connector ${step.completed ? 'completed' : ''}`}></div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="order-details-items">
                         <h4>Order Items</h4>
                         {order.items.map((item, index) => (
@@ -191,12 +254,59 @@ const Orders = () => {
                           </div>
                         ))}
                       </div>
-                      <div className="order-details-shipping">
-                        <h4>Shipping Address</h4>
-                        <p>{order.shippingAddress?.fullName}</p>
-                        <p>{order.shippingAddress?.address}</p>
-                        <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}</p>
-                        <p>Phone: {order.shippingAddress?.phone}</p>
+
+                      <div className="order-details-grid">
+                        <div className="order-details-shipping">
+                          <h4>Shipping Address</h4>
+                          <p>{order.shippingAddress?.fullName}</p>
+                          <p>{order.shippingAddress?.address}</p>
+                          <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}</p>
+                          <p>Phone: {order.shippingAddress?.phone}</p>
+                        </div>
+
+                        <div className="order-details-payment">
+                          <h4>Payment Information</h4>
+                          <div className="payment-info-row">
+                            <span className="payment-info-label">Payment Method:</span>
+                            <span className="payment-info-value">{order.paymentMethod || 'N/A'}</span>
+                          </div>
+                          <div className="payment-info-row">
+                            <span className="payment-info-label">Payment Status:</span>
+                            <span className={`payment-status payment-status-${paymentInfo.color}`}>
+                              {paymentInfo.label}
+                            </span>
+                          </div>
+                          {order.paymentId && (
+                            <div className="payment-info-row">
+                              <span className="payment-info-label">Payment ID:</span>
+                              <span className="payment-info-value payment-id">{order.paymentId}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="order-summary">
+                        <h4>Order Summary</h4>
+                        <div className="summary-row">
+                          <span>Subtotal:</span>
+                          <span>₹{(order.subtotal || 0).toLocaleString()}</span>
+                        </div>
+                        {order.shippingAmount > 0 && (
+                          <div className="summary-row">
+                            <span>Shipping:</span>
+                            <span>₹{(order.shippingAmount || 0).toLocaleString()}</span>
+                          </div>
+                        )}
+                        {order.discountAmount > 0 && (
+                          <div className="summary-row discount">
+                            <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}:</span>
+                            <span>-₹{(order.discountAmount || 0).toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="summary-row total">
+                          <span>Total Amount:</span>
+                          <span>₹{(order.totalAmount || 0).toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
                   )}

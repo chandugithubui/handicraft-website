@@ -16,15 +16,38 @@ const router = Router();
 // Get dashboard statistics
 router.get('/stats', adminAuth, async (_req: Request, res: Response): Promise<void> => {
   try {
-    const totalUsers = await User.countDocuments();
+    // Count only customer accounts (exclude admin roles)
+    const totalUsers = await User.countDocuments({
+      role: { $nin: ['admin', 'super_admin', 'moderator', 'editor'] }
+    });
+
+    // Count all orders
     const totalOrders = await Order.countDocuments();
+
+    // Count all products
     const totalProducts = await Product.countDocuments();
 
-    const totalRevenue = await Order.aggregate([
-      { $match: { orderStatus: { $ne: 'cancelled' } } },
-      { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+    // Calculate revenue from completed/valid orders only
+    // Exclude cancelled orders and failed payments
+    // COD orders with 'pending' payment status are included as valid revenue expectation
+    const revenueResult = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $nin: ['cancelled'] },
+          paymentStatus: { $ne: 'failed' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalAmount' }
+        }
+      }
     ]);
 
+    const totalRevenue = revenueResult[0]?.total || 0;
+
+    // Get recent orders with user info
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
       .limit(5)
@@ -34,7 +57,8 @@ router.get('/stats', adminAuth, async (_req: Request, res: Response): Promise<vo
       totalUsers,
       totalOrders,
       totalProducts,
-      totalRevenue: totalRevenue[0]?.total || 0,
+      totalRevenue,
+      totalSales: totalRevenue, // Alias for backward compatibility
       recentOrders,
     });
   } catch (error) {

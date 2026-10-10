@@ -28,7 +28,7 @@ const ProductDetail = () => {
 
   const { data: product, isLoading: loading } = useProductDetail(id);
   const { data: reviewsData } = useProductReviews(id);
-  const { data: allProducts = [] } = useProducts();
+  const { data: allProducts = [], isLoading: loadingProducts } = useProducts();
 
   // averageRating — 0 when no reviews. Never fall back to a non-zero default.
   const averageRating = Number(reviewsData?.averageRating ?? product?.rating ?? 0);
@@ -36,6 +36,8 @@ const ProductDetail = () => {
   const totalReviews  = Number(reviewsData?.totalReviews  ?? product?.numReviews ?? 0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
 
   const productId = id || (product?._id ? String(product._id) : '');
   const isWishlisted = isInWishlist(productId);
@@ -69,7 +71,7 @@ const ProductDetail = () => {
         ];
 
   // Add product to cart with stock validation
-  const handleAddToCart = (qtyToAdd: number = 1) => {
+  const handleAddToCart = (qtyToAdd: number = quantity) => {
     if (!product) return;
     if (stock <= 0) {
       setNotice('This product is out of stock.');
@@ -86,8 +88,9 @@ const ProductDetail = () => {
       setNotice(res.message);
       setTimeout(() => setNotice(null), 3000);
     } else {
-      setNotice(`Added to your cart!`);
+      setNotice(`Added ${qtyToAdd} item${qtyToAdd > 1 ? 's' : ''} to your cart!`);
       setTimeout(() => setNotice(null), 3000);
+      setQuantity(1); // Reset quantity selector
     }
   };
 
@@ -211,6 +214,8 @@ const ProductDetail = () => {
                 src={images[selectedImage]}
                 alt={product.name}
                 className="main-image"
+                onClick={() => setIsImageExpanded(true)}
+                style={{ cursor: 'pointer' }}
               />
 
               {discount > 0 && (
@@ -331,6 +336,34 @@ const ProductDetail = () => {
               </div>
             )}
 
+            {/* Quantity Selector - Show before adding to cart */}
+            {quantityInCart === 0 && stock > 0 && (
+              <div className="quantity-selector-wrapper">
+                <label className="quantity-label">Quantity:</label>
+                <div className="quantity-controls">
+                  <button
+                    type="button"
+                    className="quantity-btn"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    title="Decrease quantity"
+                  >
+                    <FiMinus />
+                  </button>
+                  <span className="quantity-value">{quantity}</span>
+                  <button
+                    type="button"
+                    className="quantity-btn"
+                    onClick={() => setQuantity(Math.min(stock, quantity + 1))}
+                    disabled={quantity >= stock}
+                    title="Increase quantity"
+                  >
+                    <FiPlus />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* In-Cart Quantity Controls (Only shown once item is added to cart) */}
             {quantityInCart > 0 && (
               <div className="cart-quantity-banner">
@@ -371,11 +404,11 @@ const ProductDetail = () => {
                   <button
                     type="button"
                     className="btn add-to-cart-btn"
-                    onClick={() => handleAddToCart(1)}
+                    onClick={() => handleAddToCart(quantity)}
                     disabled={product.stock === 0}
                   >
                     <FiShoppingBag className="btn-icon" />
-                    <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                    <span>{product.stock === 0 ? 'Out of Stock' : `Add ${quantity > 1 ? `${quantity} ` : ''}to Cart`}</span>
                   </button>
 
                   <button
@@ -548,11 +581,25 @@ const ProductDetail = () => {
               <h2 className="suggested-title">You May Also Like</h2>
               <p className="suggested-subtitle">Handcrafted treasures curated especially for you</p>
             </div>
-            <div className="suggested-grid">
-              {displaySuggested.map((item: any) => (
-                <ProductCard key={item._id} product={item} />
-              ))}
-            </div>
+            {loadingProducts ? (
+              <div className="suggested-grid">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="product-skeleton">
+                    <div className="skeleton-image"></div>
+                    <div className="skeleton-content">
+                      <div className="skeleton-title"></div>
+                      <div className="skeleton-price"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="suggested-grid">
+                {displaySuggested.map((item: any) => (
+                  <ProductCard key={item._id} product={item} />
+                ))}
+              </div>
+            )}
           </section>
         )}
 
@@ -560,6 +607,39 @@ const ProductDetail = () => {
         <div className="product-reviews-section">
           <ReviewSection productId={id} />
         </div>
+
+        {/* Image Lightbox Modal */}
+        {isImageExpanded && (
+          <div className="image-lightbox-overlay" onClick={() => setIsImageExpanded(false)}>
+            <div className="image-lightbox-content" onClick={(e) => e.stopPropagation()}>
+              <button
+                className="lightbox-close-btn"
+                onClick={() => setIsImageExpanded(false)}
+                aria-label="Close image preview"
+              >
+                ✕
+              </button>
+              <img
+                src={images[selectedImage]}
+                alt={product.name}
+                className="lightbox-image"
+              />
+              {images.length > 1 && (
+                <div className="lightbox-thumbnails">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      className={`lightbox-thumbnail ${selectedImage === index ? 'active' : ''}`}
+                      onClick={() => setSelectedImage(index)}
+                    >
+                      <img src={image} alt={`${product.name} ${index + 1}`} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

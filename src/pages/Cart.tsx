@@ -76,6 +76,12 @@ const Cart = () => {
 
                   <div className="cart-item-price">₹{item.price.toLocaleString()}</div>
 
+                  {item.stock !== undefined && item.stock <= 5 && item.stock > 0 && (
+                    <div className="stock-warning">
+                      Only {item.stock} left in stock
+                    </div>
+                  )}
+
                   <div className="cart-item-quantity" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button
                       type="button"
