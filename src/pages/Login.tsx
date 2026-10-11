@@ -148,9 +148,9 @@ const Login = () => {
           </p>
           <div className="auth-features">
             {[
-              '500+ Verified Artisans',
-              '10,000+ Unique Products',
-              'Secure Payments',
+              'Explore Indian Handcrafted Products',
+              'Save Your Favourite Products',
+              'Track Your Orders Easily',
             ].map((text) => (
               <div className="auth-feature" key={text}>
                 <span className="feature-icon">✓</span>

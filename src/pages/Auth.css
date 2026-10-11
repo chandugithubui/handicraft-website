@@ -341,3 +341,182 @@
   height: 20px;
   flex-shrink: 0;
 }
+
+/* ==========================================
+   LOGIN PAGE — LAYOUT & ALIGNMENT FIX
+   ========================================== */
+
+@media (min-width: 1024px) {
+  .auth-page:has(.auth-info) .auth-container {
+    grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+    align-items: center;
+    justify-content: center;
+    gap: 70px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .auth-page:has(.auth-info) .auth-card {
+    width: 100%;
+    max-width: 480px;
+    margin: 0;
+  }
+
+  .auth-page:has(.auth-info) .auth-info {
+    padding: 20px 0;
+    justify-content: center;
+  }
+}
+
+/* Reduce unnecessary form spacing */
+.auth-page:has(.auth-info) .auth-card {
+  padding: 30px 34px;
+}
+
+.auth-page:has(.auth-info) .auth-header {
+  margin-bottom: 22px;
+}
+
+.auth-page:has(.auth-info) .auth-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+}
+
+.auth-page:has(.auth-info) .auth-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.auth-page:has(.auth-info) .auth-form {
+  gap: 16px;
+}
+
+.auth-page:has(.auth-info) .form-group {
+  gap: 7px;
+}
+
+/* Input appearance */
+.auth-page:has(.auth-info) .auth-form .form-input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  min-height: 46px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #d9c7b6;
+  border-radius: 8px;
+  color: #38251e;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.auth-page:has(.auth-info) .auth-form .form-input:focus {
+  outline: none;
+  border-color: #842b25;
+  box-shadow: 0 0 0 3px rgba(132, 43, 37, 0.1);
+}
+
+/* Google sign-in and divider */
+.auth-page:has(.auth-info) .auth-divider {
+  margin: 18px 0;
+}
+
+.auth-page:has(.auth-info) .btn-google {
+  min-height: 46px;
+}
+
+/* Submit button */
+.auth-page:has(.auth-info) .auth-submit-btn {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* Bottom registration link */
+.auth-page:has(.auth-info) .auth-footer {
+  margin-top: 20px;
+  padding-top: 18px;
+}
+
+/* Right-side content */
+.auth-page:has(.auth-info) .auth-info-title {
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+
+.auth-page:has(.auth-info) .auth-info-description {
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+
+/* Tablet and mobile */
+@media (max-width: 1023px) {
+  .auth-page:has(.auth-info) .auth-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .auth-page:has(.auth-info) .auth-card {
+    width: 100%;
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page:has(.auth-info) .auth-card {
+    padding: 24px 20px;
+  }
+}
+
+/* ==========================================
+   LOGIN — EMAIL & PASSWORD ALIGNMENT FIX
+   ========================================== */
+
+.auth-page:has(.auth-info) .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-page:has(.auth-info) .auth-form .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-page:has(.auth-info) .auth-form .form-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}
+
+.auth-page:has(.auth-info) .auth-form .label-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.auth-page:has(.auth-info) .auth-form .form-input {
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid #d9c7b6;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.auth-page:has(.auth-info) .auth-actions {
+  margin: 0;
+  padding: 0;
+}
