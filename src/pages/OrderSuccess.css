@@ -12,13 +12,14 @@
   border-radius: 8px;
 }
 
+/* Order Success Button Styles - Scoped to prevent global override */
 .order-success-container .btn-primary {
-  background-color: #e67e22;
+  background-color: #e67e22 !important;
   border-color: #e67e22;
 }
 
 .order-success-container .btn-primary:hover {
-  background-color: #d35400;
+  background-color: #d35400 !important;
   border-color: #d35400;
 }
 

@@ -1,0 +1,372 @@
+
+/* Returns & Refunds Page */
+.returns-page {
+  --returns-red: #842b25;
+  --returns-dark: #6e1717;
+  --returns-cream: #fcf6ed;
+  --returns-ink: #38251e;
+  --returns-muted: #705c50;
+  --returns-border: #ead7c2;
+
+  min-height: 100vh;
+  padding-bottom: 70px;
+  background: var(--returns-cream);
+  color: var(--returns-ink);
+}
+
+.returns-page * {
+  box-sizing: border-box;
+}
+
+/* Hero Section */
+.returns-hero {
+  width: min(1440px, calc(100% - 48px));
+  margin: 28px auto 0;
+  border: 1px solid var(--returns-border);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f9f0e4, #fcf6ed, #f4ead8);
+  text-align: center;
+}
+
+.returns-hero-inner {
+  padding: 65px 24px;
+}
+
+.returns-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--returns-red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.returns-hero h1 {
+  margin: 0 0 18px;
+  font-family: Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  color: #68231f;
+}
+
+.returns-hero h1 em {
+  color: #a64b37;
+  font-weight: 400;
+}
+
+.returns-hero p {
+  max-width: 620px;
+  margin: 0 auto;
+  color: var(--returns-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Main Container */
+.returns-container {
+  width: min(1150px, calc(100% - 32px));
+  margin: 48px auto 0;
+}
+
+/* Introduction */
+.returns-intro {
+  max-width: 750px;
+  margin: 0 auto 38px;
+  text-align: center;
+}
+
+.returns-small-label {
+  color: var(--returns-red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.returns-intro h2 {
+  margin: 12px 0 14px;
+  font-family: Georgia, serif;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  color: var(--returns-ink);
+}
+
+.returns-intro p {
+  color: var(--returns-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* Information Cards */
+.returns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.returns-card {
+  padding: 30px 25px;
+  border: 1px solid var(--returns-border);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(56, 37, 30, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.returns-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(56, 37, 30, 0.09);
+}
+
+.returns-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  border: 1px solid var(--returns-border);
+  border-radius: 14px;
+  background: #fff8ed;
+  color: var(--returns-red);
+  font-size: 24px;
+}
+
+.returns-card h3 {
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  color: var(--returns-ink);
+}
+
+.returns-card p {
+  margin: 0;
+  color: var(--returns-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* Return Assistance Process */
+.returns-process {
+  margin-top: 55px;
+}
+
+.returns-process-heading {
+  max-width: 700px;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.returns-process-heading h2 {
+  margin: 12px 0;
+  font-family: Georgia, serif;
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+}
+
+.returns-process-heading p {
+  color: var(--returns-muted);
+  line-height: 1.7;
+}
+
+.returns-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.returns-step {
+  padding: 25px 20px;
+  border: 1px solid var(--returns-border);
+  border-radius: 14px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.returns-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: #fff0e2;
+  color: var(--returns-red);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.returns-step h3 {
+  margin: 0 0 10px;
+  font-family: Georgia, serif;
+  font-size: 19px;
+}
+
+.returns-step p {
+  margin: 0;
+  color: var(--returns-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* My Orders Section */
+.returns-order {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 48px;
+  padding: 35px;
+  border: 1px solid var(--returns-border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f7e8d8, #fff8ed);
+}
+
+.returns-order h2 {
+  margin: 12px 0;
+  font-family: Georgia, serif;
+  font-size: 27px;
+}
+
+.returns-order p {
+  max-width: 570px;
+  margin: 0;
+  color: var(--returns-muted);
+  line-height: 1.7;
+}
+
+/* CTA Buttons */
+.returns-page .returns-order-btn,
+.returns-page .returns-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 25px;
+  border: 1px solid var(--returns-red);
+  border-radius: 9px;
+  background: var(--returns-red) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.returns-page .returns-order-btn:hover,
+.returns-page .returns-contact-btn:hover {
+  background: var(--returns-dark) !important;
+  border-color: var(--returns-dark);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.returns-page .returns-order-btn:focus-visible,
+.returns-page .returns-contact-btn:focus-visible {
+  outline: 2px solid var(--returns-red);
+  outline-offset: 3px;
+}
+
+/* Support Section */
+.returns-support {
+  margin-top: 35px;
+  padding: 42px 24px;
+  border: 1px solid var(--returns-border);
+  border-radius: 18px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.returns-support > svg {
+  color: var(--returns-red);
+  font-size: 32px;
+}
+
+.returns-support h2 {
+  margin: 15px 0 12px;
+  font-family: Georgia, serif;
+  font-size: 28px;
+}
+
+.returns-support p {
+  max-width: 520px;
+  margin: 0 auto 25px;
+  color: var(--returns-muted);
+  line-height: 1.7;
+}
+
+/* Disclaimer */
+.returns-note {
+  max-width: 850px;
+  margin: 30px auto 0;
+  color: var(--returns-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* Responsive Layout */
+@media (max-width: 992px) {
+  .returns-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .returns-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .returns-order {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .returns-hero {
+    width: calc(100% - 24px);
+    margin-top: 16px;
+  }
+
+  .returns-hero-inner {
+    padding: 45px 20px;
+  }
+
+  .returns-hero h1 {
+    font-size: 2rem;
+  }
+
+  .returns-container {
+    width: calc(100% - 24px);
+    margin-top: 32px;
+  }
+
+  .returns-grid,
+  .returns-steps {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .returns-card,
+  .returns-step {
+    padding: 24px 20px;
+  }
+
+  .returns-order {
+    padding: 26px 20px;
+  }
+
+  .returns-order h2 {
+    font-size: 24px;
+  }
+
+  .returns-page .returns-order-btn {
+    width: 100%;
+  }
+
+  .returns-support {
+    padding: 32px 20px;
+  }
+
+  .returns-support h2 {
+    font-size: 24px;
+  }
+}

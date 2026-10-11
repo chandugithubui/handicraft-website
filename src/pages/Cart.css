@@ -174,49 +174,66 @@
   color: var(--color-charcoal);
 }
 
-.cart-item-quantity {
-  display: flex;
+/* Cart Quantity Selector */
+.cart-page .cart-item-quantity {
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: 0;
   width: fit-content;
+  margin-top: 8px;
+  border: 1px solid #c99a4a;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
 }
 
-.quantity-btn {
-  display: flex;
+.cart-page .quantity-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: 1px solid #E0D5C5;
-  border-radius: var(--radius-md);
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #fff8ed;
+  color: #6e1717;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
-  color: var(--color-charcoal);
-  transition: all var(--transition-fast);
+  transition: background-color 0.2s ease;
 }
 
-.quantity-btn:hover:not(:disabled) {
-  background-color: var(--color-sand);
-  border-color: var(--color-primary);
+.cart-page .quantity-btn:hover:not(:disabled) {
+  background: #f1dfc4;
 }
 
-.quantity-btn:disabled {
+.cart-page .quantity-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.quantity-btn svg {
-  width: 16px;
-  height: 16px;
+.cart-page .quantity-btn:focus-visible {
+  outline: 2px solid #842b25;
+  outline-offset: -3px;
 }
 
-.quantity-value {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-charcoal);
-  min-width: 32px;
-  text-align: center;
+.cart-page .quantity-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.5;
+}
+
+.cart-page .quantity-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 38px;
+  padding: 0 8px;
+  font-weight: 700;
+  color: #6e1717;
+  background: #ffffff;
+  border-left: 1px solid #ead7c2;
+  border-right: 1px solid #ead7c2;
 }
 
 .cart-item-total {
@@ -321,9 +338,58 @@
   margin-top: var(--spacing-4);
 }
 
-.clear-cart-btn {
+/* Fix button visibility: scope to Cart page to prevent design-system.css override */
+.cart-page .btn-primary {
+  background-color: var(--color-terracotta) !important;
+  color: var(--color-white) !important;
+}
+
+.cart-page .btn-primary:hover:not(:disabled) {
+  background-color: var(--color-orange) !important;
+  transform: translateY(-1px);
+}
+
+.cart-page .btn-primary:focus:not(:disabled) {
+  outline: 2px solid var(--color-terracotta);
+}
+
+.cart-page .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cart-page .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Clear Cart Button */
+.cart-page .clear-cart-btn {
   width: 100%;
   margin-top: var(--spacing-3);
+  background-color: #800000 !important;
+  color: #ffffff !important;
+  border: 1px solid #800000 !important;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Hover */
+.cart-page .clear-cart-btn:hover:not(:disabled) {
+  background-color: #600000 !important;
+  border-color: #600000 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/* Keyboard focus */
+.cart-page .clear-cart-btn:focus-visible {
+  outline: 2px solid #800000;
+  outline-offset: 3px;
 }
 
 .continue-shopping {

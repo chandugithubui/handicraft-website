@@ -414,15 +414,23 @@ export const UserDashboard: React.FC = () => {
                         <span className="font-bold text-sm text-[#6E1717]">
                           ₹{(order.totalAmount || 0).toLocaleString()}
                         </span>
-                        <button
-                          onClick={() => {
-                            setExpandedOrderId(order._id);
-                            handleTabChange('orders');
-                          }}
-                          className="px-3 py-1.5 rounded-lg border border-[#e8d5c0] hover:border-[#6E1717] text-xs font-semibold text-[#6E1717] hover:bg-[#FFF8ED] transition"
-                        >
-                          Details
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setExpandedOrderId(order._id);
+                              handleTabChange('orders');
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-[#e8d5c0] hover:border-[#6E1717] text-xs font-semibold text-[#6E1717] hover:bg-[#FFF8ED] transition"
+                          >
+                            Details
+                          </button>
+                          <Link
+                            to={`/track-order?orderId=${order._id}`}
+                            className="px-3 py-1.5 rounded-lg bg-[#6E1717] hover:bg-[#4B0F0F] text-white text-xs font-semibold transition inline-flex items-center gap-1"
+                          >
+                            <FiTruck className="w-3 h-3" /> Track
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -501,20 +509,28 @@ export const UserDashboard: React.FC = () => {
                                 ₹{(order.totalAmount || 0).toLocaleString()}
                               </span>
                             </div>
-                            <button
-                              onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#e8d5c0] bg-white hover:bg-[#FFF8ED] text-xs font-semibold text-[#6E1717] transition"
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <FiChevronUp className="w-3.5 h-3.5" /> Less
-                                </>
-                              ) : (
-                                <>
-                                  <FiEye className="w-3.5 h-3.5" /> Details
-                                </>
-                              )}
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#e8d5c0] bg-white hover:bg-[#FFF8ED] text-xs font-semibold text-[#6E1717] transition"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <FiChevronUp className="w-3.5 h-3.5" /> Less
+                                  </>
+                                ) : (
+                                  <>
+                                    <FiEye className="w-3.5 h-3.5" /> Details
+                                  </>
+                                )}
+                              </button>
+                              <Link
+                                to={`/track-order?orderId=${order._id}`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#6E1717] hover:bg-[#4B0F0F] text-white text-xs font-semibold transition"
+                              >
+                                <FiTruck className="w-3.5 h-3.5" /> Track
+                              </Link>
+                            </div>
                           </div>
                         </div>
 

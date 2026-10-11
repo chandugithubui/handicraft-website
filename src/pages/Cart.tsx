@@ -82,51 +82,29 @@ const Cart = () => {
                     </div>
                   )}
 
-                  <div className="cart-item-quantity" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="cart-item-quantity">
                     <button
                       type="button"
                       className="quantity-btn"
                       onClick={() => updateQuantity(item._id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '6px',
-                        backgroundColor: '#FFF8ED',
-                        border: '1.5px solid #C99A4A',
-                        color: '#6E1717',
-                        cursor: item.quantity <= 1 ? 'not-allowed' : 'pointer',
-                        opacity: item.quantity <= 1 ? 0.4 : 1,
-                      }}
+                      aria-label={`Decrease quantity of ${item.name}`}
                     >
-                      <FiMinus style={{ width: '14px', height: '14px', color: '#6E1717', strokeWidth: 3 }} />
+                      <FiMinus />
                     </button>
-                    <span className="quantity-value" style={{ fontWeight: 700, color: '#6E1717', minWidth: '24px', textAlign: 'center' }}>
+
+                    <span className="quantity-value">
                       {item.quantity}
                     </span>
+
                     <button
                       type="button"
                       className="quantity-btn"
                       onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                      disabled={Boolean(item.stock && item.quantity >= item.stock)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '6px',
-                        backgroundColor: '#FFF8ED',
-                        border: '1.5px solid #C99A4A',
-                        color: '#6E1717',
-                        cursor: Boolean(item.stock && item.quantity >= item.stock) ? 'not-allowed' : 'pointer',
-                        opacity: Boolean(item.stock && item.quantity >= item.stock) ? 0.4 : 1,
-                      }}
+                      disabled={item.stock !== undefined && item.quantity >= item.stock}
+                      aria-label={`Increase quantity of ${item.name}`}
                     >
-                      <FiPlus style={{ width: '14px', height: '14px', color: '#6E1717', strokeWidth: 3 }} />
+                      <FiPlus />
                     </button>
                   </div>
 

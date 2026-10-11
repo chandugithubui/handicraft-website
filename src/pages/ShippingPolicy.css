@@ -1,0 +1,296 @@
+
+/* Shipping Policy Page */
+.shipping-page {
+  --shipping-red: #842b25;
+  --shipping-dark: #6e1717;
+  --shipping-cream: #fcf6ed;
+  --shipping-ink: #38251e;
+  --shipping-muted: #705c50;
+  --shipping-border: #ead7c2;
+
+  min-height: 100vh;
+  padding-bottom: 70px;
+  background: var(--shipping-cream);
+  color: var(--shipping-ink);
+}
+
+.shipping-page * {
+  box-sizing: border-box;
+}
+
+/* Hero Section */
+.shipping-hero {
+  width: min(1440px, calc(100% - 48px));
+  margin: 28px auto 0;
+  border: 1px solid var(--shipping-border);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f9f0e4, #fcf6ed, #f4ead8);
+  text-align: center;
+}
+
+.shipping-hero-inner {
+  padding: 65px 24px;
+}
+
+.shipping-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--shipping-red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.shipping-hero h1 {
+  margin: 0 0 18px;
+  font-family: Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  color: #68231f;
+}
+
+.shipping-hero h1 em {
+  color: #a64b37;
+  font-weight: 400;
+}
+
+.shipping-hero p {
+  max-width: 620px;
+  margin: 0 auto;
+  color: var(--shipping-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Main Container */
+.shipping-container {
+  width: min(1150px, calc(100% - 32px));
+  margin: 48px auto 0;
+}
+
+/* Introduction */
+.shipping-intro {
+  max-width: 750px;
+  margin: 0 auto 38px;
+  text-align: center;
+}
+
+.shipping-intro h2 {
+  margin: 0 0 14px;
+  font-family: Georgia, serif;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  color: var(--shipping-ink);
+}
+
+.shipping-intro p {
+  color: var(--shipping-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* Information Cards */
+.shipping-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.shipping-card {
+  padding: 30px 25px;
+  border: 1px solid var(--shipping-border);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(56, 37, 30, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.shipping-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(56, 37, 30, 0.09);
+}
+
+.shipping-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  border: 1px solid #ead7c2;
+  border-radius: 14px;
+  background: #fff8ed;
+  color: var(--shipping-red);
+  font-size: 24px;
+}
+
+.shipping-card h3 {
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  color: var(--shipping-ink);
+}
+
+.shipping-card p {
+  margin: 0;
+  color: var(--shipping-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* Tracking CTA */
+.shipping-tracking {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 45px;
+  padding: 35px;
+  border: 1px solid var(--shipping-border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f7e8d8, #fff8ed);
+}
+
+.shipping-small-label {
+  color: var(--shipping-red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.shipping-tracking h2 {
+  margin: 12px 0;
+  font-family: Georgia, serif;
+  font-size: 27px;
+}
+
+.shipping-tracking p {
+  max-width: 570px;
+  margin: 0;
+  color: var(--shipping-muted);
+  line-height: 1.7;
+}
+
+.shipping-page .shipping-track-btn,
+.shipping-page .shipping-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 25px;
+  border: 1px solid var(--shipping-red);
+  border-radius: 9px;
+  background: var(--shipping-red) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.shipping-page .shipping-track-btn:hover,
+.shipping-page .shipping-contact-btn:hover {
+  background: var(--shipping-dark) !important;
+  border-color: var(--shipping-dark);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/* Support Section */
+.shipping-support {
+  margin-top: 35px;
+  padding: 42px 24px;
+  border: 1px solid var(--shipping-border);
+  border-radius: 18px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.shipping-support > svg {
+  color: var(--shipping-red);
+  font-size: 32px;
+}
+
+.shipping-support h2 {
+  margin: 15px 0 12px;
+  font-family: Georgia, serif;
+  font-size: 28px;
+}
+
+.shipping-support p {
+  max-width: 520px;
+  margin: 0 auto 25px;
+  color: var(--shipping-muted);
+  line-height: 1.7;
+}
+
+/* Disclaimer */
+.shipping-note {
+  max-width: 850px;
+  margin: 30px auto 0;
+  color: var(--shipping-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .shipping-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shipping-tracking {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .shipping-hero {
+    width: calc(100% - 24px);
+    margin-top: 16px;
+  }
+
+  .shipping-hero-inner {
+    padding: 45px 20px;
+  }
+
+  .shipping-hero h1 {
+    font-size: 2rem;
+  }
+
+  .shipping-container {
+    width: calc(100% - 24px);
+    margin-top: 32px;
+  }
+
+  .shipping-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .shipping-card {
+    padding: 24px 20px;
+  }
+
+  .shipping-tracking {
+    padding: 26px 20px;
+  }
+
+  .shipping-tracking h2 {
+    font-size: 24px;
+  }
+
+  .shipping-page .shipping-track-btn {
+    width: 100%;
+  }
+
+  .shipping-support {
+    padding: 32px 20px;
+  }
+
+  .shipping-support h2 {
+    font-size: 24px;
+  }
+}

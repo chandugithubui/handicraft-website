@@ -252,24 +252,29 @@ router.put('/cart/sync', auth, async (req: Request, res: Response): Promise<Resp
       user.cart = [];
     }
 
-    // Merge items
+    // Merge items: use MAX quantity from local and server, NOT sum
+    // This prevents quantity duplication on navigation/refresh
     for (const item of items) {
       const pId = item._id || item.product;
       if (!pId) continue;
 
       const product = await Product.findById(pId);
-      if (!product) continue;
+
+      if (!product || product.stock <= 0) {
+        continue;
+      }
 
       const existing = user.cart.find((ci: any) => ci.product.toString() === pId.toString());
       if (existing) {
+        // Use the MAXIMUM quantity, not the sum
         existing.quantity = Math.min(
-          existing.quantity + (item.quantity || 1),
-          product.stock || 99
+          Math.max(existing.quantity, item.quantity || 1),
+          product.stock ?? 99
         );
       } else {
         user.cart.push({
           product: new mongoose.Types.ObjectId(pId),
-          quantity: Math.min(item.quantity || 1, product.stock || 99),
+          quantity: Math.min(item.quantity || 1, product.stock ?? 99),
         });
       }
     }

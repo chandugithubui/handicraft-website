@@ -154,7 +154,8 @@
   background: #e0e0e0;
 }
 
-.btn-primary {
+/* Wishlist Page Button Styles - Scoped to prevent global override */
+.wishlist-page .btn-primary {
   display: inline-block;
   background: #d4af37;
   color: white;
@@ -165,7 +166,7 @@
   transition: background 0.3s;
 }
 
-.btn-primary:hover {
+.wishlist-page .btn-primary:hover {
   background: #b8962e;
 }
 

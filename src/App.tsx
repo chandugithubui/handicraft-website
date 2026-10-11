@@ -25,6 +25,14 @@ import Orders from './pages/Orders';
 import ArtisanProfile from './pages/ArtisanProfile';
 import Wishlist from './pages/Wishlist';
 import UserDashboard from './pages/user/UserDashboard';
+import TrackOrder from './pages/TrackOrder';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import FAQ from './pages/FAQ';
+import ShippingPolicy from './pages/ShippingPolicy';
+import ReturnsPolicy from './pages/ReturnsPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
 
 // Admin Architecture
 import AdminGuard from './components/admin/AdminGuard';
@@ -120,7 +128,30 @@ const App = () => {
                   {/* Artisan Profile Route */}
                   <Route path="/artisan/:slug" element={<ArtisanProfile />} />
 
+                  {/* Track Order Route */}
+                  <Route path="/track-order" element={<TrackOrder />} />
+
+                  {/* Blog Routes */}
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+
+                  {/* FAQ Route */}
+                  <Route path="/faq" element={<FAQ />} />
+
+
+                  {/* Shipping Policy Route */}
+                  <Route path="/shipping" element={<ShippingPolicy />} />
                   {/* ── Admin Control Center (Permission-Gated Nested Routes) ── */}
+
+                  {/* Returns & Refunds Route */}
+                  <Route path="/returns" element={<ReturnsPolicy />} />
+
+                  {/* Privacy Policy Route */}
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+
+                  {/* Terms & Conditions Route */}
+                  <Route path="/terms" element={<TermsConditions />} />
+
                   <Route
                     path="/admin"
                     element={

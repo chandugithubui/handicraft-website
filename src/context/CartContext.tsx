@@ -17,7 +17,6 @@ import {
   saveItemToServer,
   removeItemFromServer,
   clearServerCart,
-  syncCartWithServer,
   CartItem,
 } from '../store/slices/cartSlice';
 import { useAuth } from './AuthContext';
@@ -49,11 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isAuthenticated) {
       if (!hasSyncedRef.current) {
         hasSyncedRef.current = true;
-        if (cartItems.length > 0) {
-          dispatch(syncCartWithServer(cartItems));
-        } else {
-          dispatch(fetchCartFromServer());
-        }
+        dispatch(fetchCartFromServer());
       }
     } else {
       hasSyncedRef.current = false;

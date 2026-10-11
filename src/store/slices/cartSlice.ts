@@ -38,7 +38,7 @@ const loadInitialCart = (): CartItem[] => {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed)) return parsed;
     }
-  } catch (e) {}
+  } catch (e) { }
   return [];
 };
 
@@ -46,7 +46,7 @@ const persistCart = (items: CartItem[]) => {
   try {
     localStorage.setItem('cart_cache', JSON.stringify(items));
     localStorage.setItem('cart', JSON.stringify(items));
-  } catch (e) {}
+  } catch (e) { }
 };
 
 const initialState: CartState = {
@@ -210,7 +210,7 @@ export const cartSlice = createSlice({
       try {
         localStorage.removeItem('cart_cache');
         localStorage.removeItem('cart');
-      } catch (e) {}
+      } catch (e) { }
     },
 
     clearStockAlert: (state) => {
@@ -229,10 +229,9 @@ export const cartSlice = createSlice({
     });
     builder.addCase(fetchCartFromServer.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.length > 0) {
-        state.items = action.payload;
-        persistCart(state.items);
-      }
+      state.error = null;
+      state.items = action.payload;
+      persistCart(state.items);
     });
     builder.addCase(fetchCartFromServer.rejected, (state, action) => {
       state.loading = false;
