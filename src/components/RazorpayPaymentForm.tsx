@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import {
   createRazorpayOrder,
@@ -36,77 +37,132 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
   onError,
   loading: parentLoading = false,
 }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(
+    () => Boolean((window as any).Razorpay)
+  );
+
   const [isProcessing, setIsProcessing] = useState(false);
+
   const paymentInProgressRef = useRef(false);
 
-  // Per-checkout idempotency key to prevent double submissions on network retries
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
   const idempotencyKeyRef = useRef<string>(
     typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
-      : `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      : `idemp_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 9)}`
   );
 
+  // Load Razorpay SDK without repeatedly removing the script
   useEffect(() => {
-    // Check if SDK already loaded
     if ((window as any).Razorpay) {
       setScriptLoaded(true);
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => setScriptLoaded(true);
-    script.onerror = () => {
-      console.error('Failed to load Razorpay SDK');
-      onError('Unable to load payment gateway. Please check your internet connection or ad-blocker.');
-    };
-    document.body.appendChild(script);
+    const scriptUrl =
+      'https://checkout.razorpay.com/v1/checkout.js';
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+    let script = document.querySelector<HTMLScriptElement>(
+      `script[src="${scriptUrl}"]`
+    );
+
+    let active = true;
+
+    const handleLoad = () => {
+      if (active) {
+        setScriptLoaded(true);
       }
     };
-  }, [onError]);
 
-  if (paymentInProgressRef.current) {
-    return;
-  }
+    const handleError = () => {
+      if (active) {
+        setScriptLoaded(false);
+        onErrorRef.current(
+          'Unable to load Razorpay. Please check your internet connection or ad-blocker.'
+        );
+      }
+    };
 
-  paymentInProgressRef.current = true;
+    if (!script) {
+      script = document.createElement('script');
+      script.src = scriptUrl;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
+    script.addEventListener('load', handleLoad);
+    script.addEventListener('error', handleError);
+
+    // Handle SDK already loaded by another component
+    if ((window as any).Razorpay) {
+      setScriptLoaded(true);
+    }
+
+    return () => {
+      active = false;
+      script?.removeEventListener('load', handleLoad);
+      script?.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  const resetProcessing = () => {
+    paymentInProgressRef.current = false;
+    setIsProcessing(false);
+  };
+
   const handlePayment = async () => {
-    // 1. Client-side form validation check
+    // Prevent duplicate payment requests
+    if (paymentInProgressRef.current || parentLoading) {
+      return;
+    }
+
+    // Validate shipping form
     if (!validateForm()) {
       return;
     }
 
+    // Check Razorpay SDK
     if (!scriptLoaded || !(window as any).Razorpay) {
-      onError('Payment gateway is still initializing. Please wait a moment and try again.');
+      onError(
+        'Payment gateway is still initializing. Please wait and try again.'
+      );
       return;
     }
 
+    paymentInProgressRef.current = true;
     setIsProcessing(true);
 
     try {
-      // 2. Create server-verified Razorpay order with actual cart items & coupon
+      // Prepare cart items for backend
       const formattedItems = cartItems.map((item) => ({
         product: item._id,
         quantity: item.quantity,
       }));
 
+      // Create Razorpay order on backend
       const orderData = await createRazorpayOrder({
         amount,
         items: formattedItems,
         couponCode: couponCode || null,
       });
 
-      if (!orderData || !orderData.orderId) {
-        throw new Error('Invalid order response received from payment gateway');
+      if (
+        !orderData ||
+        !orderData.orderId ||
+        !orderData.keyId
+      ) {
+        throw new Error(
+          'Invalid order response received from payment gateway'
+        );
       }
 
-      // 3. Configure Razorpay modal options
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
@@ -114,69 +170,107 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
         name: 'Handicraft Hub',
         description: `Order for ${cartItems.length} handcrafted item(s)`,
         order_id: orderData.orderId,
+
         prefill: {
-          name: shippingAddress.fullName || user?.name || user?.displayName || '',
+          name:
+            shippingAddress.fullName ||
+            user?.name ||
+            user?.displayName ||
+            '',
           email: user?.email || '',
           contact: shippingAddress.phone || '',
         },
+
         theme: {
           color: '#B3541E',
         },
+
         modal: {
           ondismiss: () => {
-            setIsProcessing(false);
+            resetProcessing();
           },
         },
+
         handler: async (response: {
           razorpay_order_id: string;
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
           try {
-            // 4. Atomic signature verification & order placement on backend
-            const result = await verifyAndCreateRazorpayOrder({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              items: formattedItems,
-              shippingAddress,
-              couponCode: couponCode || null,
-              idempotencyKey: idempotencyKeyRef.current,
-            });
+            // Verify payment signature and create order securely
+            const result =
+              await verifyAndCreateRazorpayOrder({
+                razorpay_order_id:
+                  response.razorpay_order_id,
+                razorpay_payment_id:
+                  response.razorpay_payment_id,
+                razorpay_signature:
+                  response.razorpay_signature,
+                items: formattedItems,
+                shippingAddress,
+                couponCode: couponCode || null,
+                idempotencyKey:
+                  idempotencyKeyRef.current,
+              });
 
             if (result && result.success) {
               onSuccess(result.order);
             } else {
-              onError(result?.message || 'Payment verification failed. Please contact support.');
+              onError(
+                result?.message ||
+                  'Payment verification failed. Please contact support.'
+              );
             }
           } catch (verificationError: any) {
-            console.error('Order verification error:', verificationError);
+            console.error(
+              'Order verification error:',
+              verificationError
+            );
+
             onError(
               verificationError.response?.data?.message ||
-              verificationError.message ||
-              'Payment was captured, but we encountered an issue finalizing your order. Our team will verify it shortly.'
+                verificationError.message ||
+                'Payment may have been captured, but order verification failed. Please contact support before retrying.'
             );
           } finally {
-            setIsProcessing(false);
+            resetProcessing();
           }
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', (failResponse: any) => {
-        setIsProcessing(false);
-        const reason = failResponse?.error?.description || failResponse?.error?.reason || 'Payment failed';
-        onError(`Payment failed: ${reason}`);
-      });
+      // Initialize Razorpay checkout
+      const razorpay = new (window as any).Razorpay(
+        options
+      );
 
-      rzp.open();
+      razorpay.on(
+        'payment.failed',
+        (failResponse: any) => {
+          resetProcessing();
+
+          const reason =
+            failResponse?.error?.description ||
+            failResponse?.error?.reason ||
+            'Payment failed';
+
+          onError(`Payment failed: ${reason}`);
+        }
+      );
+
+      // Open payment popup
+      razorpay.open();
     } catch (error: any) {
-      console.error('Razorpay initialization error:', error);
-      setIsProcessing(false);
+      console.error(
+        'Razorpay initialization error:',
+        error
+      );
+
+      resetProcessing();
+
       onError(
         error.response?.data?.message ||
-        error.message ||
-        'Unable to initialize payment. Please try again.'
+          error.message ||
+          'Unable to initialize payment. Please try again.'
       );
     }
   };
@@ -186,6 +280,7 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
   return (
     <div className="razorpay-payment-form">
       <Button
+        type="button"
         variant="primary"
         size="lg"
         className="w-100 place-order-btn"
@@ -200,12 +295,24 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
           gap: '8px',
         }}
       >
-        {isLoading && <Spinner animation="border" size="sm" />}
-        {isLoading ? 'Processing Payment…' : `Pay ₹${amount.toLocaleString()} with Razorpay`}
+        {isLoading && (
+          <Spinner animation="border" size="sm" />
+        )}
+
+        {isLoading
+          ? 'Processing Payment…'
+          : !scriptLoaded
+          ? 'Loading Razorpay…'
+          : `Pay ₹${amount.toLocaleString()} with Razorpay`}
       </Button>
+
       <div className="mt-3 text-center">
-        <small className="text-muted" style={{ fontSize: '12px' }}>
-          🔒 Secure 256-bit encrypted checkout via Razorpay (UPI, Credit/Debit Cards, Net Banking, Wallets)
+        <small
+          className="text-muted"
+          style={{ fontSize: '12px' }}
+        >
+          🔒 Secure checkout via Razorpay
+          (UPI, Credit/Debit Cards, Net Banking, Wallets)
         </small>
       </div>
     </div>
