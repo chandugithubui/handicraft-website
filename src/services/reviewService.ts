@@ -1,42 +1,44 @@
+
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+// Use centralized API configuration
+const API_URL = API_BASE_URL;
 
-const API_URL = getApiUrl();
-
+// Create a new product review
 export const createReview = async (reviewData, token) => {
-  const response = await axios.post(`${API_URL}/reviews`, reviewData, {
-    headers: {
-      Authorization: `Bearer ${token}`
+  const response = await axios.post(
+    `${API_URL}/reviews`,
+    reviewData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  });
+  );
+
   return response.data;
 };
 
+// Get reviews for a specific product
 export const getProductReviews = async (productId) => {
-  const response = await axios.get(`${API_URL}/reviews/product/${productId}`);
+  const response = await axios.get(
+    `${API_URL}/reviews/product/${productId}`
+  );
+
   return response.data;
 };
 
+// Delete a product review
 export const deleteReview = async (reviewId, token) => {
-  const response = await axios.delete(`${API_URL}/reviews/${reviewId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
+  const response = await axios.delete(
+    `${API_URL}/reviews/${reviewId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  });
+  );
+
   return response.data;
 };

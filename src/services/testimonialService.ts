@@ -1,16 +1,10 @@
-const getApiUrl = () => {
-  if (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
-  ) {
-    return 'http://localhost:5000/api';
-  }
 
-  return 'https://handicraft-website.onrender.com/api';
-};
+import { API_BASE_URL } from '../config/api.config';
 
-const API_URL = getApiUrl();
+// Use centralized API configuration
+const API_URL = API_BASE_URL;
 
+// Fetch all testimonials
 export const getTestimonials = async () => {
   const response = await fetch(`${API_URL}/testimonials`);
 

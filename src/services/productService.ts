@@ -1,25 +1,15 @@
+
 // src/services/productService.js
+
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+// Use the centralized API URL configuration.
+// Production: REACT_APP_API_URL from Vercel
+// Development: http://localhost:5000/api
+const API_URL = API_BASE_URL;
 
-const API_URL = getApiUrl();
-
-// Normalize backend product to frontend format (imageUrl -> image)
+// Normalize backend product image URLs
 const resolveProductImage = (imageUrl) => {
   if (!imageUrl) return '';
 
@@ -36,20 +26,16 @@ const resolveProductImage = (imageUrl) => {
     return imageUrl;
   }
 
-  // Images uploaded through backend
+  // Images uploaded through the backend
   if (imageUrl.startsWith('/uploads/')) {
-    const backendOrigin =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:5000'
-        : 'https://handicraft-website.onrender.com';
-
+    const backendOrigin = new URL(API_BASE_URL).origin;
     return `${backendOrigin}${imageUrl}`;
   }
 
   return imageUrl;
 };
 
+// Normalize backend product to frontend format
 const normalizeProduct = (product) => ({
   ...product,
   image: resolveProductImage(product.imageUrl || product.image),
@@ -73,7 +59,7 @@ export const getProducts = async (queryParams = '') => {
 
     return normalizedProducts;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error fetching products:', error);
     throw error;
   }
 };
@@ -95,7 +81,7 @@ export const getPaginatedProducts = async (queryParams = '') => {
       pagination: response.data.pagination
     };
   } catch (error) {
-    console.error("Error fetching paginated products:", error);
+    console.error('Error fetching paginated products:', error);
     throw error;
   }
 };
@@ -106,7 +92,7 @@ export const getProductById = async (productId) => {
     const response = await axios.get(`${API_URL}/products/${productId}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching product", error);
+    console.error('Error fetching product', error);
     return null;
   }
 };
@@ -115,31 +101,38 @@ export const getProductById = async (productId) => {
 export const addProduct = async (productData) => {
   try {
     const response = await axios.post(`${API_URL}/products`, productData);
-    return response.data;  // Return the added product data
+    return response.data;
   } catch (error) {
-    console.error("Error adding product", error);
-    return null;  // Return null if there's an error
+    console.error('Error adding product', error);
+    return null;
   }
 };
 
 // Edit an existing product
 export const editProduct = async (productId, productData) => {
   try {
-    const response = await axios.put(`${API_URL}/products/${productId}`, productData);
-    return response.data;  // Return the updated product data
+    const response = await axios.put(
+      `${API_URL}/products/${productId}`,
+      productData
+    );
+
+    return response.data;
   } catch (error) {
-    console.error("Error editing product", error);
-    return null;  // Return null if there's an error
+    console.error('Error editing product', error);
+    return null;
   }
 };
 
 // Delete a product
 export const deleteProduct = async (productId) => {
   try {
-    const response = await axios.delete(`${API_URL}/products/${productId}`);
-    return response.data;  // Return the response from the server (e.g., success message)
+    const response = await axios.delete(
+      `${API_URL}/products/${productId}`
+    );
+
+    return response.data;
   } catch (error) {
-    console.error("Error deleting product", error);
-    return null;  // Return null if there's an error
+    console.error('Error deleting product', error);
+    return null;
   }
 };

@@ -1,22 +1,9 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
-// Detect environment and set API URL
-const getApiUrl = () => {
-  // Check if we're in local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-  // Check if we're in production (Vercel deployment)
-  if (window.location.hostname === 'handicraft-website-fyao.vercel.app' ||
-      window.location.hostname.includes('vercel.app')) {
-    return 'https://handicraft-website.onrender.com/api';
-  }
-  // Fallback to environment variable or localhost
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+const API_URL = API_BASE_URL;
 
-const API_URL = getApiUrl();
+// ── Admin Statistics ─────────────────────────────────────────
 
 export const getAdminStats = async (token) => {
   const response = await axios.get(`${API_URL}/admin/stats`, {
@@ -24,8 +11,11 @@ export const getAdminStats = async (token) => {
       Authorization: `Bearer ${token}`
     }
   });
+
   return response.data;
 };
+
+// ── Orders ───────────────────────────────────────────────────
 
 export const getAllOrders = async (token) => {
   const response = await axios.get(`${API_URL}/admin/orders`, {
@@ -33,8 +23,11 @@ export const getAllOrders = async (token) => {
       Authorization: `Bearer ${token}`
     }
   });
+
   return response.data;
 };
+
+// ── Users ────────────────────────────────────────────────────
 
 export const getAllUsers = async (token) => {
   const response = await axios.get(`${API_URL}/admin/users`, {
@@ -42,8 +35,11 @@ export const getAllUsers = async (token) => {
       Authorization: `Bearer ${token}`
     }
   });
+
   return response.data;
 };
+
+// ── Order Status ─────────────────────────────────────────────
 
 export const updateOrderStatus = async (orderId, orderStatus, token) => {
   const response = await axios.patch(
@@ -55,8 +51,11 @@ export const updateOrderStatus = async (orderId, orderStatus, token) => {
       }
     }
   );
+
   return response.data;
 };
+
+// ── Contacts ─────────────────────────────────────────────────
 
 export const getAllContacts = async (token) => {
   const response = await axios.get(`${API_URL}/admin/contacts`, {
@@ -64,52 +63,81 @@ export const getAllContacts = async (token) => {
       Authorization: `Bearer ${token}`
     }
   });
+
   return response.data;
 };
 
-// ── Products ──────────────────────────────────────────────────────────────────
+// ── Products ─────────────────────────────────────────────────
 
 export const getAdminProducts = async (token) => {
   const response = await axios.get(`${API_URL}/products?limit=100`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
 
   return response.data.products;
 };
 
 export const createAdminProduct = async (productData, token) => {
-  const response = await axios.post(`${API_URL}/products`, productData, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await axios.post(
+    `${API_URL}/products`,
+    productData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
   return response.data;
 };
 
 export const updateAdminProduct = async (id, productData, token) => {
-  const response = await axios.put(`${API_URL}/products/${id}`, productData, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await axios.put(
+    `${API_URL}/products/${id}`,
+    productData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
   return response.data;
 };
 
 export const deleteAdminProduct = async (id, token) => {
-  const response = await axios.delete(`${API_URL}/products/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await axios.delete(
+    `${API_URL}/products/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
   return response.data;
 };
 
-// ── Image upload ──────────────────────────────────────────────────────────────
+// ── Image Upload ─────────────────────────────────────────────
 
 export const uploadProductImage = async (file, token) => {
   const formData = new FormData();
+
   formData.append('image', file);
-  // Do NOT set Content-Type manually — axios must set it automatically
-  // so it includes the correct multipart boundary parameter.
-  const response = await axios.post(`${API_URL}/upload`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`
-      // Content-Type intentionally omitted: axios sets multipart/form-data + boundary
+
+  // Do not set Content-Type manually.
+  // Axios automatically sets the multipart boundary.
+  const response = await axios.post(
+    `${API_URL}/upload`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  });
-  return response.data; // { imageUrl: '/uploads/<filename>' }
+  );
+
+  return response.data;
 };

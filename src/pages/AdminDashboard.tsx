@@ -9,6 +9,8 @@ import {
 import './AdminDashboard.css';
 import { getAdminCoupons, createCoupon, updateCoupon, deleteCoupon } from '../services/couponService';
 import { http } from '../services/apiClient';
+import { API_BASE_URL } from '../config/api.config';
+
 const AdminDashboard = () => {
   const { user, isAuthenticated, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -150,13 +152,8 @@ const AdminDashboard = () => {
     // Already an absolute URL — use as-is
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     // Public folder images (/images/...) — served by the React dev/build server
-    if (url.startsWith('/images/')) return url;
-    // Uploaded files (/uploads/...) — served by the Express backend
     if (url.startsWith('/uploads/')) {
-      const backendOrigin =
-        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:5000'
-          : 'https://handicraft-website.onrender.com';
+      const backendOrigin = new URL(API_BASE_URL).origin;
       return `${backendOrigin}${url}`;
     }
     // Fallback: return unchanged
@@ -953,7 +950,7 @@ const AdminDashboard = () => {
 
                           </tr>
                         ))
-                        )}
+                      )}
                     </tbody>
                   </table>
                 </div>
