@@ -66,6 +66,7 @@ const parseAllowedOrigins = (): string[] => {
     ...customList,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    // Always include production Vercel domain
     'https://handicraft-website.vercel.app',
   ].filter(Boolean) as string[];
 

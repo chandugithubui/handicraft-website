@@ -49,13 +49,23 @@ export const signRefreshToken = (payload: JwtRefreshPayload): string => {
  * Throws UnauthorizedError if verification fails.
  */
 export const verifyAccessToken = (token: string): JwtAccessPayload => {
+  const primarySecret = googleOAuthConfig.jwt.accessSecret || process.env.JWT_SECRET || '';
   try {
     const decoded = jwt.verify(
       token,
-      googleOAuthConfig.jwt.accessSecret
+      primarySecret
     ) as JwtAccessPayload;
     return decoded;
   } catch (err: unknown) {
+    const fallbackSecret = process.env.JWT_SECRET;
+    if (fallbackSecret && fallbackSecret !== primarySecret) {
+      try {
+        const decoded = jwt.verify(token, fallbackSecret) as JwtAccessPayload;
+        return decoded;
+      } catch {
+        // Fall through to error handling
+      }
+    }
     if (err instanceof jwt.TokenExpiredError) {
       throw new UnauthorizedError('Access token has expired.');
     }

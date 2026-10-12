@@ -183,22 +183,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let alive = true;
 
     const restore = async () => {
-      // Strip oauth success query param if present (from redirect flow)
+      // ── Process OAuth redirect query params ───────────────────────────────
       const params = new URLSearchParams(window.location.search);
       const isOAuthSuccess = params.get('oauth') === 'success';
-      if (isOAuthSuccess) {
+      const exchangeCode = params.get('code') || params.get('oauth_code');
+
+      // Purge any legacy refreshToken from localStorage
+      localStorage.removeItem('refreshToken');
+
+      // Immediately sanitize URL so code and oauth params are removed from address bar & history
+      if (isOAuthSuccess || exchangeCode) {
         params.delete('oauth');
+        params.delete('code');
+        params.delete('oauth_code');
+        params.delete('token');
+        params.delete('refreshToken');
         const clean = params.size ? `?${params.toString()}` : '';
         window.history.replaceState({}, '', window.location.pathname + clean);
       }
 
-      // ── Strategy 1: cookie session via /me (prioritized after OAuth redirect) ──
-      // After Google OAuth redirect, we need to attempt /me first with a retry
-      // to account for cookie transmission timing
+      // If we received a single-use exchange code, redeem it via POST
+      if (exchangeCode) {
+        try {
+          const { exchangeOAuthCode } = await import('../services/authService');
+          const exchangeRes = await exchangeOAuthCode(exchangeCode);
+          const exchangedToken = exchangeRes?.token ?? exchangeRes?.tokens?.accessToken ?? null;
+          const exchangedUser = exchangeRes?.user ?? null;
+
+          if (exchangedToken && exchangedUser && alive) {
+            localStorage.setItem('token', exchangedToken);
+            localStorage.setItem('user', JSON.stringify(exchangedUser));
+            setToken(exchangedToken);
+            setUser(exchangedUser);
+            scheduleRefresh(exchangedToken);
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.error('[AuthContext] Failed to redeem OAuth exchange code:', err);
+        }
+      }
+
+      // ── Strategy 1: Profile session via /me (uses Bearer token or cookies) ──
       try {
         const { getCurrentUser } = await import('../services/authService');
         
-        // For OAuth success, retry /me up to 3 times with delays to handle cookie timing
         let res: any = null;
         const maxRetries = isOAuthSuccess ? 3 : 1;
         
@@ -207,23 +236,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             res = await getCurrentUser();
             if (res?.user) break;
             
-            // If no user and this is OAuth, wait before retry
-            if (isOAuthSuccess && attempt < maxRetries - 1) {
+            if (attempt < maxRetries - 1) {
               await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
             }
           } catch (err) {
-            // If last attempt failed, throw to fall through to localStorage
             if (attempt === maxRetries - 1) throw err;
-            
-            // Wait before retry on OAuth
-            if (isOAuthSuccess) {
-              await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
-            }
+            await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
           }
         }
 
         if (res?.user && alive) {
-          const freshToken = res?.tokens?.accessToken ?? res?.token ?? null;
+          const freshToken = res?.tokens?.accessToken ?? res?.token ?? localStorage.getItem('token');
 
           setUser(res.user);
           localStorage.setItem('user', JSON.stringify(res.user));
@@ -238,7 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
       } catch {
-        // /me failed — no cookie session, try localStorage below
+        // /me failed — fallback to localStorage validation below
       }
 
       // ── Strategy 2: valid localStorage token ──────────────────────────────
@@ -253,9 +276,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(parsedUser);
             scheduleRefresh(storedToken);
           } catch {
-            LOCAL_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
-            dispatch(clearCart());
-            dispatch(clearWishlist());
+            const payload = decodeJwt(storedToken);
+            if (payload?.userId || payload?.id) {
+              const fallbackUser: AuthUser = {
+                id: payload.userId || payload.id,
+                name: payload.name || payload.email?.split('@')[0] || 'User',
+                email: payload.email || '',
+                role: payload.role || 'user',
+              };
+              setToken(storedToken);
+              setUser(fallbackUser);
+              localStorage.setItem('user', JSON.stringify(fallbackUser));
+              scheduleRefresh(storedToken);
+            } else {
+              LOCAL_STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
+              dispatch(clearCart());
+              dispatch(clearWishlist());
+            }
           }
         }
       } else if (storedToken) {

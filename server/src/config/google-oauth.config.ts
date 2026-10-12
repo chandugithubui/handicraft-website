@@ -45,6 +45,7 @@ const parseAllowedRedirectUris = (): string[] => {
     'http://127.0.0.1:3000',
     process.env.FRONTEND_URL || '',
     process.env.ALLOWED_ORIGIN || '',
+    'https://handicraft-website.vercel.app',
   ].filter(Boolean);
 
   const raw = process.env.ALLOWED_REDIRECT_URIS;
@@ -67,14 +68,20 @@ const hasGoogleClientId = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLI
 const hasGoogleClientSecret = process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CLIENT_SECRET.trim() !== '';
 
 if (hasGoogleClientId || hasGoogleClientSecret) {
-  // If any Google OAuth credential is set, all are required
-  const googleSecrets = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
+  // If any Google OAuth credential is set, client ID, client secret, and at least one JWT secret are required
+  const googleSecrets = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
   const missingGoogleSecrets = googleSecrets.filter(key => !process.env[key] || process.env[key]!.trim() === '');
   
   if (missingGoogleSecrets.length > 0) {
     throw new Error(
       `[Config] Missing required Google OAuth secrets: ${missingGoogleSecrets.join(', ')}. ` +
       `Either provide all Google OAuth credentials or remove them to disable Google OAuth.`
+    );
+  }
+
+  if (!process.env.JWT_ACCESS_SECRET && !process.env.JWT_SECRET) {
+    throw new Error(
+      `[Config] Missing JWT secret for Google OAuth. Please set JWT_ACCESS_SECRET or JWT_SECRET.`
     );
   }
 }
@@ -95,8 +102,8 @@ export const googleOAuthConfig: IGoogleOAuthConfig = {
   allowedRedirectUris: allowedRedirects,
 
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET || '',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || '',
+    accessSecret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || '',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || '',
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     accessExpiresInSeconds: 15 * 60, // 15 minutes in seconds
@@ -149,7 +156,9 @@ export const googleOAuthConfig: IGoogleOAuthConfig = {
    * Returns an allowlisted redirect URI or falls back to the primary frontend URL.
    */
   getSafeRedirectUri: (uri?: string | null): string => {
-    const fallback = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const fallback =
+      process.env.FRONTEND_URL ||
+      (isProduction ? 'https://handicraft-website.vercel.app' : 'http://localhost:3000');
     if (!uri) return fallback;
     if (googleOAuthConfig.validateRedirectUri(uri)) {
       return uri;

@@ -32,6 +32,22 @@ export const extractToken = (req: Request): string | null => {
   return (req as any).cookies?.[COOKIE_NAME] ?? null;
 };
 
+const verifyTokenWithFallback = (token: string): AuthenticatedUserPayload => {
+  try {
+    return jwt.verify(token, env.JWT_SECRET) as AuthenticatedUserPayload;
+  } catch (err: any) {
+    const accessSecret = process.env.JWT_ACCESS_SECRET;
+    if (accessSecret && accessSecret !== env.JWT_SECRET) {
+      try {
+        return jwt.verify(token, accessSecret) as AuthenticatedUserPayload;
+      } catch {
+        // Throw original error below
+      }
+    }
+    throw err;
+  }
+};
+
 /**
  * Ensures request has a valid JWT token.
  */
@@ -46,7 +62,7 @@ export const auth = (req: Request, res: Response, next: NextFunction): void => {
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as AuthenticatedUserPayload;
+    const decoded = verifyTokenWithFallback(token);
     (req as any).user = decoded;
     next();
   } catch (err: any) {
@@ -77,7 +93,7 @@ export const adminAuth = (req: Request, res: Response, next: NextFunction): void
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as AuthenticatedUserPayload;
+    const decoded = verifyTokenWithFallback(token);
 
     if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
       res.status(403).json({

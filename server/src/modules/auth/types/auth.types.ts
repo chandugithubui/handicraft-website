@@ -75,4 +75,5 @@ export interface OAuthStateData {
 export interface AuthSuccessResult {
   user: PublicUser;
   tokens: TokenPair;
+  returnTo?: string;
 }

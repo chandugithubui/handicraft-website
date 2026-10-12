@@ -36,6 +36,17 @@ router.get(
   googleAuthController.handleGoogleCallback
 );
 
+/**
+ * @route   POST /api/auth/exchange-code
+ * @desc    Exchange short-lived single-use authorization code for session
+ * @access  Public (Rate limited)
+ */
+router.post(
+  '/exchange-code',
+  oauthRateLimiter,
+  googleAuthController.exchangeCode
+);
+
 // ── Session & Token Endpoints ─────────────────────────────────────────────────
 
 /**

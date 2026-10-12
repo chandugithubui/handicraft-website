@@ -141,3 +141,13 @@ export const refreshTokens = async () => {
   return data;
 };
 
+/**
+ * Exchanges a single-use authorization code for an authenticated session.
+ * @param {string} code - Single-use exchange code from OAuth redirect
+ * @returns {{ success: boolean, user: object, token: string, tokens: object }}
+ */
+export const exchangeOAuthCode = async (code: string) => {
+  const { data } = await authApi.post('/exchange-code', { code });
+  return data;
+};
+

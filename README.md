@@ -10,10 +10,10 @@ Built using modern web technologies to provide a seamless shopping experience.
 ## 🚀 Live Demo
 
 🌐 Frontend:
-https://handicraft-website-sgak-git-main-chandan-sahoos-projects.vercel.app/
+https://handicraft-website.vercel.app/
 
 🔧 Backend API:
-https://handicraft-website.onrender.com/
+https://handicraft-website-1.onrender.com/
 
 ---
 
@@ -137,7 +137,7 @@ This application features a production-grade **Google OAuth 2.0 Authorization Co
      - Your production frontend URL (e.g., `https://handicraft-website-*.vercel.app`)
    - Under **Authorized redirect URIs**, add:
      - `http://localhost:5000/api/auth/google/callback`
-     - Your production backend callback URL (e.g., `https://handicraft-website.onrender.com/api/auth/google/callback`)
+     - Your production backend callback URL (e.g., `https://handicraft-website-1.onrender.com/api/auth/google/callback`)
 5. Copy the **Client ID** and **Client Secret**.
 
 ### 2. Environment Variables (.env)

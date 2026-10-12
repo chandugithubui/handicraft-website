@@ -12,7 +12,12 @@ export const corsOptions: CorsOptions = {
     // Allow non-browser requests (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
 
-    if (env.ALLOWED_ORIGINS.includes(origin)) {
+    const normalized = origin.replace(/\/$/, '');
+    const isExplicitlyAllowed = env.ALLOWED_ORIGINS.some(
+      (allowed) => allowed === origin || allowed === normalized
+    );
+
+    if (isExplicitlyAllowed) {
       return callback(null, true);
     }
 

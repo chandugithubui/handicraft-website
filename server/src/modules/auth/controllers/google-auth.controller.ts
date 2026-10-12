@@ -17,6 +17,7 @@ import { validateCallbackQuery } from '../dto/google-auth.dto';
 import { googleAuthService } from '../services/google-auth.service';
 import { TokenPair } from '../types/auth.types';
 import { verifyRefreshToken } from '../utils/token.util';
+import { extractAccessToken } from '../middleware/auth.middleware';
 
 
 // ── Cookie Option Builders ───────────────────────────────────────────────────
@@ -103,6 +104,10 @@ export class GoogleAuthController {
     try {
       const returnTo = typeof req.query.returnTo === 'string' ? req.query.returnTo : undefined;
 
+      if (returnTo && !googleOAuthConfig.validateRedirectUri(returnTo)) {
+        throw new RedirectUriNotAllowedError();
+      }
+
       // Validate or fall back safely to configured frontend URL
       const safeReturnTo = googleOAuthConfig.getSafeRedirectUri(returnTo);
 
@@ -141,7 +146,7 @@ export class GoogleAuthController {
       const savedNonce = req.cookies?.[googleOAuthConfig.cookies.oauthNonceName];
       const savedReturnTo = req.cookies?.[googleOAuthConfig.cookies.oauthRedirectName];
 
-      const safeReturnTo = googleOAuthConfig.getSafeRedirectUri(savedReturnTo);
+      let safeReturnTo = googleOAuthConfig.getSafeRedirectUri(savedReturnTo);
 
       // Always clear state cookies regardless of outcome
       clearStateCookies(res);
@@ -166,6 +171,10 @@ export class GoogleAuthController {
         savedNonce: savedNonce || '',
       });
 
+      safeReturnTo = googleOAuthConfig.getSafeRedirectUri(
+        result.returnTo || savedReturnTo
+      );
+
       // Write secure httpOnly authentication cookies
       setAuthCookies(res, result.tokens);
 
@@ -184,10 +193,57 @@ export class GoogleAuthController {
         return;
       }
 
-      // Browser redirect to frontend with success query param
+      // Generate a short-lived, single-use exchange code for secure cross-domain handoff
+      const exchangeCode = googleAuthService.createExchangeCode({
+        user: result.user,
+        tokens: result.tokens,
+      });
+
+      // Browser redirect to frontend with ONLY single-use exchange code (NO TOKENS IN URL)
       const targetUrl = new URL(safeReturnTo);
       targetUrl.searchParams.set('oauth', 'success');
+      targetUrl.searchParams.set('code', exchangeCode);
       res.redirect(targetUrl.toString());
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * POST /api/auth/exchange-code
+   * Exchanges a single-use authorization code for an authenticated session.
+   */
+  public exchangeCode = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const code = typeof req.body?.code === 'string' ? req.body.code : '';
+      if (!code) {
+        throw new UnauthorizedError('Authorization exchange code is required.');
+      }
+
+      const redeemed = googleAuthService.redeemExchangeCode(code);
+      if (!redeemed) {
+        throw new UnauthorizedError('Invalid or expired authorization code.');
+      }
+
+      // Write secure httpOnly authentication cookies
+      setAuthCookies(res, redeemed.tokens);
+
+      // Return user profile and short-lived access token.
+      // Refresh token is NOT stored in response body or localStorage.
+      res.json({
+        success: true,
+        message: 'Authentication successful.',
+        user: redeemed.user,
+        token: redeemed.tokens.accessToken,
+        tokens: {
+          accessToken: redeemed.tokens.accessToken,
+          expiresIn: redeemed.tokens.expiresIn,
+        },
+      });
     } catch (err) {
       next(err);
     }
@@ -288,10 +344,13 @@ export class GoogleAuthController {
       }
 
       const user = await googleAuthService.getUserProfile(req.user.userId);
+      const currentToken = extractAccessToken(req);
 
       res.json({
         success: true,
         user,
+        token: currentToken || undefined,
+        tokens: currentToken ? { accessToken: currentToken } : undefined,
       });
     } catch (err) {
       next(err);

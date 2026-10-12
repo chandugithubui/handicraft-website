@@ -7,6 +7,7 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { User, IUserDocument } from '../models/user.model';
 import RoleModel from '../models/role.model';
 import sendEmail from '../utils/sendEmail';
@@ -35,10 +36,21 @@ export const resolvePermissions = async (
   roleName: string,
   customPermissions: string[] = []
 ): Promise<string[]> => {
-  const roleDoc = await RoleModel.findOne({ name: roleName.toLowerCase() }).lean();
-  const rolePerms: string[] = roleDoc?.permissions ?? [];
-  // Merge, deduplicate
-  return [...new Set([...rolePerms, ...customPermissions])];
+  if (roleName.toLowerCase() === 'super_admin') {
+    return ['*'];
+  }
+
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return [...new Set(customPermissions)];
+  }
+
+  try {
+    const roleDoc = await RoleModel.findOne({ name: roleName.toLowerCase() }).lean();
+    const rolePerms: string[] = roleDoc?.permissions ?? [];
+    return [...new Set([...rolePerms, ...customPermissions])];
+  } catch {
+    return [...new Set(customPermissions)];
+  }
 };
 
 /**

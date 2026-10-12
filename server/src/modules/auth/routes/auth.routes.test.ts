@@ -91,6 +91,7 @@ describe('Auth Routes Integration Tests', () => {
       };
 
       (googleAuthService.handleGoogleCallback as jest.Mock).mockResolvedValue(mockResult);
+      (googleAuthService.createExchangeCode as jest.Mock).mockReturnValue('mock-exchange-code-123');
 
       const response = await request(app)
         .get('/api/auth/google/callback?code=valid-code&state=cookie-state')
@@ -103,6 +104,9 @@ describe('Auth Routes Integration Tests', () => {
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('http://localhost:3000');
       expect(response.headers.location).toContain('oauth=success');
+      expect(response.headers.location).toContain('code=mock-exchange-code-123');
+      expect(response.headers.location).not.toContain('token=');
+      expect(response.headers.location).not.toContain('refreshToken=');
 
       const cookies = response.headers['set-cookie'] as unknown as string[];
       expect(cookies.some((c) => c.includes(googleOAuthConfig.cookies.accessTokenName))).toBe(true);
@@ -140,6 +144,68 @@ describe('Auth Routes Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.user.email).toBe(mockResult.user.email);
       expect(response.body.tokens.accessToken).toBe(mockResult.tokens.accessToken);
+    });
+  });
+
+  describe('POST /api/auth/exchange-code', () => {
+    it('should reject missing or empty authorization exchange code with 401', async () => {
+      const response = await request(app)
+        .post('/api/auth/exchange-code')
+        .send({})
+        .expect(401);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('should reject invalid or expired authorization exchange code with 401', async () => {
+      (googleAuthService.redeemExchangeCode as jest.Mock).mockReturnValue(null);
+
+      const response = await request(app)
+        .post('/api/auth/exchange-code')
+        .send({ code: 'expired-or-invalid-code' })
+        .expect(401);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('should exchange valid code for user profile and token, set httpOnly cookies, and not expose refreshToken in body', async () => {
+      const mockExchangePayload = {
+        user: {
+          id: 'user-001',
+          name: 'Artisan User',
+          email: 'artisan@handicrafthub.com',
+          role: 'user',
+          avatar: null,
+          authProviders: ['google'],
+        },
+        tokens: {
+          accessToken: 'exchange-access-token',
+          refreshToken: 'exchange-refresh-token',
+          expiresIn: 900,
+        },
+      };
+
+      (googleAuthService.redeemExchangeCode as jest.Mock).mockReturnValue(mockExchangePayload);
+
+      const response = await request(app)
+        .post('/api/auth/exchange-code')
+        .send({ code: 'valid-exchange-code' })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.user.email).toBe('artisan@handicrafthub.com');
+      expect(response.body.token).toBe('exchange-access-token');
+      expect(response.body.tokens.accessToken).toBe('exchange-access-token');
+      // Refresh token must NOT be in JSON body
+      expect(response.body.tokens.refreshToken).toBeUndefined();
+      expect(response.body.refreshToken).toBeUndefined();
+
+      // Cookies must be set
+      const cookies = response.headers['set-cookie'] as unknown as string[];
+      expect(cookies.some((c) => c.includes(googleOAuthConfig.cookies.accessTokenName))).toBe(true);
+      expect(cookies.some((c) => c.includes(googleOAuthConfig.cookies.refreshTokenName))).toBe(true);
     });
   });
 

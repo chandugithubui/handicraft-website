@@ -33,7 +33,61 @@ import {
 import { resolvePermissions } from '../../../services/auth.service';
 
 export class GoogleAuthService {
+  private static stateStore = new Map<
+    string,
+    { nonce: string; returnTo: string; expiresAt: number }
+  >();
+
+  private static exchangeStore = new Map<
+    string,
+    { user: PublicUser; tokens: TokenPair; expiresAt: number }
+  >();
+
   constructor(private strategy: GoogleOAuthStrategy = googleStrategy) {}
+
+  /**
+   * Generates a single-use, 60-second exchange code to securely pass authentication
+   * tokens to the client via a POST exchange rather than URL parameters.
+   */
+  public createExchangeCode(data: { user: PublicUser; tokens: TokenPair }): string {
+    const code = generateRandomToken(32);
+
+    // Clean up expired entries if store grows
+    if (GoogleAuthService.exchangeStore.size > 200) {
+      const now = Date.now();
+      for (const [key, val] of GoogleAuthService.exchangeStore.entries()) {
+        if (val.expiresAt < now) {
+          GoogleAuthService.exchangeStore.delete(key);
+        }
+      }
+    }
+
+    GoogleAuthService.exchangeStore.set(code, {
+      user: data.user,
+      tokens: data.tokens,
+      expiresAt: Date.now() + 60 * 1000, // 60 seconds TTL
+    });
+
+    return code;
+  }
+
+  /**
+   * Redeems and atomically invalidates a single-use authorization exchange code.
+   */
+  public redeemExchangeCode(code: string): { user: PublicUser; tokens: TokenPair } | null {
+    if (!code) return null;
+    const entry = GoogleAuthService.exchangeStore.get(code);
+    if (!entry) return null;
+
+    // Single-use: delete immediately to prevent replay attacks
+    GoogleAuthService.exchangeStore.delete(code);
+
+    if (entry.expiresAt < Date.now()) {
+      return null;
+    }
+
+    return { user: entry.user, tokens: entry.tokens };
+  }
 
   /**
    * Initializes the OAuth 2.0 authorization code flow.
@@ -50,6 +104,23 @@ export class GoogleAuthService {
     const safeReturnTo = googleOAuthConfig.getSafeRedirectUri(returnTo);
     const url = this.strategy.generateAuthUrl(state, nonce);
 
+    // Clean up expired entries if store grows
+    if (GoogleAuthService.stateStore.size > 200) {
+      const now = Date.now();
+      for (const [key, val] of GoogleAuthService.stateStore.entries()) {
+        if (val.expiresAt < now) {
+          GoogleAuthService.stateStore.delete(key);
+        }
+      }
+    }
+
+    // Cache state server-side to survive third-party cookie blocking
+    GoogleAuthService.stateStore.set(state, {
+      nonce,
+      returnTo: safeReturnTo,
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes TTL
+    });
+
     return { url, state, nonce, safeReturnTo };
   }
 
@@ -65,8 +136,28 @@ export class GoogleAuthService {
   }): Promise<AuthSuccessResult> {
     const { code, state, savedState, savedNonce } = params;
 
+    // Check cached state (survives third-party cookie stripping in Incognito/mobile)
+    const cached = state ? GoogleAuthService.stateStore.get(state) : undefined;
+    if (state && cached) {
+      GoogleAuthService.stateStore.delete(state);
+    }
+
+    let isStateValid = false;
+    let resolvedNonce = savedNonce;
+    let resolvedReturnTo = cached?.returnTo;
+
+    if (state && savedState && state === savedState) {
+      isStateValid = true;
+      if (!resolvedNonce && cached) {
+        resolvedNonce = cached.nonce;
+      }
+    } else if (cached && cached.expiresAt > Date.now()) {
+      isStateValid = true;
+      resolvedNonce = resolvedNonce || cached.nonce;
+    }
+
     // 1. Strict CSRF State parameter validation
-    if (!state || !savedState || state !== savedState) {
+    if (!isStateValid) {
       console.warn('[GoogleAuthService] CSRF state parameter validation failed.');
       throw new InvalidStateError();
     }
@@ -80,7 +171,7 @@ export class GoogleAuthService {
     // 3. Server-side validation of ID token signature, audience, and nonce
     const googleProfile = await this.strategy.verifyIdToken(
       googleTokens.id_token,
-      savedNonce
+      resolvedNonce
     );
 
     // 4. Find or provision user account
@@ -140,6 +231,7 @@ export class GoogleAuthService {
     return {
       user: toPublicUser(user),
       tokens: tokenPair,
+      returnTo: resolvedReturnTo,
     };
   }
 
