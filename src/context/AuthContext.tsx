@@ -185,16 +185,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const restore = async () => {
       // Strip oauth success query param if present (from redirect flow)
       const params = new URLSearchParams(window.location.search);
-      if (params.get('oauth') === 'success') {
+      const isOAuthSuccess = params.get('oauth') === 'success';
+      if (isOAuthSuccess) {
         params.delete('oauth');
         const clean = params.size ? `?${params.toString()}` : '';
         window.history.replaceState({}, '', window.location.pathname + clean);
       }
 
-      // ── Strategy 1: cookie session via /me ─────────────────────────────────
+      // ── Strategy 1: cookie session via /me (prioritized after OAuth redirect) ──
+      // After Google OAuth redirect, we need to attempt /me first with a retry
+      // to account for cookie transmission timing
       try {
         const { getCurrentUser } = await import('../services/authService');
-        const res = await getCurrentUser();
+        
+        // For OAuth success, retry /me up to 3 times with delays to handle cookie timing
+        let res: any = null;
+        const maxRetries = isOAuthSuccess ? 3 : 1;
+        
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          try {
+            res = await getCurrentUser();
+            if (res?.user) break;
+            
+            // If no user and this is OAuth, wait before retry
+            if (isOAuthSuccess && attempt < maxRetries - 1) {
+              await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
+            }
+          } catch (err) {
+            // If last attempt failed, throw to fall through to localStorage
+            if (attempt === maxRetries - 1) throw err;
+            
+            // Wait before retry on OAuth
+            if (isOAuthSuccess) {
+              await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
+            }
+          }
+        }
 
         if (res?.user && alive) {
           const freshToken = res?.tokens?.accessToken ?? res?.token ?? null;
