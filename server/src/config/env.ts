@@ -14,6 +14,19 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const REQUIRED = ['MONGODB_URI', 'JWT_SECRET'] as const;
 
+// Validate JWT secrets for OAuth module if configured
+const hasGoogleOAuth = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
+if (hasGoogleOAuth) {
+  const oauthRequired = ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
+  const missingOAuth = oauthRequired.filter(key => !process.env[key]);
+  if (missingOAuth.length > 0) {
+    console.error(
+      `[Config] FATAL — missing required JWT secrets for OAuth: ${missingOAuth.join(', ')}`
+    );
+    process.exit(1);
+  }
+}
+
 const missing = REQUIRED.filter((key) => !process.env[key]);
 
 if (missing.length > 0) {
@@ -36,6 +49,10 @@ export interface AppConfig {
   RESEND_API_KEY?: string;
   RAZORPAY_KEY_ID?: string;
   RAZORPAY_KEY_SECRET?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  JWT_ACCESS_SECRET?: string;
+  JWT_REFRESH_SECRET?: string;
 }
 
 const parseAllowedOrigins = (): string[] => {
@@ -67,6 +84,10 @@ export const env: AppConfig = {
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
 };
 
 export default env;

@@ -39,9 +39,20 @@ export const createApp = (): Application => {
   app.use(cors(corsOptions));
   app.options('*', cors(corsOptions));
 
-  // JSON Body Parser
-  app.use(express.json());
+  // JSON Body Parser with size limits
+  // Preserve original request bytes for Razorpay webhook verification.
+  app.use(
+    express.json({
+      limit: '1mb',
+      verify: (req: Request, _res: Response, buf: Buffer) => {
+        if (req.originalUrl.split('?')[0] === '/api/payment/webhook') {
+          (req as Request & { rawBody?: Buffer }).rawBody = Buffer.from(buf);
+        }
+      },
+    })
+  );
 
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
   // Static files with Cross-Origin Resource Policy
   const uploadsPath = path.join(__dirname, '../../uploads');
   app.use(

@@ -38,6 +38,7 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
 }) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const paymentInProgressRef = useRef(false);
 
   // Per-checkout idempotency key to prevent double submissions on network retries
   const idempotencyKeyRef = useRef<string>(
@@ -70,6 +71,11 @@ const RazorpayPaymentForm: React.FC<RazorpayPaymentFormProps> = ({
     };
   }, [onError]);
 
+  if (paymentInProgressRef.current) {
+    return;
+  }
+
+  paymentInProgressRef.current = true;
   const handlePayment = async () => {
     // 1. Client-side form validation check
     if (!validateForm()) {

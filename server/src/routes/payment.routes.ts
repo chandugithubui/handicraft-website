@@ -292,6 +292,16 @@ router.post('/verify-and-create-order', auth, async (req: Request, res: Response
     // ── STEP 3: Idempotency Check AFTER Signature Verification ───────────────────
     const userId = req.user?.userId || req.user?.id || req.user?._id;
 
+    // Ensure the Razorpay order belongs to the authenticated customer
+    if (
+      !userId ||
+      String(razorpayOrder.notes?.userId || '') !== String(userId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'This payment order does not belong to your account.',
+      });
+    }
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -323,6 +333,18 @@ router.post('/verify-and-create-order', auth, async (req: Request, res: Response
     // ── STEP 5: Verify Payment Amount Matches Server-Calculated Amount ───────────
     const serverAmountPaise = Math.round(totals.totalAmount * 100);
     const razorpayAmountPaise = razorpayOrder.amount;
+
+    if (
+      razorpayPayment.amount !== razorpayAmountPaise ||
+      razorpayPayment.currency !== 'INR'
+    ) {
+      await session.abortTransaction();
+
+      return res.status(400).json({
+        success: false,
+        message: 'Payment amount or currency mismatch.',
+      });
+    }
 
     if (razorpayAmountPaise !== serverAmountPaise) {
       await session.abortTransaction();
@@ -494,22 +516,35 @@ router.post('/verify-payment', async (req: Request, res: Response): Promise<Resp
 router.post('/webhook', async (req: Request, res: Response): Promise<Response> => {
   try {
     // Prefer dedicated webhook secret, fallback to API secret
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || env.RAZORPAY_KEY_SECRET;
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature = req.headers['x-razorpay-signature'] as string;
 
     if (!webhookSecret || !signature) {
       return res.status(400).send('Webhook secret or signature missing');
     }
 
-    // CRITICAL: Use raw body for signature verification
-    // Express body-parser must be configured to preserve raw body for webhooks
-    const payload = JSON.stringify(req.body);
+    // Verify Razorpay signature using the original raw request body
+    const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
+
+    if (!rawBody) {
+      console.error('[Webhook] Raw request body is missing');
+      return res.status(400).send('Invalid webhook payload');
+    }
+
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
-      .update(payload)
+      .update(rawBody)
       .digest('hex');
 
-    if (expectedSignature !== signature) {
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+
+    if (
+      !/^[a-f0-9]{64}$/i.test(signature) ||
+      !crypto.timingSafeEqual(
+        expectedBuffer,
+        Buffer.from(signature, 'hex')
+      )
+    ) {
       console.warn('[Webhook] Invalid Razorpay webhook signature');
       return res.status(400).send('Invalid signature');
     }

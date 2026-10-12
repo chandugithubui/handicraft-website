@@ -1,3 +1,4 @@
+
 /**
  * server/src/models/order.model.ts
  *
@@ -145,8 +146,33 @@ const orderSchema = new Schema<IOrder>(
   }
 );
 
-orderSchema.index({ paymentId: 1 }, { unique: true, sparse: true });
-orderSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
+// Unique index for real Razorpay payment IDs.
+// Missing or null values are excluded from the index.
+orderSchema.index(
+  { paymentId: 1 },
+  {
+    name: 'paymentId_unique_string_v2',
+    unique: true,
+    partialFilterExpression: {
+      paymentId: { $type: 'string' },
+    },
+  }
+);
 
-export const Order = mongoose.models.Order || mongoose.model<IOrder>('Order', orderSchema);
+// Unique index to prevent duplicate order creation
+// when the same idempotency key is submitted again.
+orderSchema.index(
+  { idempotencyKey: 1 },
+  {
+    name: 'idempotencyKey_unique_string_v2',
+    unique: true,
+    partialFilterExpression: {
+      idempotencyKey: { $type: 'string' },
+    },
+  }
+);
+
+export const Order =
+  mongoose.models.Order || mongoose.model<IOrder>('Order', orderSchema);
+
 export default Order;

@@ -25,6 +25,17 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
   try {
     const { items, shippingAddress, paymentMethod, couponCode } = req.body;
 
+    // Online payments must use the verified Razorpay payment flow.
+    // This endpoint accepts Cash on Delivery orders only.
+    if (paymentMethod !== undefined && paymentMethod !== 'COD') {
+      await session.abortTransaction();
+
+      return res.status(400).json({
+        success: false,
+        message: 'Online payments must be processed through Razorpay.',
+      });
+    }
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       await session.abortTransaction();
       return res.status(400).json({ message: 'Order must contain at least one item' });
@@ -124,8 +135,8 @@ router.post('/', auth, async (req: Request, res: Response): Promise<Response> =>
       user: userId,
       items: validatedItems,
       shippingAddress,
-      paymentMethod: paymentMethod || 'COD',
-      paymentStatus: paymentMethod === 'COD' ? 'pending' : 'paid',
+      paymentMethod: 'COD',
+      paymentStatus: 'pending',
       orderStatus: 'pending',
       subtotal,
       shippingAmount,

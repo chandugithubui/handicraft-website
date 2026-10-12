@@ -62,6 +62,23 @@ const allowedRedirects = parseAllowedRedirectUris();
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Validate Google OAuth secrets only if OAuth is configured
+const hasGoogleClientId = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID.trim() !== '';
+const hasGoogleClientSecret = process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CLIENT_SECRET.trim() !== '';
+
+if (hasGoogleClientId || hasGoogleClientSecret) {
+  // If any Google OAuth credential is set, all are required
+  const googleSecrets = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
+  const missingGoogleSecrets = googleSecrets.filter(key => !process.env[key] || process.env[key]!.trim() === '');
+  
+  if (missingGoogleSecrets.length > 0) {
+    throw new Error(
+      `[Config] Missing required Google OAuth secrets: ${missingGoogleSecrets.join(', ')}. ` +
+      `Either provide all Google OAuth credentials or remove them to disable Google OAuth.`
+    );
+  }
+}
+
 export const googleOAuthConfig: IGoogleOAuthConfig = {
   clientId: process.env.GOOGLE_CLIENT_ID || '',
   clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
@@ -78,15 +95,8 @@ export const googleOAuthConfig: IGoogleOAuthConfig = {
   allowedRedirectUris: allowedRedirects,
 
   jwt: {
-    accessSecret:
-      process.env.JWT_ACCESS_SECRET ||
-      process.env.JWT_SECRET ||
-      'fallback_development_access_secret_do_not_use_in_production',
-    refreshSecret:
-      process.env.JWT_REFRESH_SECRET ||
-      (process.env.JWT_SECRET
-        ? `${process.env.JWT_SECRET}_refresh`
-        : 'fallback_development_refresh_secret_do_not_use_in_production'),
+    accessSecret: process.env.JWT_ACCESS_SECRET || '',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || '',
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     accessExpiresInSeconds: 15 * 60, // 15 minutes in seconds
